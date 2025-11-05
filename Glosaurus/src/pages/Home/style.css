@@ -1,0 +1,116 @@
+.glossaire {
+	display: flex;
+	flex-direction: column;
+	align-items: center; 
+	padding: 2rem 4rem;
+	background-color: #f7f8fa;
+	min-height: 100vh;
+	font-family: 'Poppins', sans-serif;
+}
+
+
+.glossaire-header {
+	width: 75%;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 1rem;
+}
+
+.glossaire-header h1 {
+	font-size: 2rem;
+	font-weight: 700;
+	color: #b32134;
+	margin: 0;
+}
+
+.deco{
+	display: flex;
+	gap: 1rem;
+	margin-left: -7rem;
+
+}
+
+.new-word {
+	background-color: #b32134;
+	color: white;
+	font-weight: 600;
+	border: none;
+	border-radius: 8px;
+	padding: 0.8rem 1.5rem;
+	cursor: pointer;
+	transition: background-color 0.2s;
+}
+
+.new-word:hover {
+	background-color: #921b2a;
+}
+
+
+.glossaire-table {
+	width: 75%;
+	border-collapse: separate;
+	border-spacing: 0;
+	background-color: white;
+	border: 2px solid #e4e6eb;
+	border-radius: 12px;
+	overflow: hidden;
+	box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+	margin-bottom: 1rem;
+}
+
+.glossaire-table th, .glossaire-table td {
+	padding: 1rem 1.5rem;
+	text-align: left;
+	font-size: 1rem;
+}
+
+.glossaire-table th {
+	background-color: #ffffff;
+	font-weight: 700;
+	border-bottom: 2px solid #e4e6eb;
+}
+
+.glossaire-table tr:not(:last-child) td {
+	border-bottom: 1px solid #e4e6eb;
+}
+
+.glossaire-table td {
+	color: #D17178;
+	word-break: normal;
+	overflow-wrap: break-word;
+	white-space: normal;
+	max-width: 20ch;
+}
+
+.word {
+	color: #000000;
+}
+
+.tag {
+	display: inline-block;
+	background-color: #f0f2f5;
+	color: #444;
+	padding: 0.3rem 0.8rem;
+	border-radius: 20px;
+	font-size: 0.9rem;
+	margin-right: 0.5rem;
+}
+
+
+.export {
+	align-self: flex-start;
+	margin-left: 12.5%;
+	background-color: #b32134;
+	color: white;
+	font-weight: 600;
+	border: none;
+	border-radius: 8px;
+	padding: 0.8rem 1.5rem;
+	cursor: pointer;
+	transition: background-color 0.2s;
+}
+
+.export:hover {
+	background-color: #921b2a;
+}

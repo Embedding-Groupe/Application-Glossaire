@@ -1,0 +1,169 @@
+.modal-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(0, 0, 0, 0.5);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 1000;
+}
+
+.modal {
+	background: #fff;
+	border-radius: 10px;
+	padding: 2rem;
+
+	width: 1000px;
+	max-width: 90%;
+	box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.modal h2 {
+	margin-bottom: 1rem;
+	font-size: 1.5rem;
+	color: #111827;
+}
+
+label {
+	font-weight: 600;
+	color: #333;
+}
+
+input,
+textarea {
+	width: 50%;
+	padding: 0.7rem;
+	border-radius: 8px;
+	border: 2px solid #ddd;
+	font-family: 'Poppins', sans-serif;
+	font-size: 0.95rem;
+	outline: none;
+	transition: border-color 0.2s, background-color 0.2s;
+	color: #000; 
+}
+
+textarea {
+	resize: none;
+}
+
+input::placeholder,
+textarea::placeholder {
+	color: #4D7399;
+	opacity: 1;
+}
+
+input:focus,
+textarea:focus {
+	border-color: #4D7399;
+}
+
+
+.input-error {
+	border-color: #e63946;
+	background-color: #ffffff;
+}
+
+.error-text {
+	color: #e63946;
+	margin-top: 0.001rem;
+
+}
+
+.attention{
+	display: flex;
+	align-items: center;
+	gap: 0.3rem;
+}
+
+
+.synonym-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+	margin-top: 0.5rem;
+}
+
+.tag {
+	background-color: #f0f2f5;
+	padding: 0.3rem 0.7rem;
+	border-radius: 15px;
+	font-size: 0.9rem;
+	color: #444;
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+}
+
+
+.remove-btn {
+	background: none;
+	border: none;
+	color: #000;
+	font-size: 1rem;
+	cursor: pointer;
+	line-height: 1;
+	padding: 0;
+	margin-right: 0.2rem;
+	font-weight: bold;
+}
+
+.remove-btn:hover {
+	color: #b32134;
+}
+
+
+.ai-suggestion {
+	font-size: 0.9rem;
+	color: #888;
+	margin-top: 0.5rem;
+	font-style: italic;
+}
+
+.logo-ia{
+	width: 30px;
+	height: 30px;   
+}
+
+
+nav{
+	display: flex;
+	align-items: center;
+	gap: 0.3rem;
+}
+
+.modal-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 1rem;
+	margin-top: 1rem;
+}
+
+.cancel,
+.add {
+	border: none;
+	border-radius: 8px;
+	padding: 0.8rem 1.4rem;
+	cursor: pointer;
+	font-weight: 600;
+}
+
+.cancel {
+	background-color: #ccc;
+	color: #222;
+}
+
+.add {
+	background-color: #b32134;
+	color: white;
+}
+
+.add:hover {
+	background-color: #921b2a;
+}
+

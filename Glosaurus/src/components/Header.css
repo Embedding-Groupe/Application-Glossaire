@@ -1,0 +1,121 @@
+html, body {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+.header {
+	display: flex;
+	align-items: center;
+	justify-content: flex-start; 
+	width: 100%;
+	background-color: #B51621;
+	padding: 0 2rem;   
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+	color: white;
+	position: sticky;
+	top: 0;
+	z-index: 100;
+	height: 100px;
+	gap: 30px; 
+}
+
+.new-glossary {
+	margin-left: 1150px;
+}
+
+.header-left {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.header-left .logo {
+	width: 100px;
+	height: 100px;        
+
+}
+
+.header-left .app-name {
+	font-size: 2rem;
+	font-weight: 700;
+	color: white;
+	margin: 0;
+}
+
+.separator {
+	width: 2px;
+	height: 70px; 
+	background-color: white;
+	margin: 0 1.5rem;
+}
+
+
+.nav {
+	display: flex;
+	gap: 1.5rem;
+	align-items: center;
+}
+
+.nav a {
+	color: white;
+	text-decoration: none;
+	font-weight: 800;
+	font-size: 1.5rem;
+	padding-bottom: 2px;
+	transition: color 0.2s, border-bottom 0.2s;
+}
+
+.nav a:hover {
+	color: #1f76a8;
+}
+
+.nav a {
+	border-bottom: 2px solid #B51621;
+}
+
+
+.header-button {
+	display: flex;
+	align-items: center;
+	margin-left: 20px;
+}
+
+.header-left .app-name,
+.nav a,
+.new-glossary {
+	font-family: 'Inter';
+}
+
+.new-glossary {
+	
+	background-color: #FEFEFE;
+	color: rgb(0, 0, 0);
+	font-weight: 1000;
+	border: none;
+	border-radius: 6px;
+	padding: 1rem 1rem;
+	cursor: pointer;
+	transition: background-color 0.2s;
+}
+
+.new-glossary:hover {
+	background-color: #acacac;
+}
+
+
+@media (max-width: 640px) {
+	.header {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.5rem;
+	}
+
+	.separator {
+		display: none;
+	}
+
+	.nav {
+		gap: 1rem;
+	}
+}
