@@ -8,8 +8,10 @@ interface AddWordModalPOPUP {
 }
 
 
-export function SynonymSuggestion({ word, userSynonyms }) {
-  const [synonyms, setSynonyms] = useState([]);
+export function SynonymSuggestion({ word, userSynonyms, onAddSynonym }) {
+  const [synonyms, setSynonyms] = useState<string[]>([]);
+  const [visibleSynonyms, setVisibleSynonyms] = useState<string[]>([]);
+  const [startIndex, setStartIndex] = useState(0);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -31,13 +33,17 @@ export function SynonymSuggestion({ word, userSynonyms }) {
           console.log("Réponse API :", data);
           if (data.synonyms && data.synonyms.length > 0) {
             setSynonyms(data.synonyms);
+            setVisibleSynonyms(data.synonyms.slice(0, 5));
+            setStartIndex(0);
           } else {
             setSynonyms([]);
+            setVisibleSynonyms([]);
           }
         })
         .catch((err) => {
           console.error("Erreur API :", err);
           setSynonyms([]);
+          setVisibleSynonyms([]);
         })
         .finally(() => setLoading(false));
     }, 500);
@@ -45,15 +51,52 @@ export function SynonymSuggestion({ word, userSynonyms }) {
     return () => clearTimeout(timeout);
   }, [word, userSynonyms]);
 
+  const handleReload = () => {
+    if (synonyms.length <= 5) return;
+    const nextIndex = (startIndex + 5) % synonyms.length;
+    const nextSlice = [
+      ...synonyms.slice(nextIndex, nextIndex + 5),
+      ...synonyms.slice(0, Math.max(0, (nextIndex + 5) - synonyms.length)),
+    ];
+    setVisibleSynonyms(nextSlice);
+    setStartIndex(nextIndex);
+  };
+
   return (
-    <p className="ai-suggestion">
-      AI Suggestions :{" "}
-      {loading
-        ? "Chargement..."
-        : synonyms.length > 0
-        ? synonyms.slice(0, 5).join(", ")
-        : "No suggestion found"}
-    </p>
+    <div className="ai-suggestion">
+      <p>
+        AI Suggestions :{" "}
+        {loading ? (
+          "Chargement..."
+        ) : visibleSynonyms.length > 0 ? (
+          <>
+            {visibleSynonyms.map((syn, i) => (
+              <span
+                key={i}
+                className="clickable-synonym"
+                onClick={() => onAddSynonym(syn)}
+                title="Cliquer pour ajouter ce synonyme"
+              >
+                {syn}
+                {i < visibleSynonyms.length - 1 && ", "}
+              </span>
+            ))}
+          </>
+        ) : (
+          "No suggestion found"
+        )}
+      </p>
+
+      {!loading && synonyms.length > 5 && (
+        <button
+          onClick={handleReload}
+          className="reload-btn"
+          title="Afficher d'autres synonymes"
+        >
+          🔁
+        </button>
+      )}
+    </div>
   );
 }
 
@@ -207,7 +250,15 @@ export function AddWordModal({ isOpen, onClose, onAddWord }: AddWordModalPOPUP) 
 				</div>
 				<nav>
 					<img src="/public/ia.png" className="logo-ia" title="AI Suggestions" />
-					<SynonymSuggestion word={word} userSynonyms={synonyms} />
+					<SynonymSuggestion
+					word={word}
+					userSynonyms={synonyms}
+					onAddSynonym={(syn) => {
+						if (!synonyms.includes(syn)) {
+						setSynonyms([...synonyms, syn]);
+						}
+					}}
+					/>
 
 				</nav>
 				<div className="modal-actions">

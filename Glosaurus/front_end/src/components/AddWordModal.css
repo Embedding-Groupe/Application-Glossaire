@@ -196,3 +196,7 @@ nav{
 	background-color: #921b2a;
 }
 
+.clickable-synonym {
+  cursor: pointer;
+  transition: color 0.2s;
+}
