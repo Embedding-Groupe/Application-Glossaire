@@ -1,29 +1,27 @@
 # Application-Glossaire
 Glossaire intelligent avec interface graphique 
 
-Pour faite cette application nous utiliserons FastAPI, qui est un framework web pour Python, conçu pour créer des API.
+Pour faite cette application nous utiliserons Preact pour le front-end et l'interface utilisateur ainsi que  FastAPI pour gérer le back-end de l'application et charger les suggestions intelligentes.
 
+Installation : 
 
-Instalation : 
+1 - Front Preact :
 
-Pour pouvoir utiliser ce framework, il faut l’installer.
+Commandes à lancer pour télécharger les packages et lancer l'application :
 
-Ouvrez un terminal et tapez la commande suivante : pip install fastapi[all]
-Cette commande permet d’installer FastAPI et Uvicorn en même temps. Uvicorn est le serveur recommandé pour exécuter les applications FastAPI.
+Tout d'abord il vous faut node, qui permet de gerer les paquets pour les projets typescript, puis :
+npm install
+npm run dev
 
-Une fois que FastAPI est installé, vous pouvez lancer le projet avec la commande suivante : : uvicorn [nom du fichier]:[nom de l'objet FastAPI]
-Vous pouvez égalment ajouter l'option --reload à la fin de la commande, pour recharger automatiquement le serveur à chaque modification du code.
+Puis lancer le lien depuis un navigateur pour acceder a l'appli
 
-Exemple : uvicorn main:app --reload
+2 - Back FastAPI :
 
-- main : c’est le nom du fichier Python (sans le .py)
-- app : c’est le nom de l’objet FastAPI défini dans ce fichier. Dans main.py, il y aura donc : app = FastAPI()
+Le back utilise un fichier lourd, pour le récuperer, utilisez soit GIT-LFS, ou télécharger le fichier resyf.xml sur le site https://cental.uclouvain.be/resyf/download.html et placez le dans le dossier back-end/src/resyf-package/resources
 
-Donc main:app signifie : "Cherche dans le fichier main.py, l’objet nommé app."
-Le nom app pour l’objet FastAPI fait partie des conventions.
+Commandes à lancer pour télécharger les packages eet lancer l'application :
 
-Pour lancer l'application il faut taper dans le dossier du projet les commande suivante : npm install et npm run dev
+pip install -r requirements.txt
+uvicorn main:app
 
-Après cela vous devez avoir ceci : <img width="747" height="237" alt="image" src="https://github.com/user-attachments/assets/0378779c-2942-4b5a-b135-0603156c3997" />
-
-Il ne vous reste plus qu'à cliquer sur le lien.
+Puis l'API se lance pour accéder à la récupération des données
