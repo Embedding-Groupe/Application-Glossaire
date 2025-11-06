@@ -8,7 +8,7 @@ class miniLM:
 
 
     def load_model(self):
-        model = SentenceTransformer("sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2", device="mps")
+        model = SentenceTransformer("sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2", device="cpu")
         return model
     
     def getEmbedding(self, word: str):

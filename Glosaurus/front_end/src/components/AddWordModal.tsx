@@ -7,6 +7,60 @@ interface AddWordModalPOPUP {
 	onAddWord: (word: string, definition: string, synonyms: string[]) => void;
 }
 
+
+export function SynonymSuggestion({ word, userSynonyms }) {
+  const [synonyms, setSynonyms] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!word || word.trim() === "") return;
+
+    const timeout = setTimeout(() => {
+      setLoading(true);
+
+      fetch("http://127.0.0.1:8000/synonym/getSynonym", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          word: word.trim(),
+          synonyms: userSynonyms || [],
+        }),
+      })
+        .then(async (res) => {
+          const data = await res.json();
+          console.log("Réponse API :", data);
+          if (data.synonyms && data.synonyms.length > 0) {
+            setSynonyms(data.synonyms);
+          } else {
+            setSynonyms([]);
+          }
+        })
+        .catch((err) => {
+          console.error("Erreur API :", err);
+          setSynonyms([]);
+        })
+        .finally(() => setLoading(false));
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, [word, userSynonyms]);
+
+  return (
+    <p className="ai-suggestion">
+      AI Suggestions :{" "}
+      {loading
+        ? "Chargement..."
+        : synonyms.length > 0
+        ? synonyms.slice(0, 5).join(", ")
+        : "No suggestion found"}
+    </p>
+  );
+}
+
+
+export default SynonymSuggestion;
+
+
 export function AddWordModal({ isOpen, onClose, onAddWord }: AddWordModalPOPUP) {
 	const [word, setWord] = useState("");
 	const [definition, setDefinition] = useState("");
@@ -153,10 +207,9 @@ export function AddWordModal({ isOpen, onClose, onAddWord }: AddWordModalPOPUP) 
 				</div>
 				<nav>
 					<img src="/public/ia.png" className="logo-ia" title="AI Suggestions" />
-					<p className="ai-suggestion">AI Suggestions : No suggestion found</p>
+					<SynonymSuggestion word={word} userSynonyms={synonyms} />
+
 				</nav>
-
-
 				<div className="modal-actions">
 					<button className="cancel" onClick={onClose}>Cancel</button>
 					<button className="add" onClick={handleSubmit}>Add Word</button>

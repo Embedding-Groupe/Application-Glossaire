@@ -8,7 +8,7 @@ miniLM_instance = miniLM()
 
 router = APIRouter(prefix="/synonym", tags=["synonyms"])
 
-@router.get("/getSynonym")
+@router.post("/getSynonym")
 async def getSynonym(request: Request):
     """
     envoyer le mot a Resyf pour avoir une liste de synonymes.
