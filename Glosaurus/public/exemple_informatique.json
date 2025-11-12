@@ -1,0 +1,31 @@
+{
+  "name": "Glossaire Informatique",
+  "description": "Termes courants utilisés en développement logiciel et technologies de l'information.",
+  "words": [
+    {
+      "word": "API",
+      "definition": "Interface de programmation applicative permettant l'interaction entre différents logiciels",
+      "synonyms": ["Interface", "Web Service"]
+    },
+    {
+      "word": "Framework",
+      "definition": "Structure logicielle standardisée servant de fondation au développement d'applications",
+      "synonyms": ["Cadriciel", "Infrastructure"]
+    },
+    {
+      "word": "Debug",
+      "definition": "Processus d'identification et de correction des erreurs dans un programme",
+      "synonyms": ["Débogage", "Debugging"]
+    },
+    {
+      "word": "Repository",
+      "definition": "Espace de stockage centralisé pour le code source et ses versions",
+      "synonyms": ["Repo", "Dépôt"]
+    },
+    {
+      "word": "Commit",
+      "definition": "Action d'enregistrer des modifications dans un système de contrôle de version",
+      "synonyms": ["Validation", "Enregistrement"]
+    }
+  ]
+}

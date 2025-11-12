@@ -2,6 +2,7 @@ import { useState, useEffect } from "preact/hooks";
 import { loadFromStorage, saveToStorage, clearStorage, DEFAULT_STORAGE_KEY } from "../../utils/storage";
 import { postWords } from "../../utils/api";
 import { AddWordModal } from "../../components/AddWordModal";
+import { ExportModal } from "../../components/ExportModal";
 import "./style.css";
 
 type WordItem = {
@@ -23,7 +24,9 @@ export function Glossaire() {
 	const STORAGE_KEY = DEFAULT_STORAGE_KEY;
 
 	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 	const [words, setWords] = useState<WordItem[]>(() => loadFromStorage(STORAGE_KEY, initialWords));
+	const [glossaryName] = useState("Media Library");
 
 	// persist words whenever they change
 	useEffect(() => {
@@ -51,37 +54,17 @@ export function Glossaire() {
 			// default endpoint — change as needed
 			const endpoint = '/api/words';
 			await postWords(endpoint, words);
-			// create and download JSON file after successful POST
-			downloadJSON(words);
-			window.alert('Export réussi, fichier JSON téléchargé.');
+			// Open export modal to choose format
+			setIsExportModalOpen(true);
 		} catch (err: any) {
 			console.error('Export failed', err);
 			setExportError(err?.message || String(err));
-			// Even if POST fails, still create local JSON file so user doesn't lose data
-			downloadJSON(words);
-			window.alert('Export failed (server). Fichier JSON téléchargé localement. Error: ' + (err?.message || String(err)));
+			// If POST fails, still open modal for local export
+			setIsExportModalOpen(true);
 		} finally {
 			setIsExporting(false);
 		}
 	};
-
-	function downloadJSON(data: unknown) {
-		try {
-			const content = JSON.stringify(data, null, 2);
-			const blob = new Blob([content], { type: 'application/json' });
-			const url = URL.createObjectURL(blob);
-			const a = document.createElement('a');
-			const ts = new Date().toISOString().replace(/[:.]/g, '-');
-			a.href = url;
-			a.download = `glossaire-${ts}.json`;
-			document.body.appendChild(a);
-			a.click();
-			document.body.removeChild(a);
-			URL.revokeObjectURL(url);
-		} catch (e) {
-			console.error('Download failed', e);
-		}
-	}
 
 	return (
 		<div className="glossaire">
@@ -91,9 +74,15 @@ export function Glossaire() {
 					<h1>Media Library</h1>
 				</nav>
 
-				<button className="new-word" onClick={() => setIsModalOpen(true)}>
-					Add New Word
-				</button>
+				<div className="header-buttons">
+					<button className="export-btn" onClick={handleExport} disabled={isExporting}>
+						<img src="/export.svg" alt="Export icon" />
+						{isExporting ? 'Exporting...' : 'Export'}
+					</button>
+					<button className="new-word" onClick={() => setIsModalOpen(true)}>
+						Add New Word
+					</button>
+				</div>
 			</div>
 			<table className="glossaire-table">
 				<thead>
@@ -119,15 +108,21 @@ export function Glossaire() {
 					))}
 				</tbody>
 			</table>
-			<button className="export" onClick={handleExport} disabled={isExporting}>
-				{isExporting ? 'Exporting...' : 'Export JSON'}
-			</button>
 			<button onClick={handleReset}>Reset</button>
 
 			<AddWordModal
 				isOpen={isModalOpen}
 				onClose={() => setIsModalOpen(false)}
 				onAddWord={handleAddWord}
+			/>
+
+			<ExportModal
+				isOpen={isExportModalOpen}
+				onClose={() => setIsExportModalOpen(false)}
+				glossary={{
+					name: glossaryName,
+					words: words
+				}}
 			/>
 		</div>
 	);

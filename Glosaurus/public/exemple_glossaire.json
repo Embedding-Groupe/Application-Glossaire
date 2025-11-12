@@ -1,0 +1,36 @@
+{
+  "name": "Glossaire de Bibliothèque",
+  "description": "Ce glossaire regroupe les termes essentiels utilisés dans le domaine des bibliothèques et de la gestion documentaire.",
+  "words": [
+    {
+      "word": "Book",
+      "definition": "A set of written or printed sheets bound together",
+      "synonyms": ["Tome", "Volume", "Publication"]
+    },
+    {
+      "word": "Borrow",
+      "definition": "To take and use something temporarily before returning it",
+      "synonyms": ["Check out", "Loan"]
+    },
+    {
+      "word": "Periodical",
+      "definition": "A publication issued at regular intervals",
+      "synonyms": ["Magazine", "Journal", "Serial"]
+    },
+    {
+      "word": "Shelf",
+      "definition": "A flat surface used for storing or displaying items",
+      "synonyms": ["Rack", "Ledge"]
+    },
+    {
+      "word": "Film",
+      "definition": "A sequence of moving images, often with sound, that tells a story, documents an event, or presents an artistic idea",
+      "synonyms": ["Movie", "Motion Picture", "Flick"]
+    },
+    {
+      "word": "Catalog",
+      "definition": "A complete list of items, typically in systematic order",
+      "synonyms": ["Inventory", "List", "Directory"]
+    }
+  ]
+}
