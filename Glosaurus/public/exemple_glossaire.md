@@ -1,54 +1,54 @@
-# Glossaire de Bibliothèque
+# Library Glossary
 
-_Ce glossaire regroupe les termes essentiels utilisés dans le domaine des bibliothèques et de la gestion documentaire._
+_This glossary brings together essential terms used in the field of libraries and document management._
 
 ---
 
 ## 1. Book
 
-**Définition:** A set of written or printed sheets bound together
+**Definition:** A set of written or printed sheets bound together
 
-**Synonymes:** Tome, Volume, Publication
+**Synonyms:** Tome, Volume, Publication
 
 ---
 
 ## 2. Borrow
 
-**Définition:** To take and use something temporarily before returning it
+**Definition:** To take and use something temporarily before returning it
 
-**Synonymes:** Check out, Loan
+**Synonyms:** Check out, Loan
 
 ---
 
 ## 3. Periodical
 
-**Définition:** A publication issued at regular intervals
+**Definition:** A publication issued at regular intervals
 
-**Synonymes:** Magazine, Journal, Serial
+**Synonyms:** Magazine, Journal, Serial
 
 ---
 
 ## 4. Shelf
 
-**Définition:** A flat surface used for storing or displaying items
+**Definition:** A flat surface used for storing or displaying items
 
-**Synonymes:** Rack, Ledge
+**Synonyms:** Rack, Ledge
 
 ---
 
 ## 5. Film
 
-**Définition:** A sequence of moving images, often with sound, that tells a story, documents an event, or presents an artistic idea
+**Definition:** A sequence of moving images, often with sound, that tells a story, documents an event, or presents an artistic idea
 
-**Synonymes:** Movie, Motion Picture, Flick
+**Synonyms:** Movie, Motion Picture, Flick
 
 ---
 
 ## 6. Catalog
 
-**Définition:** A complete list of items, typically in systematic order
+**Definition:** A complete list of items, typically in systematic order
 
-**Synonymes:** Inventory, List, Directory
+**Synonyms:** Inventory, List, Directory
 
 ---
 

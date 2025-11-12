@@ -1,27 +1,27 @@
-# Vocabulaire Scientifique
+# Scientific Vocabulary
 
 ---
 
-## 1. Atome
+## 1. Atom
 
-**Définition:** Plus petite unité constitutive de la matière ordinaire possédant les propriétés d'un élément chimique
+**Definition:** Smallest constituent unit of ordinary matter that has the properties of a chemical element
 
-**Synonymes:** Particule élémentaire
-
----
-
-## 2. Cellule
-
-**Définition:** Unité structurelle et fonctionnelle fondamentale des organismes vivants
-
-**Synonymes:** Unité biologique
+**Synonyms:** Elementary Particle
 
 ---
 
-## 3. Énergie
+## 2. Cell
 
-**Définition:** Capacité d'un système à produire un travail ou à modifier son état
+**Definition:** Basic structural and functional unit of living organisms
 
-**Synonymes:** Force, Puissance
+**Synonyms:** Biological Unit
+
+---
+
+## 3. Energy
+
+**Definition:** Capacity of a system to produce work or modify its state
+
+**Synonyms:** Force, Power
 
 ---

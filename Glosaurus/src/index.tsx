@@ -6,17 +6,15 @@ import { Glossaire } from './pages/Home/index.jsx';
 import { NotFound } from './pages/_404.jsx';
 import { Menu } from './components/Menu.tsx';
 
-// No react-modal: we use a Preact-native modal implementation inside components.
-
 export function App() {
 	return (
 		<LocationProvider>
 			<Header />
 			<main>
 				<Router>
-					<Route path="/" component={Glossaire} />
+					<Route path="/" component={Menu} />
+					<Route path="/glossaire/:name" component={Glossaire} />
 					<Route default component={NotFound} />
-					<Route default component={Menu} />
 				</Router>
 			</main>
 		</LocationProvider>
@@ -25,4 +23,3 @@ export function App() {
 
 const root = document.getElementById('app');
 if (root) render(<App />, root);
-

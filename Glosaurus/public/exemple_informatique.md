@@ -1,45 +1,45 @@
-# Glossaire Informatique
+# Computer Science Glossary
 
-_Termes courants utilisés en développement logiciel et technologies de l'information._
+_Common terms used in software development and information technology._
 
 ---
 
 ## 1. API
 
-**Définition:** Interface de programmation applicative permettant l'interaction entre différents logiciels
+**Definition:** Application Programming Interface allowing interaction between different software systems
 
-**Synonymes:** Interface, Web Service
+**Synonyms:** Interface, Web Service
 
 ---
 
 ## 2. Framework
 
-**Définition:** Structure logicielle standardisée servant de fondation au développement d'applications
+**Definition:** Standardized software structure serving as a foundation for application development
 
-**Synonymes:** Cadriciel, Infrastructure
+**Synonyms:** Software Framework, Infrastructure
 
 ---
 
 ## 3. Debug
 
-**Définition:** Processus d'identification et de correction des erreurs dans un programme
+**Definition:** Process of identifying and correcting errors in a program
 
-**Synonymes:** Débogage, Debugging
+**Synonyms:** Debugging, Troubleshooting
 
 ---
 
 ## 4. Repository
 
-**Définition:** Espace de stockage centralisé pour le code source et ses versions
+**Definition:** Centralized storage space for source code and its versions
 
-**Synonymes:** Repo, Dépôt
+**Synonyms:** Repo, Code Repository
 
 ---
 
 ## 5. Commit
 
-**Définition:** Action d'enregistrer des modifications dans un système de contrôle de version
+**Definition:** Action of recording changes in a version control system
 
-**Synonymes:** Validation, Enregistrement
+**Synonyms:** Check-in, Save
 
 ---

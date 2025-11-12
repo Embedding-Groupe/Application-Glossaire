@@ -1,9 +1,11 @@
 import { useState, useEffect } from "preact/hooks";
-import { loadFromStorage, saveToStorage, clearStorage, DEFAULT_STORAGE_KEY } from "../../utils/storage";
+import { loadFromStorage, saveToStorage} from "../../utils/storage";
 import { postWords } from "../../utils/api";
 import { AddWordModal } from "../../components/AddWordModal";
 import { ExportModal } from "../../components/ExportModal";
 import "./style.css";
+import { useRoute } from "preact-iso";
+import { Trash2 } from "lucide-preact";
 
 type WordItem = {
 	word: string;
@@ -11,24 +13,17 @@ type WordItem = {
 	synonyms: string[];
 };
 
-const initialWords: WordItem[] = [
-	{ word: "Book", definition: "A set of written or printed sheets bound together", synonyms: ["Tome", "Volume", "Publication"] },
-	{ word: "Borrow", definition: "To take and use something temporarily before returning it", synonyms: ["Check out", "Loan"] },
-	{ word: "Periodical", definition: "A publication issued at regular intervals", synonyms: ["Magazine", "Journal", "Serial"] },
-	{ word: "Shelf", definition: "A flat surface used for storing or displaying items", synonyms: ["Rack", "Ledge"] },
-	{ word: "Film", definition: "A sequence of moving images, often with sound, that tells a story, documents an event, or presents an artistic idea", synonyms: ["Movie", "Motion Picture", "Flick"] },
-	{ word: "Catalog", definition: "A complete list of items, typically in systematic order", synonyms: ["Inventory", "List", "Directory"] },
-];
+const initialWords: WordItem[] = [];
 
 export function Glossaire() {
-	const STORAGE_KEY = DEFAULT_STORAGE_KEY;
-
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-	const [words, setWords] = useState<WordItem[]>(() => loadFromStorage(STORAGE_KEY, initialWords));
-	const [glossaryName] = useState("Media Library");
+	const { params } = useRoute();
+	const glossaryName = params.name || "Unknown Glossary";
 
-	// persist words whenever they change
+	const STORAGE_KEY = `glossary_${glossaryName}`;
+
+	const [words, setWords] = useState<WordItem[]>(() => loadFromStorage(STORAGE_KEY, initialWords));
 	useEffect(() => {
 		saveToStorage(STORAGE_KEY, words);
 	}, [words]);
@@ -39,9 +34,11 @@ export function Glossaire() {
 		setIsModalOpen(false);
 	};
 
-	const handleReset = () => {
-		clearStorage(STORAGE_KEY);
-		setWords(initialWords);
+	const handleDeleteWord = (wordToDelete: string) => {
+		if (confirm(`Supprimer le mot "${wordToDelete}" ?`)) {
+			const updated = words.filter((w) => w.word !== wordToDelete);
+			setWords(updated);
+		}
 	};
 
 	const [isExporting, setIsExporting] = useState(false);
@@ -51,13 +48,12 @@ export function Glossaire() {
 		setExportError(null);
 		setIsExporting(true);
 		try {
-			// default endpoint — change as needed
-			const endpoint = '/api/words';
+			const endpoint = "/api/words";
 			await postWords(endpoint, words);
 			// Open export modal to choose format
 			setIsExportModalOpen(true);
 		} catch (err: any) {
-			console.error('Export failed', err);
+			console.error("Export failed", err);
 			setExportError(err?.message || String(err));
 			// If POST fails, still open modal for local export
 			setIsExportModalOpen(true);
@@ -71,7 +67,7 @@ export function Glossaire() {
 			<div className="glossaire-header">
 				<nav className="deco">
 					<img src="/deco.svg" title="Decoration" alt="Decoration" />
-					<h1>Media Library</h1>
+					<h1>{glossaryName}</h1>
 				</nav>
 
 				<div className="header-buttons">
@@ -84,12 +80,14 @@ export function Glossaire() {
 					</button>
 				</div>
 			</div>
+
 			<table className="glossaire-table">
 				<thead>
 					<tr>
 						<th>Word</th>
 						<th>Definition</th>
 						<th>Synonyms</th>
+						<th></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -98,17 +96,25 @@ export function Glossaire() {
 							<td><span className="word">{w.word}</span></td>
 							<td>{w.definition}</td>
 							<td>
-								{w.synonyms && w.synonyms.length > 0 ? (
+								{w.synonyms?.length ? (
 									w.synonyms.map((s, i) => <span key={i} className="tag">{s}</span>)
 								) : (
 									<span className="no-synonyme">No synonym</span>
 								)}
 							</td>
+							<td className="trash-cell">
+								<button
+									className="delete-btn"
+									onClick={() => handleDeleteWord(w.word)}
+									title="Supprimer"
+								>
+									<Trash2 size={20} />
+								</button>
+							</td>
 						</tr>
 					))}
 				</tbody>
 			</table>
-			<button onClick={handleReset}>Reset</button>
 
 			<AddWordModal
 				isOpen={isModalOpen}

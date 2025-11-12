@@ -141,10 +141,42 @@
     border-bottom: 1px solid #e4e6eb;
 }
 
+.glossaire-table thead {
+    background-color: #f5f5f5;
+}
 .glossaire-table td {
     color: #D17178;
     word-break: normal;
     overflow-wrap: break-word;
     white-space: normal;
     max-width: 20ch;
+    border-bottom: 1px solid #e4e6eb;
+}
+
+.glossaire-table tr.clickable:hover {
+    background-color: #f9f9f9;
+    transition: background-color 0.2s;
+}
+
+
+.actions-column {
+    width: 80px;
+    text-align: center;
+}
+
+.actions-cell {
+    text-align: center;
+}
+
+.delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #b32134;
+    transition: color 0.2s, transform 0.1s;
+}
+
+.delete-btn:hover {
+    color: #921b2a;
+    transform: scale(1.1);
 }
