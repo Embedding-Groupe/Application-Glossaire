@@ -107,7 +107,7 @@ body{
 
 .export {
 	align-self: flex-start;
-	margin-left: 12.5%;
+	margin-left: 17.85%;
 	background-color: #b32134;
 	color: white;
 	font-weight: 600;
@@ -117,6 +117,8 @@ body{
 	cursor: pointer;
 	transition: background-color 0.2s;
 }
+
+
 
 .export:hover {
 	background-color: #921b2a;

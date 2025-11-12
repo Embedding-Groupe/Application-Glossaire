@@ -1,6 +1,9 @@
-import { useState } from 'preact/hooks';
+import { useState, useEffect } from 'preact/hooks';
+import { useLocation } from 'preact-iso';
 import './Menu.css';
 import { AddGlossaryModal } from './AddGlossaryModal';
+import { loadFromStorage, saveToStorage } from "../utils/storage";
+import { Trash2 } from 'lucide-preact'; // 🗑️ icône de poubelle
 
 interface Glossary {
     name: string;
@@ -8,14 +11,35 @@ interface Glossary {
 }
 
 export function Menu() {
+    const STORAGE_KEY = "glossaries";
     const [search, setSearch] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [glossaries, setGlossaries] = useState<Glossary[]>([]);
+    const [glossaries, setGlossaries] = useState<Glossary[]>(() => loadFromStorage(STORAGE_KEY, []));
+    const { route } = useLocation();
+
+    useEffect(() => {
+        saveToStorage(STORAGE_KEY, glossaries);
+    }, [glossaries]);
 
     const handleAddGlossary = (newGlossary: Glossary) => {
         setGlossaries([...glossaries, newGlossary]);
         setIsModalOpen(false);
     };
+
+    const handleDeleteGlossary = (index: number) => {
+        if (confirm("Delete this glossary?")) {
+            const updated = glossaries.filter((_, i) => i !== index);
+            setGlossaries(updated);
+        }
+    };
+
+    const handleOpenGlossary = (name: string) => {
+        route(`/glossaire/${encodeURIComponent(name)}`);
+    };
+
+    const filteredGlossaries = glossaries.filter((g) =>
+        g.name.toLowerCase().includes(search.toLowerCase())
+    );
 
     return (
         <div className="glossaire">
@@ -26,7 +50,7 @@ export function Menu() {
                 </nav>
 
                 <button className="new-word" onClick={() => setIsModalOpen(true)}>
-                    Add New Glossary
+                    Create New Glossary
                 </button>
             </div>
 
@@ -43,13 +67,23 @@ export function Menu() {
                     <tr>
                         <th>Name</th>
                         <th>Description</th>
+                        <th className="actions-column"></th>
                     </tr>
                 </thead>
                 <tbody>
-                    {glossaries.map((g, index) => (
+                    {filteredGlossaries.map((g, index) => (
                         <tr key={index}>
-                            <td>{g.name}</td>
-                            <td>{g.description}</td>
+                            <td onClick={() => handleOpenGlossary(g.name)} className="clickable">{g.name}</td>
+                            <td onClick={() => handleOpenGlossary(g.name)} className="clickable">{g.description}</td>
+                            <td className="actions-cell">
+                                <button
+                                    className="delete-btn"
+                                    onClick={() => handleDeleteGlossary(index)}
+                                    title="Delete Glossary"
+                                >
+                                    <Trash2 size={20} />
+                                </button>
+                            </td>
                         </tr>
                     ))}
                 </tbody>
@@ -58,7 +92,7 @@ export function Menu() {
             {isModalOpen && (
                 <AddGlossaryModal 
                     onClose={() => setIsModalOpen(false)}
-                    onAdd={handleAddGlossary} // passe la fonction au modal
+                    onAdd={handleAddGlossary}
                 />
             )}
         </div>

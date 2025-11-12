@@ -10,7 +10,7 @@ export function Header() {
                 
                 <div class="separator"></div>
                 <nav class="nav">
-                    <a href="/menu" class="active">Home</a> {/* simple lien */}
+                    <a href="/" class="active">Home</a>
                 </nav>
             </div>
 
