@@ -183,8 +183,12 @@ nav{
 }
 
 .cancel {
-	background-color: #ccc;
-	color: #222;
+	background-color: #888;
+	color: white;
+}
+
+.cancel:hover {
+	background-color: #555;
 }
 
 .add {

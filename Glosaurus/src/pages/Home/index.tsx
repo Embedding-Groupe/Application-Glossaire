@@ -41,12 +41,10 @@ export function Glossaire() {
 		}
 	};
 
-	const [isExporting, setIsExporting] = useState(false);
 	const [, setExportError] = useState<string | null>(null);
 
 	const handleExport = async () => {
 		setExportError(null);
-		setIsExporting(true);
 		try {
 			const endpoint = "/api/words";
 			await postWords(endpoint, words);
@@ -57,8 +55,6 @@ export function Glossaire() {
 			setExportError(err?.message || String(err));
 			// If POST fails, still open modal for local export
 			setIsExportModalOpen(true);
-		} finally {
-			setIsExporting(false);
 		}
 	};
 
@@ -71,9 +67,9 @@ export function Glossaire() {
 				</nav>
 
 				<div className="header-buttons">
-					<button className="export-btn" onClick={handleExport} disabled={isExporting}>
+					<button className="export-btn" onClick={handleExport}>
 						<img src="/export.svg" alt="Export icon" />
-						{isExporting ? 'Exporting...' : 'Export'}
+						{'Export'}
 					</button>
 					<button className="new-word" onClick={() => setIsModalOpen(true)}>
 						Add New Word

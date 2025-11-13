@@ -56,53 +56,44 @@ export function ExportModal({ isOpen, onClose, glossary }: ExportModalProps) {
     };
 
     return (
-        <div class="modal-overlay" onClick={onClose}>
-            <div class="modal-content export-modal" onClick={(e) => e.stopPropagation()}>
-                <div class="modal-header">
-                    <h2>📤 Exporter le Glossaire</h2>
-                    <button class="close-btn" onClick={onClose}>×</button>
-                </div>
+        <div class="export-modal-overlay" onClick={onClose}>
+            <div class="export-modal-content export-modal" onClick={(e) => e.stopPropagation()}>
+                <div class="export-modal-main">
+                    
+                    <h2>Export your Glossary</h2>
 
-                <div class="modal-body">
-                    {error && <div class="alert alert-error">{error}</div>}
-                    {success && <div class="alert alert-success">{success}</div>}
+                    <div class="export-modal-body">
+                        {error && <div class="alert alert-error">{error}</div>}
+                        {success && <div class="alert alert-success">{success}</div>}
 
-                    <div class="export-section">
                         <p class="section-description">
-                            Exportez votre glossaire "<strong>{glossary.name}</strong>" contenant <strong>{glossary.words.length}</strong> mot(s).
+                            Export your glossary "<strong>{glossary.name}</strong>" containing <strong>{glossary.words.length}</strong> word(s).
                         </p>
                         
                         <div class="export-options">
-                            <div class="export-option">
-                                <div class="option-info">
-                                    <h3>📄 Format JSON</h3>
-                                    <p>Format structuré, idéal pour les sauvegardes et le partage de données.</p>
-                                </div>
                                 <button 
                                     class="btn btn-primary"
                                     onClick={handleExportJSON}
                                     disabled={isExporting}
                                 >
-                                    {isExporting ? 'Export en cours...' : 'Exporter en JSON'}
+                                    {isExporting ? 'Exporting…' : 'Export as JSON'}
                                 </button>
-                            </div>
 
-                            <div class="export-option">
-                                <div class="option-info">
-                                    <h3>📝 Format Markdown</h3>
-                                    <p>Format lisible, parfait pour la documentation et la lecture.</p>
-                                </div>
                                 <button 
                                     class="btn btn-primary"
                                     onClick={handleExportMarkdown}
                                     disabled={isExporting}
                                 >
-                                    {isExporting ? 'Export en cours...' : 'Exporter en Markdown'}
+                                    {isExporting ? 'Exporting…' : 'Export as Markdown'}
                                 </button>
-                            </div>
                         </div>
                     </div>
                 </div>
+
+                <div class="export-modal-action">
+                    <button class="close-btn" onClick={onClose}>Cancel</button>
+                </div>
+
             </div>
         </div>
     );
