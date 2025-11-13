@@ -1,11 +1,17 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import "./AddWordModal.css";
 
-interface AddWordModalPOPUP {
+interface AddWordModalProps {
 	isOpen: boolean;
 	onClose: () => void;
 	onAddWord: (word: string, definition: string, synonyms: string[]) => void;
+	initialData?: {
+		word: string;
+		definition: string;
+		synonyms: string[];
+	} | null;
 }
+
 
 
 export function SynonymSuggestion({
@@ -112,10 +118,11 @@ export function SynonymSuggestion({
 export default SynonymSuggestion;
 
 
-export function AddWordModal({ isOpen, onClose, onAddWord }: AddWordModalPOPUP) {
-	const [word, setWord] = useState("");
-	const [definition, setDefinition] = useState("");
-	const [synonyms, setSynonyms] = useState<string[]>([]);
+export function AddWordModal({ isOpen, onClose, onAddWord, initialData }: AddWordModalProps) {
+	const [word, setWord] = useState(initialData?.word || "");
+	const [definition, setDefinition] = useState(initialData?.definition || "");
+	const [synonyms, setSynonyms] = useState<string[]>(initialData?.synonyms || []);
+
 	const [currentSynonym, setCurrentSynonym] = useState("");
 	const [errors, setErrors] = useState<{ word?: string; definition?: string }>({});
 
@@ -124,14 +131,24 @@ export function AddWordModal({ isOpen, onClose, onAddWord }: AddWordModalPOPUP) 
 	const previouslyFocused = useRef<Element | null>(null);
 
 	useEffect(() => {
+	if (initialData) {
+		setWord(initialData.word);
+		setDefinition(initialData.definition);
+		setSynonyms(initialData.synonyms);
+	} else {
+		setWord("");
+		setDefinition("");
+		setSynonyms([]);
+	}
+}, [initialData, isOpen]);
+
+	useEffect(() => {
 		if (isOpen) {
-			// Save previously focused element
 			previouslyFocused.current = document.activeElement;
-			// Prevent background scroll
 			const prev = document.body.style.overflow;
 			document.body.style.overflow = 'hidden';
 
-			// focus first input after a tick
+	
 			setTimeout(() => {
 				firstInputRef.current?.focus();
 			}, 0);
@@ -143,7 +160,6 @@ export function AddWordModal({ isOpen, onClose, onAddWord }: AddWordModalPOPUP) 
 			return () => {
 				document.removeEventListener('keydown', onKey);
 				document.body.style.overflow = prev;
-				// restore focus
 				(previouslyFocused.current as HTMLElement | null)?.focus?.();
 			};
 		}
