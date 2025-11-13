@@ -1,139 +1,243 @@
-body{
-	background-color: #f7f8fa;
-}
+	/* 🎨 Variables globales */
+	:root {
+		--color-primary: #b32134;
+		--color-primary-dark: #921b2a;
+		--color-secondary: #a0a0a0;
+		--color-danger: #e63946;
+		--color-text: #000;
+		--color-bg: #f7f8fa;
+		--color-table-border: #e4e6eb;
+		--font-main: 'Poppins', sans-serif;
+	}
 
-.glossaire {
-	display: flex;
-	flex-direction: column;
-	align-items: center; 
-	padding: 2rem 4rem;
-	background-color: #f7f8fa;
-	font-family: 'Poppins', sans-serif;
-}
+	/* 🌍 Base */
+	body {
+		background-color: var(--color-bg);
+		margin: 0;
+		padding: 0;
+		font-family: var(--font-main);
+	}
 
+	/* 📚 Glossaire global */
+	.glossaire {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: 2rem 4rem;
+		background-color: var(--color-bg);
+		animation: fadeIn 0.5s ease-in-out;
+	}
 
-.glossaire-header {
-	width: 75%;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	margin-bottom: 1rem;
-}
+	/* 🧾 En-tête */
+	.glossaire-header {
+		width: 75%;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 1rem;
+	}
 
-.glossaire-header h1 {
-	font-size: 2rem;
-	font-weight: 700;
-	color: #b32134;
-	margin: 0;
-}
+	.glossaire-header h1 {
+		font-size: 2rem;
+		font-weight: 700;
+		color: var(--color-primary);
+		margin: 0;
+	}
 
-.header-buttons {
-	display: flex;
-	gap: 1rem;
-	align-items: center;
-}
+	.deco {
+		display: flex;
+		gap: 1rem;
+		margin-left: -7rem;
+		align-items: center;
+	}
 
-.deco{
-	display: flex;
-	gap: 1rem;
-	margin-left: -7rem;
+	/* 🧠 Boutons du header */
+	.header-buttons {
+		display: flex;
+		gap: 1rem;
+		align-items: center;
+	}
 
-}
+	.new-word {
+		background-color: var(--color-primary);
+		color: white;
+		font-weight: 600;
+		font-size: 1rem;
+		border: none;
+		border-radius: 8px;
+		padding: 0.8rem 1.5rem;
+		cursor: pointer;
+		transition: background-color 0.2s, transform 0.2s;
+	}
 
-.new-word {
-	background-color: #b32134;
-	color: white;
-	font-weight: 600;
-	font-size: 1rem;
-	border: none;
-	border-radius: 8px;
-	padding: 0.8rem 1.5rem;
-	cursor: pointer;
-	transition: background-color 0.2s;
-}
+	.new-word:hover {
+		background-color: var(--color-primary-dark);
+		transform: translateY(-2px);
+	}
 
-.new-word:hover {
-	background-color: #921b2a;
-}
+	.export-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background-color: var(--color-secondary);
+		color: white;
+		font-weight: 500;
+		font-size: 1rem;
+		gap: 0.5rem;
+		border: none;
+		border-radius: 8px;
+		padding: 0.75rem 1.5rem;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
 
+	.export-btn:hover {
+		background-color: var(--color-primary);
+		transform: translateY(-2px);
+	}
 
+	.export-btn:disabled {
+		background-color: #cccccc;
+		cursor: not-allowed;
+		transform: none;
+	}
+
+	/* 📋 Tableau */
 .glossaire-table {
 	width: 75%;
 	border-collapse: separate;
 	border-spacing: 0;
 	background-color: white;
-	border: 2px solid #e4e6eb;
+	border: 2px solid var(--color-table-border);
 	border-radius: 12px;
 	overflow: hidden;
-	box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+	box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
 	margin-bottom: 1rem;
+	animation: fadeInUp 0.6s ease;
 }
 
-.glossaire-table th, .glossaire-table td {
+.glossaire-table th,
+.glossaire-table td {
 	padding: 1rem 1.5rem;
 	text-align: left;
 	font-size: 1rem;
+	vertical-align: top; /* ✅ texte en haut de la cellule */
 }
 
 .glossaire-table th {
-	color: black;
+	color: var(--color-text);
 	font-feature-settings: 'dlig' on;
 	font-size: 18px;
-	font-style: normal;
 	font-weight: 700;
 	line-height: 21px;
 }
 
-.glossaire-table tr:not(:last-child) td {
-	border-bottom: 1px solid #e4e6eb;
-}
-
 .glossaire-table td {
-	color: #D17178;
+	color: #d17178;
 	word-break: normal;
 	overflow-wrap: break-word;
 	white-space: normal;
 	max-width: 20ch;
 }
 
-.word {
-	color: black;
-	font-size: 16px;
+	.word {
+		color: var(--color-text);
+		font-size: 16px;
+	}
+
+	.tag {
+		display: inline-block;
+		background-color: #f0f2f5;
+		color: var(--color-text);
+		padding: 0.3rem 0.8rem;
+		border-radius: 20px;
+		font-size: 0.9rem;
+		margin-right: 0.5rem;
+		margin: 0.25rem 0.5rem 0.25rem 0;
+	}
+
+	.action-cell {
+  vertical-align: top; /* si tu veux le texte en haut */
+  border-left: none;
+  padding: 0; /* supprime padding inutile */
 }
 
-.tag {
-	display: inline-block;
-	background-color: #f0f2f5;
-	color: black;
-	padding: 0.3rem 0.8rem;
-	border-radius: 20px;
-	font-size: 0.9rem;
-	margin-right: 0.5rem;
+/* Conteneur flex pour centrer les boutons */
+.action-buttons {
+  display: flex;
+  flex-direction: row;       /* icônes côte à côte */
+  justify-content: center;   /* centre horizontalement */
+  align-items: center;       /* centre verticalement */
+  height: 100%;              /* prend toute la hauteur de la cellule */
+  gap: 10px;                 /* espace entre les boutons */
+}
+
+.action-buttons button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-primary);
+  transition: transform 0.2s, color 0.2s;
+}
+
+.action-buttons button:hover {
+  transform: scale(1.2);
+  color: var(--color-danger);
 }
 
 
-.export-btn {
-	display: flex;
-    align-items: center;
-	background-color: #a0a0a0;
-	color: white;
-	font-weight: 500;
-	font-size: 1rem;
-	gap: 0.5rem;
-	border: none;
-	border-radius: 8px;
-	padding: 0.75rem 1.5rem;
-	cursor: pointer;
-	transition: all 0.2s;
-}
+	.delete-btn:hover {
+		color: var(--color-danger);
+		
+		transform: scale(1.1);
+	}
 
-.export-btn:hover {
-	background-color: #b32134;
-	transform: translateY(-2px);
-}
+	@media (max-width: 800px) {
+		.glossaire {
+			padding: 1rem;
+		}
 
-.export-btn:disabled {
-	background-color: #cccccc;
-	cursor: not-allowed;
-	transform: none;
-}
+		.glossaire-header {
+			width: 100%;
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 1rem;
+		}
+
+		.glossaire-table {
+			width: 100%;
+			font-size: 0.9rem;
+		}
+
+		.new-word,
+		.export-btn {
+			width: 100%;
+			justify-content: center;
+		}
+	}
+
+
+	@keyframes fadeIn {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+
+	@keyframes fadeInUp {
+		from {
+			opacity: 0;
+			transform: translateY(10px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
