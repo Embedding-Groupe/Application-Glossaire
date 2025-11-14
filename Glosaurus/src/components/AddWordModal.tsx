@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import "./AddWordModal.css";
+import { postJSON } from "../utils/api";
 
 interface AddWordModalProps {
 	isOpen: boolean;
@@ -28,38 +29,48 @@ export function SynonymSuggestion({
   const [startIndex, setStartIndex] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (!word || word.trim() === "") return;
+ useEffect(() => {
+    if (!word || word.trim() === "") {
+      setSynonyms([]);
+      setVisibleSynonyms([]);
+      setStartIndex(0);
+      return;
+    }
+
+    // Reset immédiat pour que l'affichage montre "Chargement..."
+    setSynonyms([]);
+    setVisibleSynonyms([]);
+    setStartIndex(0);
+    setLoading(true);
 
     const timeout = setTimeout(() => {
-      setLoading(true);
-
-      fetch("http://127.0.0.1:8000/synonym/getSynonym", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          word: word.trim(),
-          synonyms: userSynonyms || [],
-        }),
+      console.log("start fetch");
+      postJSON("http://127.0.0.1:8000/synonym/getSynonym", {
+        word: word.trim(),
+        synonyms: userSynonyms || [],
       })
-        .then(async (res) => {
-          const data = await res.json();
-          console.log("Réponse API :", data);
-          if (data.synonyms && data.synonyms.length > 0) {
-            setSynonyms(data.synonyms);
-            setVisibleSynonyms(data.synonyms.slice(0, 5));
-            setStartIndex(0);
-          } else {
-            setSynonyms([]);
-            setVisibleSynonyms([]);
-          }
-        })
+        .then((data: any) => {
+			console.log("Réponse API :", data);
+			if (data?.synonyms && Array.isArray(data.synonyms) && data.synonyms.length > 0) {
+				// on force le type en string[]
+				const uniqueSynonyms: string[] = Array.from(new Set(data.synonyms as string[]));
+				setSynonyms(uniqueSynonyms);
+				setVisibleSynonyms(uniqueSynonyms.slice(0, 5));
+				setStartIndex(0);
+			} else {
+				setSynonyms([]);
+				setVisibleSynonyms([]);
+			}
+			})
         .catch((err) => {
           console.error("Erreur API :", err);
           setSynonyms([]);
           setVisibleSynonyms([]);
         })
-        .finally(() => setLoading(false));
+        .finally(() => {
+          console.log("fetch terminé");
+          setLoading(false);
+        });
     }, 500);
 
     return () => clearTimeout(timeout);
@@ -79,7 +90,7 @@ export function SynonymSuggestion({
   return (
     <div className="ai-suggestion">
       <p>
-        AI Suggestions :{" "}
+        AI Suggestions:{" "}
         {loading ? (
           "Chargement..."
         ) : visibleSynonyms.length > 0 ? (
@@ -113,7 +124,6 @@ export function SynonymSuggestion({
     </div>
   );
 }
-
 
 export default SynonymSuggestion;
 
