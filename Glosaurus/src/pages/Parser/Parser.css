@@ -1,0 +1,234 @@
+:root {
+  --color-primary: #b32134;
+  --color-primary-dark: #921b2a;
+  --color-secondary: #a0a0a0;
+  --color-danger: #e63946;
+  --color-text: #000;
+  --color-bg: #f7f8fa;
+  --color-table-border: #e4e6eb;
+  --font-main: "Poppins", sans-serif;
+}
+
+body {
+  background-color: var(--color-bg);
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-main);
+}
+
+.parser {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  width: 100%;
+  box-sizing: border-box;
+  gap: 2.5rem;
+  background-color: var(--color-bg);
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.parser-header {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
+.parser .parser-header {
+  margin-top: 40px;
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.parser-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 0;
+}
+
+.deco {
+  display: flex;
+  gap: 1rem;
+  margin-left: -7rem;
+  align-items: center;
+}
+
+.import-btn-parser {
+  background-color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 500;
+  font-size: 1rem;
+  gap: 0.5rem;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.import-btn-parser:hover {
+    background-color: #921b2a;
+}
+
+.header-buttons-parser {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.back-btn{
+    display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-secondary);
+  color: white;
+  font-weight: 500;
+  font-size: 1rem;
+  gap: 0.5rem;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.back-btn:hover {
+    background-color: #b32134;
+}
+
+.parser > h1 {
+  font-size: 1.5rem;
+  margin-right: 65rem;
+}
+
+.terms-found {
+  width: 100%; 
+  align-self: flex-start;
+  margin-left: 15rem;
+}
+
+
+.parser-table {
+  width: 100%;
+  max-width: 500px;
+  border-collapse: separate;
+  border-spacing: 0;
+  background-color: white;
+  border: 2px solid var(--color-table-border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  table-layout: fixed;
+}
+.parser-table th,
+.parser-table td {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  font-size: 1rem;
+  vertical-align: top;
+}
+
+.parser-table th {
+  color: var(--color-text);
+  font-feature-settings: "dlig" on;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 21px;
+}
+
+
+.parser-table td.GlossaryWord {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  position: relative;
+}
+
+.parser-table td.GlossaryDefinition {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  position: relative;
+}
+
+.parser-table {
+  table-layout: fixed;
+}
+
+.parser-table th:first-child,
+.parser-table td:first-child {
+  text-align: left;
+}
+
+.parser-table th:last-child,
+.parser-table td:last-child {
+  text-align: right;
+  padding-right: 3rem;
+}
+
+
+
+.parser-table td.GlossaryWord:hover::after {
+  content: attr(data-fulltext);
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #fff;
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  white-space: normal;
+  z-index: 10;
+  max-width: 300px;
+  color: black;
+  margin-top: 4px;
+}
+
+.download-btn {
+  margin-top: 1rem;
+  background-color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 500;
+  font-size: 1rem;
+  gap: 0.5rem;
+  border: none;
+  border-radius: 8px;
+  padding: 0.25rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+}
+
+.legend-color {
+  margin-top: 13px;
+  border: 1px solid #777777;
+  width: 40px;
+  height: 14px;
+  background-color: #FFDCF5; 
+  border-radius: 3px;
+}
+
+.legend-text{
+  margin-top: 13px;
+}

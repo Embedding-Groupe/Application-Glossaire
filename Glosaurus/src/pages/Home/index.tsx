@@ -6,6 +6,9 @@ import { ExportModal } from '../../modals/Export/Export'
 import './style.css'
 import { useRoute } from 'preact-iso'
 import { Trash2 } from 'lucide-preact'
+import { useLocation } from 'preact-iso'
+
+
 
 type WordItem = {
   word: string
@@ -19,11 +22,14 @@ function isTruncated(el: HTMLElement) {
 
 const initialWords: WordItem[] = []
 
+
 export function Glossaire() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingWord, setEditingWord] = useState<WordItem | null>(null)
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
   const { params } = useRoute()
+
+  const location = useLocation()
 
   const tooltipRef = useRef<HTMLDivElement>(null)
 
@@ -221,6 +227,16 @@ export function Glossaire() {
           ))}
         </tbody>
       </table>
+      <button
+        className="Parser"
+        onClick={() => {
+          location.route('/parser')
+        }}
+      >
+        Parser
+      </button>
+
+
 
       <AddWordModal
         isOpen={isModalOpen}
