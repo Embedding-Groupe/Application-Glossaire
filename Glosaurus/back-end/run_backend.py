@@ -1,5 +1,4 @@
-# run_backend.py
-from main import app  # Import direct de ton FastAPI
+from main import app
 import uvicorn
 
 if __name__ == "__main__":
