@@ -46,6 +46,24 @@ function venvPythonPath() {
     : join(backendDir, '.venv', 'bin', 'python')
 }
 
+function removeIfExists(targetPath) {
+  if (!existsSync(targetPath)) return true
+  try {
+    try {
+      chmodSync(targetPath, 0o666)
+    } catch (chmodErr) {
+      console.warn(
+        `⚠️  Could not change permissions for ${targetPath}: ${chmodErr.message}`
+      )
+    }
+    unlinkSync(targetPath)
+    return true
+  } catch (err) {
+    console.warn(`⚠️  Could not remove ${targetPath}: ${err.message}`)
+    return false
+  }
+}
+
 try {
   // Ensure local virtual environment
   const py = resolvePython()
@@ -67,10 +85,11 @@ try {
 
   // Run PyInstaller with the venv interpreter
   console.log('🏗️  Running PyInstaller...')
-  execSync(`${venvPy} -m PyInstaller back-end/run_backend.spec`, {
+  spawnSync(venvPy, ['-m', 'PyInstaller', 'back-end/run_backend.spec'], {
     cwd: projectRoot,
     stdio: 'inherit',
-  })
+    shell: isWindows,
+  }).status !== 0 && process.exit(1)
 
   // Source and destination paths
   // Try common PyInstaller output locations (onefile vs onedir)
@@ -101,14 +120,7 @@ try {
   // Copy the compiled backend
   console.log(`📦 Copying ${backendName} to src-tauri/bin/...`)
   try {
-    if (existsSync(destPath)) {
-      try {
-        chmodSync(destPath, 0o666)
-      } catch {}
-      try {
-        unlinkSync(destPath)
-      } catch {}
-    }
+    removeIfExists(destPath)
     copyFileSync(sourcePath, destPath)
   } catch (e) {
     console.error('⚠️  Backend copy failed:', e.message)
