@@ -85,6 +85,24 @@ export function ExportModal({
     setPreviewFormat(null)
   }
 
+  const exportActions = [
+    { handler: handleExportJSON, label: 'Export as JSON', type: 'export' },
+    {
+      handler: handleExportMarkdown,
+      label: 'Export as Markdown',
+      type: 'export',
+    },
+  ]
+
+  const previewActions = [
+    { handler: handlePreviewJSON, label: 'JSON File Preview', type: 'preview' },
+    {
+      handler: handlePreviewMarkdown,
+      label: 'Markdown File Preview',
+      type: 'preview',
+    },
+  ]
+
   return (
     <div className="export-modal-overlay" onClick={onClose}>
       <div
@@ -119,39 +137,29 @@ export function ExportModal({
                 </p>
 
                 <div className="export-options">
-                  <button
-                    className="btn btn-primary"
-                    onClick={handleExportJSON}
-                    disabled={isExporting}
-                  >
-                    {isExporting ? 'Exporting…' : 'Export as JSON'}
-                  </button>
-
-                  <button
-                    className="btn btn-primary"
-                    onClick={handleExportMarkdown}
-                    disabled={isExporting}
-                  >
-                    {isExporting ? 'Exporting…' : 'Export as Markdown'}
-                  </button>
+                  {exportActions.map(({ handler, label }) => (
+                    <button
+                      key={label}
+                      className="btn btn-primary"
+                      onClick={handler}
+                      disabled={isExporting}
+                    >
+                      {isExporting ? 'Exporting…' : label}
+                    </button>
+                  ))}
                 </div>
 
                 <div className="preview-options">
-                  <button
-                    className="btn btn-secondary"
-                    onClick={handlePreviewJSON}
-                    disabled={isExporting}
-                  >
-                    JSON File Preview
-                  </button>
-
-                  <button
-                    className="btn btn-secondary"
-                    onClick={handlePreviewMarkdown}
-                    disabled={isExporting}
-                  >
-                    Markdown File Preview
-                  </button>
+                  {previewActions.map(({ handler, label }) => (
+                    <button
+                      key={label}
+                      className="btn btn-secondary"
+                      onClick={handler}
+                      disabled={isExporting}
+                    >
+                      {label}
+                    </button>
+                  ))}
                 </div>
               </>
             )}
