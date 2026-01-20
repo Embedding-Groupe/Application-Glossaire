@@ -1,27 +1,27 @@
-// Simple localStorage helpers with safe fallbacks.
+/**
+ * DEPRECATED: Wrapper de stockage pour la compatibilité rétroactive
+ *
+ * Les nouvelles implémentations doivent utiliser:
+ * @see src/infrastructure/storage/LocalStorageProvider.ts
+ * @see src/infrastructure/DependencyContainer.ts
+ */
+
+import { DependencyContainer } from '../infrastructure/DependencyContainer'
+
+const container = DependencyContainer.getInstance()
+const storageProvider = container.getStorageProvider()
+
+// Réexporte les fonctions pour la compatibilité
 export function loadFromStorage<T>(key: string, fallback: T): T {
-    try {
-        const raw = localStorage.getItem(key);
-        return raw ? (JSON.parse(raw) as T) : fallback;
-    } catch {
-        return fallback;
-    }
+  return storageProvider.load(key, fallback)
 }
 
 export function saveToStorage<T>(key: string, data: T): void {
-    try {
-        localStorage.setItem(key, JSON.stringify(data));
-    } catch {
-        // ignore (quota, private mode...)
-    }
+  storageProvider.save(key, data)
 }
 
 export function clearStorage(key: string): void {
-    try {
-        localStorage.removeItem(key);
-    } catch {
-        // ignore
-    }
+  storageProvider.remove(key)
 }
 
-export const DEFAULT_STORAGE_KEY = 'glossaire_words';
+export const DEFAULT_STORAGE_KEY = 'glossaire_words'

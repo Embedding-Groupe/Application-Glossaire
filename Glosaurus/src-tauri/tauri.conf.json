@@ -31,6 +31,6 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "resources": ["bin/*"]
+    "resources": ["bin/backend-new.exe", "bin/backend-new", "bin/_internal"]
   }
 }
