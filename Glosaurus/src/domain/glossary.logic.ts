@@ -1,8 +1,20 @@
-export interface Glossary {
-  name: string
-  description: string
-  lastModified: string
-}
+/**
+ * DEPRECATED: Ce fichier est conservé pour la compatibilité rétroactive
+ *
+ * Les nouvelles implémentations doivent utiliser:
+ * - GlossaryService pour la logique métier des glossaires
+ * - WordService pour la logique métier des mots
+ * - GlossaryRepository pour l'accès aux données
+ *
+ * @see src/application/services/GlossaryService.ts
+ * @see src/application/services/WordService.ts
+ * @see src/domain/repositories/GlossaryRepository.ts
+ */
+
+export type { Glossary } from './types/index'
+
+// Réexporte les fonctions pures pour la compatibilité
+import type { Glossary } from './types/index'
 
 export function createGlossary(
   glossaries: Glossary[],

@@ -44,8 +44,170 @@ fn proxy_request(method: String, url: String, body: Option<Value>) -> Result<Val
     }
 }
 
-#[tauri::command]
-fn check_ollama() -> bool {
+#[cfg_attr(mobile, tauri::mobile_entry_point)]
+pub fn run() {
+    tauri::Builder::default()
+        .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_fs::init())
+        .invoke_handler(tauri::generate_handler![greet, proxy_request])
+        .setup(|app| {
+            let resource_dir = app
+                .path()
+                .resource_dir()
+                .expect("Failed to get resource dir");
+
+            // Check if Ollama is installed
+            let ollama_path = find_ollama_path();
+            let has_ollama = Command::new(&ollama_path)
+                .arg("--version")
+                .output()
+                .is_ok();
+
+            if !has_ollama {
+                // Show native OS dialog asking to install Ollama
+                let confirmed = show_ollama_dialog();
+                
+                if confirmed {
+                    if let Err(e) = install_ollama_if_needed() {
+                        println!("Failed to install Ollama: {:?}", e);
+                    }
+                }
+            } else {
+                println!("Ollama already installed");
+            }
+
+            // Le backend est dans resource_dir/bin/ (préfère backend-new.* si présent)
+            let bin_dir = resource_dir.join("bin");
+            let candidates: [&str; 2] = if cfg!(target_os = "windows") {
+                ["backend-new.exe", "backend.exe"]
+            } else {
+                ["backend-new", "backend"]
+            };
+
+            let backend_path = candidates
+                .iter()
+                .map(|name| bin_dir.join(name))
+                .find(|p| p.exists())
+                .unwrap_or_else(|| bin_dir.join(candidates[1]));
+
+            println!("Backend path: {:?}", backend_path);
+
+            let child = std::process::Command::new(&backend_path)
+                .current_dir(resource_dir.join("bin"))
+                .stdout(Stdio::inherit())
+                .stderr(Stdio::inherit())
+                .spawn()
+                .expect("Failed to start backend");
+
+            // Stocker dans un Mutex pour le rendre accessible à la fermeture
+            app.manage(Mutex::new(child));
+
+            #[cfg(debug_assertions)]
+            {
+                if let Some(window) = app.get_webview_window("main") {
+                    window.open_devtools();
+                }
+            }
+
+            Ok(())
+        })
+        .on_window_event(|window, event| {
+            if let WindowEvent::CloseRequested { .. } = event {
+                let child_mutex = window.state::<Mutex<Child>>();
+                if let Ok(mut child) = child_mutex.lock() {
+                     #[cfg(unix)]
+                    {
+                        let _ = std::process::Command::new("kill")
+                            .arg("-15")
+                            .arg(child.id().to_string())
+                            .status();
+                    }
+
+                    #[cfg(windows)]
+                    {
+                        let _ = child.kill();
+                    }
+                };
+            }
+        })
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
+}
+
+
+fn show_ollama_dialog() -> bool {
+    #[cfg(target_os = "macos")]
+    {
+        // Use osascript to show a dialog on macOS
+        let output = Command::new("osascript")
+            .arg("-e")
+            .arg("tell app \"System Events\" to button returned of (display dialog \"Do you want to install Ollama? It's needed for AI suggestions\" buttons {\"Yes\", \"No\"} default button 1 with icon caution)")
+            .output();
+
+        match output {
+            Ok(out) => {
+                let result = String::from_utf8_lossy(&out.stdout);
+                result.contains("Yes")
+            }
+            Err(_) => false,
+        }
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        // Use PowerShell to show a dialog on Windows
+        let output = Command::new("powershell")
+            .arg("-NoProfile")
+            .arg("-Command")
+            .arg("[System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms') | Out-Null; [System.Windows.Forms.MessageBox]::Show('Do you want to install Ollama? It\\'s needed for AI suggestions', 'Install Ollama', [System.Windows.Forms.MessageBoxButtons]::YesNo) -eq [System.Windows.Forms.DialogResult]::Yes")
+            .output();
+
+        match output {
+            Ok(out) => {
+                let result = String::from_utf8_lossy(&out.stdout);
+                result.trim() == "True"
+            }
+            Err(_) => false,
+        }
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        // Try zenity first, then kdialog as fallback
+        let zenity_result = Command::new("zenity")
+            .arg("--question")
+            .arg("--text=Do you want to install Ollama? It's needed for AI suggestions")
+            .arg("--title=Install Ollama")
+            .status();
+
+        match zenity_result {
+            Ok(status) => status.success(),
+            Err(_) => {
+                // Fallback to kdialog
+                let kdialog_result = Command::new("kdialog")
+                    .arg("--yesno")
+                    .arg("Do you want to install Ollama? It's needed for AI suggestions")
+                    .arg("--title")
+                    .arg("Install Ollama")
+                    .status();
+
+                match kdialog_result {
+                    Ok(status) => status.success(),
+                    Err(_) => false,
+                }
+            }
+        }
+    }
+
+    #[cfg(not(any(target_os = "macos", target_os = "windows", target_os = "linux")))]
+    {
+        false
+    }
+}
+
+
+fn install_ollama_if_needed() -> anyhow::Result<()> {
     let ollama_path = find_ollama_path();
     Command::new(&ollama_path)
         .arg("--version")
