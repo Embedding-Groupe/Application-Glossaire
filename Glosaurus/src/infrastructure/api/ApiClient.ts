@@ -59,6 +59,6 @@ export class ApiClient implements IApiClient {
   }
 
   private detectTauri(): TauriGlobal {
-    return (window as { __TAURI__?: TauriGlobal }).__TAURI__
+    return (globalThis as { __TAURI__?: TauriGlobal }).__TAURI__
   }
 }
