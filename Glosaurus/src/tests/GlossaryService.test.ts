@@ -6,38 +6,17 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { GlossaryService } from '../application/services/GlossaryService'
 import { GlossaryRepository } from '../domain/repositories/GlossaryRepository'
-import { IStorageProvider } from '../domain/repositories/IStorageProvider'
 import type { Glossary } from '../domain/types/index'
-
-// Mock du StorageProvider
-class MockStorageProvider implements IStorageProvider {
-  private data: Record<string, unknown> = {}
-
-  load<T>(key: string, fallback: T): T {
-    return (key in this.data ? this.data[key] : fallback) as T
-  }
-
-  save<T>(key: string, data: T): void {
-    this.data[key] = data
-  }
-
-  remove(key: string): void {
-    delete this.data[key]
-  }
-
-  clear(): void {
-    this.data = {}
-  }
-}
+import { InMemoryStorage } from './helpers/mockStorage'
 
 describe('GlossaryService', () => {
   let service: GlossaryService
   let repository: GlossaryRepository
-  let storage: MockStorageProvider
+  let storage: InMemoryStorage
 
   beforeEach(() => {
     repository = new GlossaryRepository()
-    storage = new MockStorageProvider()
+    storage = new InMemoryStorage()
     service = new GlossaryService(repository, storage)
   })
 

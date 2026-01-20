@@ -6,35 +6,14 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { WordService } from '../application/services/WordService'
 import type { WordItem } from '../domain/types/index'
-import { IStorageProvider } from '../domain/repositories/IStorageProvider'
-
-// Mock du StorageProvider
-class MockStorageProvider implements IStorageProvider {
-  private data: Record<string, unknown> = {}
-
-  load<T>(key: string, fallback: T): T {
-    return (key in this.data ? this.data[key] : fallback) as T
-  }
-
-  save<T>(key: string, data: T): void {
-    this.data[key] = data
-  }
-
-  remove(key: string): void {
-    delete this.data[key]
-  }
-
-  clear(): void {
-    this.data = {}
-  }
-}
+import { InMemoryStorage } from './helpers/mockStorage'
 
 describe('WordService', () => {
   let service: WordService
-  let storage: MockStorageProvider
+  let storage: InMemoryStorage
 
   beforeEach(() => {
-    storage = new MockStorageProvider()
+    storage = new InMemoryStorage()
     service = new WordService(storage, 'TestGlossary')
   })
 
