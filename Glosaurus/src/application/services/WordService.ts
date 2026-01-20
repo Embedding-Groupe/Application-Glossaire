@@ -9,8 +9,8 @@ import { IStorageProvider } from '../../domain/repositories/IStorageProvider'
 
 export class WordService {
   constructor(
-    private storage: IStorageProvider,
-    private glossaryName: string
+    private readonly storage: IStorageProvider,
+    private readonly glossaryName: string
   ) {}
 
   /**
