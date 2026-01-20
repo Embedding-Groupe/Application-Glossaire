@@ -1,100 +1,89 @@
-import { useState } from "preact/hooks";
-import type { Glossary } from "../../utils/importExport";
+import { useState } from 'preact/hooks'
+import type { Glossary } from '../../utils/importExport'
 import {
   downloadGlossaryAsJSON,
   downloadGlossaryAsMarkdown,
   exportToJSON,
-  exportToMarkdown
-} from "../../utils/importExport";
-import "./Export.css";
+  exportToMarkdown,
+} from '../../utils/importExport'
+import './Export.css'
 
 interface ParsedTerm {
-  term: string;
-  occurrence: number;
+  term: string
+  occurrence: number
 }
 
 interface ExportModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  glossary: Glossary;
-  terms: ParsedTerm[];
+  isOpen: boolean
+  onClose: () => void
+  glossary: Glossary
+  terms: ParsedTerm[]
 }
 
 export function ExportModal({
   isOpen,
   onClose,
   glossary,
-  terms
+  terms,
 }: ExportModalProps) {
-  const [error, setError] = useState<string>("");
-  const [success, setSuccess] = useState<string>("");
-  const [isExporting, setIsExporting] = useState<boolean>(false);
-  const [previewContent, setPreviewContent] = useState<string | null>(null);
+  const [error, setError] = useState<string>('')
+  const [success, setSuccess] = useState<string>('')
+  const [isExporting, setIsExporting] = useState<boolean>(false)
+  const [previewContent, setPreviewContent] = useState<string | null>(null)
   const [previewFormat, setPreviewFormat] = useState<
-    "JSON" | "Markdown" | null
-  >(null);
+    'JSON' | 'Markdown' | null
+  >(null)
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   const glossaryWithTerms: Glossary = {
     ...glossary,
-    words: terms.map(t => ({
-        word: t.term,
-        definition: `Occurrence count: ${t.occurrence}`,
-        synonyms: []
-    }))
-    };
+    words: terms.map((t) => ({
+      word: t.term,
+      definition: `Occurrence count: ${t.occurrence}`,
+      synonyms: [],
+    })),
+  }
 
-  const handleExportJSON = async () => {
-    setIsExporting(true);
-    setError("");
-    setSuccess("");
+  const handleExport = async (
+    exporter: (glossary: Glossary) => Promise<void>,
+    format: string
+  ) => {
+    setIsExporting(true)
+    setError('')
+    setSuccess('')
     try {
-      await downloadGlossaryAsJSON(glossaryWithTerms);
-      setSuccess("Glossaire exporté en JSON avec succès !");
+      await exporter(glossaryWithTerms)
+      setSuccess(`Glossaire exporté en ${format} avec succès !`)
       setTimeout(() => {
-        setSuccess("");
-        onClose();
-      }, 2000);
+        setSuccess('')
+        onClose()
+      }, 2000)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur lors de l'export");
+      setError(err instanceof Error ? err.message : "Erreur lors de l'export")
     } finally {
-      setIsExporting(false);
+      setIsExporting(false)
     }
-  };
+  }
 
-  const handleExportMarkdown = async () => {
-    setIsExporting(true);
-    setError("");
-    setSuccess("");
-    try {
-      await downloadGlossaryAsMarkdown(glossaryWithTerms);
-      setSuccess("Glossaire exporté en Markdown avec succès !");
-      setTimeout(() => {
-        setSuccess("");
-        onClose();
-      }, 2000);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur lors de l'export");
-    } finally {
-      setIsExporting(false);
-    }
-  };
+  const handleExportJSON = () => handleExport(downloadGlossaryAsJSON, 'JSON')
+  const handleExportMarkdown = () =>
+    handleExport(downloadGlossaryAsMarkdown, 'Markdown')
 
-  const handlePreviewJSON = () => {
-    setPreviewContent(exportToJSON(glossaryWithTerms));
-    setPreviewFormat("JSON");
-  };
+  const handlePreview = (content: string, format: 'JSON' | 'Markdown') => {
+    setPreviewContent(content)
+    setPreviewFormat(format)
+  }
 
-  const handlePreviewMarkdown = () => {
-    setPreviewContent(exportToMarkdown(glossaryWithTerms));
-    setPreviewFormat("Markdown");
-  };
+  const handlePreviewJSON = () =>
+    handlePreview(exportToJSON(glossaryWithTerms), 'JSON')
+  const handlePreviewMarkdown = () =>
+    handlePreview(exportToMarkdown(glossaryWithTerms), 'Markdown')
 
   const handleClosePreview = () => {
-    setPreviewContent(null);
-    setPreviewFormat(null);
-  };
+    setPreviewContent(null)
+    setPreviewFormat(null)
+  }
 
   return (
     <div className="export-modal-overlay" onClick={onClose}>
@@ -135,7 +124,7 @@ export function ExportModal({
                     onClick={handleExportJSON}
                     disabled={isExporting}
                   >
-                    {isExporting ? "Exporting…" : "Export as JSON"}
+                    {isExporting ? 'Exporting…' : 'Export as JSON'}
                   </button>
 
                   <button
@@ -143,7 +132,7 @@ export function ExportModal({
                     onClick={handleExportMarkdown}
                     disabled={isExporting}
                   >
-                    {isExporting ? "Exporting…" : "Export as Markdown"}
+                    {isExporting ? 'Exporting…' : 'Export as Markdown'}
                   </button>
                 </div>
 
@@ -176,5 +165,5 @@ export function ExportModal({
         </div>
       </div>
     </div>
-  );
+  )
 }
