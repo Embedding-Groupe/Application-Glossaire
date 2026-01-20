@@ -58,9 +58,9 @@ function removeIfExists(targetPath) {
   try {
     try {
       chmodSync(targetPath, 0o666)
-    } catch (chmodErr) {
+    } catch (error_) {
       console.warn(
-        `⚠️  Could not change permissions for ${targetPath}: ${chmodErr.message}`
+        `⚠️  Could not change permissions for ${targetPath}: ${error_.message}`
       )
     }
     unlinkSync(targetPath)
@@ -140,16 +140,14 @@ try {
       try {
         if (existsSync(altNoExt)) unlinkSync(altNoExt)
         copyFileSync(sourcePath, altNoExt)
-      } catch (copyNoExtErr) {
-        console.warn(
-          `⚠️  Could not create ${altNoExt}: ${copyNoExtErr.message}`
-        )
+      } catch (error_) {
+        console.warn(`⚠️  Could not create ${altNoExt}: ${error_.message}`)
       }
       console.log(
         `✅ Copied backend to ${altPath}. The app will prefer this file if available.`
       )
-    } catch (e2) {
-      console.error('❌ Alternate copy failed:', e2.message)
+    } catch (error_) {
+      console.error('❌ Alternate copy failed:', error_.message)
       console.error(
         'Hint: Close any running app locking backend.exe, then retry.'
       )
