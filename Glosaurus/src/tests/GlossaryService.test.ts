@@ -95,7 +95,7 @@ describe('GlossaryService', () => {
     it('devrait trouver les glossaires correspondant au terme de recherche', () => {
       service.createGlossary('Python', 'Langage Python')
       service.createGlossary('JavaScript', 'Langage JS')
-      service.createGlossary('Pythonista', 'Terme non trouvé')
+      service.createGlossary('Pythonista', 'Terme lié à Python')
 
       const results = service.searchGlossaries('python')
       expect(results).toHaveLength(2)

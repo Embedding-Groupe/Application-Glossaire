@@ -323,7 +323,7 @@ const [words, setWords] = useState(() => wordService.loadWords())
 
 ## 🏆 QUALITÉ FINALE
 
-**Une application Glosaurus **professionnelle et maintenable\*\*\*\*
+**Une application Glosaurus professionnelle et maintenable**
 
 Caractéristiques :
 

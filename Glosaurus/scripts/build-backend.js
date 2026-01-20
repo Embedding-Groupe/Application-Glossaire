@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { execSync, spawnSync } from 'child_process'
+import { spawnSync } from 'child_process'
 import { copyFileSync, existsSync, mkdirSync, unlinkSync, chmodSync } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
@@ -15,25 +15,23 @@ const backendName = isWindows ? 'backend.exe' : 'backend'
 
 console.log('🔨 Building backend with PyInstaller (using local venv)...')
 
-function tryCmd(cmd) {
-  try {
-    execSync(cmd, { stdio: 'ignore' })
-    return true
-  } catch {
-    return false
-  }
+function tryCmd(cmd, args = []) {
+  const res = spawnSync(cmd, args, { stdio: 'ignore' })
+  return res.status === 0
 }
 
 function resolvePython() {
-  if (process.platform === 'win32') {
-    if (tryCmd('py -3 -V')) return 'py -3'
-    if (tryCmd('py -V')) return 'py'
-    if (tryCmd('python -V')) return 'python'
-    if (tryCmd('python3 -V')) return 'python3'
-  } else {
-    if (tryCmd('python3 --version')) return 'python3'
-    if (tryCmd('python --version')) return 'python'
+  const candidates = isWindows
+    ? [['py', '-3'], ['py'], ['python'], ['python3']]
+    : [['python3'], ['python']]
+
+  for (const candidate of candidates) {
+    const [cmd, ...baseArgs] = candidate
+    if (tryCmd(cmd, [...baseArgs, '-V'])) {
+      return { cmd, args: baseArgs }
+    }
   }
+
   console.error(
     '❌ No Python interpreter found. Please install Python 3.10+ and ensure it is on PATH.'
   )
@@ -44,6 +42,15 @@ function venvPythonPath() {
   return isWindows
     ? join(backendDir, '.venv', 'Scripts', 'python.exe')
     : join(backendDir, '.venv', 'bin', 'python')
+}
+
+function runOrExit(cmd, args, options = {}) {
+  const res = spawnSync(cmd, args, { stdio: 'inherit', ...options })
+  if (res.error) throw res.error
+  if (res.status !== 0) {
+    const code = res.status ?? res.signal
+    throw new Error(`Command failed: ${cmd} ${args.join(' ')} (code ${code})`)
+  }
 }
 
 function removeIfExists(targetPath) {
@@ -71,25 +78,25 @@ try {
 
   if (!existsSync(venvPy)) {
     console.log('📦 Creating virtual environment in back-end/.venv ...')
-    execSync(`${py} -m venv .venv`, { cwd: backendDir, stdio: 'inherit' })
+    runOrExit(py.cmd, [...py.args, '-m', 'venv', '.venv'], {
+      cwd: backendDir,
+    })
   }
 
   console.log('📥 Upgrading pip and installing requirements...')
-  execSync(`${venvPy} -m pip install --upgrade pip`, { stdio: 'inherit' })
+  runOrExit(venvPy, ['-m', 'pip', 'install', '--upgrade', 'pip'])
   const reqFile = join(backendDir, 'requirements.txt')
   if (existsSync(reqFile)) {
-    execSync(`${venvPy} -m pip install -r "${reqFile}"`, { stdio: 'inherit' })
+    runOrExit(venvPy, ['-m', 'pip', 'install', '-r', reqFile])
   }
   // Ensure PyInstaller is available in venv
-  execSync(`${venvPy} -m pip install pyinstaller`, { stdio: 'inherit' })
+  runOrExit(venvPy, ['-m', 'pip', 'install', 'pyinstaller'])
 
   // Run PyInstaller with the venv interpreter
   console.log('🏗️  Running PyInstaller...')
-  spawnSync(venvPy, ['-m', 'PyInstaller', 'back-end/run_backend.spec'], {
+  runOrExit(venvPy, ['-m', 'PyInstaller', 'back-end/run_backend.spec'], {
     cwd: projectRoot,
-    stdio: 'inherit',
-    shell: isWindows,
-  }).status !== 0 && process.exit(1)
+  })
 
   // Source and destination paths
   // Try common PyInstaller output locations (onefile vs onedir)

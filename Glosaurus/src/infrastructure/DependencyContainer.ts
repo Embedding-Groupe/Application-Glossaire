@@ -1,6 +1,6 @@
 /**
  * Conteneur d'injection de dépendances (IoC)
- * Applique l'Inversion of Control Principle (IoC)
+ * Met en œuvre le pattern Inversion of Control (IoC)
  * Gère la création et l'injection des dépendances
  *
  * Utilisation:
