@@ -17,10 +17,10 @@ import { Glossary } from '../domain/types/index'
 
 export class DependencyContainer {
   private static instance: DependencyContainer | undefined
-  private storageProvider: LocalStorageProvider
-  private apiClient: ApiClient
-  private glossaryRepository: GlossaryRepository
-  private glossaryService: GlossaryService
+  private readonly storageProvider: LocalStorageProvider
+  private readonly apiClient: ApiClient
+  private readonly glossaryRepository: GlossaryRepository
+  private readonly glossaryService: GlossaryService
 
   private constructor() {
     // Initialisation des dépendances
@@ -45,9 +45,7 @@ export class DependencyContainer {
    * Récupère l'instance singleton du conteneur
    */
   static getInstance(): DependencyContainer {
-    if (!DependencyContainer.instance) {
-      DependencyContainer.instance = new DependencyContainer()
-    }
+    DependencyContainer.instance ??= new DependencyContainer()
     return DependencyContainer.instance
   }
 
