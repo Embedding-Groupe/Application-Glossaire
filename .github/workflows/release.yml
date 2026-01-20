@@ -23,7 +23,7 @@ jobs:
 
       - name: Setup Rust targets (macOS)
         if: matrix.os == 'macos-latest'
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@stable # @be73d7920c329f220ce78e0234b8f96b7ae60248
         with:
           targets: aarch64-apple-darwin, x86_64-apple-darwin
 
@@ -80,7 +80,7 @@ jobs:
           rm -rf ~/.cache/pip || true
 
       - name: Build app with Tauri
-        uses: tauri-apps/tauri-action@v0
+        uses: tauri-apps/tauri-action@v0.5 # @5dd1ad227f2c0d3d3f5164db1dc9ad78c8cb4974
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
