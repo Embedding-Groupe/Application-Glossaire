@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.routes import synonym
+from src.routes import synonym, route_parser
 
 app = FastAPI()
 
@@ -13,3 +13,4 @@ app.add_middleware(
 )
 
 app.include_router(synonym.router)
+app.include_router(route_parser.router)
