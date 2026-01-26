@@ -35,7 +35,7 @@ export function Glossaire() {
 
   const glossaryName = params.name || 'Unknown Glossary'
   const STORAGE_KEY = `glossary_${glossaryName}`
-
+  
   const [tooltip, setTooltip] = useState<{
     text: string
     x: number
@@ -230,11 +230,12 @@ export function Glossaire() {
       <button
         className="Parser"
         onClick={() => {
-          location.route('/parser')
+          location.route('/parser', { state: { glossaryName } });
         }}
       >
         Parser
       </button>
+
 
 
 

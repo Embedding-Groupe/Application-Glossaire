@@ -27,7 +27,7 @@ function MainApp() {
     </LocationProvider>
   );
 }
-
+//*
 function Bootstrapper() {
   const [status, setStatus] = useState<"checking" | "installing" | "starting" | "ready" | "error">("checking");
   const [message, setMessage] = useState("Checking Ollama installation...");
