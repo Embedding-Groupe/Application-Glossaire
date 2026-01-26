@@ -65,15 +65,16 @@ export function SynonymSuggestion({
         definition: definition,
         synonyms: userSynonyms || [],
       })
-        .then((data: SynonymResponse) => {
+        .then((data) => {
           console.log('Réponse API :', data)
+          const response = data as SynonymResponse
           if (
-            data?.synonyms &&
-            Array.isArray(data.synonyms) &&
-            data.synonyms.length > 0
+            response?.synonyms &&
+            Array.isArray(response.synonyms) &&
+            response.synonyms.length > 0
           ) {
             const uniqueSynonyms: string[] = Array.from(
-              new Set(data.synonyms as string[])
+              new Set(response.synonyms as string[])
             )
             setSynonyms(uniqueSynonyms)
             setVisibleSynonyms(uniqueSynonyms.slice(0, 5))

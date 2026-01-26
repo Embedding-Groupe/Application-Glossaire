@@ -79,6 +79,7 @@ export function Parser() {
               )
             }
           >
+            <img src="/public/back.svg" alt="Back icon" />
             Back
           </button>
         </div>
@@ -92,7 +93,7 @@ export function Parser() {
       </div>
 
       <div className="terms-found">
-        <h1>Terms found in {fileName}:</h1>
+        <h1>Technical terms found in {fileName} :</h1>
         <table className="parser-table">
           <thead>
             <tr>
