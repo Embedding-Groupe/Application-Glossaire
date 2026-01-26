@@ -10,8 +10,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, macos-latest, windows-latest]
+        os: [ubuntu-22.04, macos-latest, windows-latest, ubuntu-24.04-arm64]
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,7 +30,7 @@ jobs:
           targets: aarch64-apple-darwin, x86_64-apple-darwin
 
       - name: Install system deps (Linux)
-        if: matrix.os == 'ubuntu-22.04'
+        if: matrix.os == 'ubuntu-22.04' || matrix.os == 'ubuntu-24.04-arm64'
         run: |
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf
@@ -43,7 +45,7 @@ jobs:
           python-version: "3.13"
 
       - name: Preinstall CPU-only PyTorch (Linux)
-        if: matrix.os == 'ubuntu-22.04'
+        if: matrix.os == 'ubuntu-22.04' || matrix.os == 'ubuntu-24.04-arm64'
         working-directory: ./Glosaurus/back-end
         shell: bash
         run: |
@@ -73,7 +75,7 @@ jobs:
           codesign --force --deep --sign - ./Glosaurus/src-tauri/bin/backend || true
 
       - name: Cleanup pip caches (Linux)
-        if: matrix.os == 'ubuntu-22.04'
+        if: matrix.os == 'ubuntu-22.04' || matrix.os == 'ubuntu-24.04-arm64'
         shell: bash
         run: |
           pip cache purge || true
@@ -89,95 +91,40 @@ jobs:
           releaseName: ${{ github.ref_name }}
           releaseBody: "Automated release for ${{ github.ref_name }}"
 
-      - name: Update README with download links (Ubuntu only)
-        if: matrix.os == 'ubuntu-22.04'
+  update-readme:
+    needs: build
+    runs-on: ubuntu-latest
+    if: success() && startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main # Target main branch for README updates
+
+      - name: Update README with download links
         run: |
           VERSION=${{ github.ref_name }}
-          # Remove 'v' prefix if present
-          VERSION=${VERSION#v}
+          # Remove 'v' prefix if present for certain links
+          VERSION_CLEAN=${VERSION#v}
 
           # Update README with new version and download links
-          sed -i "s|\[Setup.exe\](https://github.com/Embedding-Groupe/Application-Glossaire/releases/download/v[0-9.]*.*|\[Setup.exe\](https://github.com/Embedding-Groupe/Application-Glossaire/releases/download/${{ github.ref_name }}/Glosaurus_${VERSION}_x64-setup.exe)|g" README.md
-          sed -i "s|\[MSI Installer\](https://github.com/Embedding-Groupe/Application-Glossaire/releases/download/v[0-9.]*.*|\[MSI Installer\](https://github.com/Embedding-Groupe/Application-Glossaire/releases/download/${{ github.ref_name }}/Glosaurus_${VERSION}_x64_en-US.msi)|g" README.md
-          sed -i "s|\[DMG\](https://github.com/Embedding-Groupe/Application-Glossaire/releases/download/v[0-9.]*.*|\[DMG\](https://github.com/Embedding-Groupe/Application-Glossaire/releases/download/${{ github.ref_name }}/Glosaurus_${VERSION}_aarch64.dmg)|g" README.md
-          sed -i "s|\[DEB\](https://github.com/Embedding-Groupe/Application-Glossaire/releases/download/v[0-9.]*.*|\[DEB\](https://github.com/Embedding-Groupe/Application-Glossaire/releases/download/${{ github.ref_name }}/Glosaurus_${VERSION}_amd64.deb)|g" README.md
-          sed -i "s|\[AppImage\](https://github.com/Embedding-Groupe/Application-Glossaire/releases/download/v[0-9.]*.*|\[AppImage\](https://github.com/Embedding-Groupe/Application-Glossaire/releases/download/${{ github.ref_name }}/Glosaurus_${VERSION}_amd64.AppImage)|g" README.md
-          sed -i "s|\[RPM\](https://github.com/Embedding-Groupe/Application-Glossaire/releases/download/v[0-9.]*.*|\[RPM\](https://github.com/Embedding-Groupe/Application-Glossaire/releases/download/${{ github.ref_name }}/Glosaurus-${VERSION}-1.x86_64.rpm)|g" README.md
+          sed -i "s|\[Setup.exe\](https://github.com/Embedding-Groupe/Application-Glossaire/releases/download/v[0-9.]*.*|\[Setup.exe\](https://github.com/Embedding-Groupe/Application-Glossaire/releases/download/${VERSION}/Glosaurus_${VERSION_CLEAN}_x64-setup.exe)|g" README.md
+          sed -i "s|\[MSI Installer\](https://github.com/Embedding-Groupe/Application-Glossaire/releases/download/v[0-9.]*.*|\[MSI Installer\](https://github.com/Embedding-Groupe/Application-Glossaire/releases/download/${VERSION}/Glosaurus_${VERSION_CLEAN}_x64_en-US.msi)|g" README.md
+          sed -i "s|\[DMG\](https://github.com/Embedding-Groupe/Application-Glossaire/releases/download/v[0-9.]*.*|\[DMG\](https://github.com/Embedding-Groupe/Application-Glossaire/releases/download/${VERSION}/Glosaurus_${VERSION_CLEAN}_aarch64.dmg)|g" README.md
+          sed -i "s|\[DEB\](https://github.com/Embedding-Groupe/Application-Glossaire/releases/download/v[0-9.]*.*|\[DEB\](https://github.com/Embedding-Groupe/Application-Glossaire/releases/download/${VERSION}/Glosaurus_${VERSION_CLEAN}_amd64.deb)|g" README.md
+          sed -i "s|\[AppImage\](https://github.com/Embedding-Groupe/Application-Glossaire/releases/download/v[0-9.]*.*|\[AppImage\](https://github.com/Embedding-Groupe/Application-Glossaire/releases/download/${VERSION}/Glosaurus_${VERSION_CLEAN}_amd64.AppImage)|g" README.md
+          sed -i "s|\[RPM\](https://github.com/Embedding-Groupe/Application-Glossaire/releases/download/v[0-9.]*.*|\[RPM\](https://github.com/Embedding-Groupe/Application-Glossaire/releases/download/${VERSION}/Glosaurus-${VERSION_CLEAN}-1.x86_64.rpm)|g" README.md
 
-      - name: Commit and push README updates (Ubuntu only)
-        if: matrix.os == 'ubuntu-22.04'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add README.md
-          git commit -m "docs: update README with ${{ github.ref_name }} download links" || true
-          git push origin HEAD:main
+          # Add ARM64 links if they are not already managed (assuming they follow a pattern)
+          # Note: The version clean might be differently needed for ARM names
+          sed -i "s|\[ARM64 DEB\](https://github.com/Embedding-Groupe/Application-Glossaire/releases/download/v[0-9.]*.*|\[ARM64 DEB\](https://github.com/Embedding-Groupe/Application-Glossaire/releases/download/${VERSION}/Glosaurus_${VERSION_CLEAN}_arm64.deb)|g" README.md || true
 
-  release-arm64:
-    name: "Release (Linux ARM64)"
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build and Release ARM64
-        uses: uraimo/run-on-arch-action@v2
+      - name: Commit and push changes
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          arch: aarch64
-          distro: ubuntu22.04
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
-          install: |
-            apt-get update
-            apt-get install -y software-properties-common wget curl build-essential \
-            libwebkit2gtk-4.0-dev libssl-dev libgtk-3-dev libayatana-appindicator3-dev \
-            librsvg2-dev patchelf libwebkit2gtk-4.1-dev \
-            squashfs-tools
-          run: |
-            # Install Node.js 20 (LTS)
-            curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-            apt-get install -y nodejs
+          commit_message: "docs: update README with ${{ github.ref_name }} download links"
+          branch: main
+          file_pattern: 'README.md'
 
-            # Install Rust
-            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-            source $HOME/.cargo/env
-
-            # Install Python 3.13
-            add-apt-repository -y ppa:deadsnakes/ppa
-            apt-get update
-            apt-get install -y python3.13 python3.13-venv python3.13-dev
-            
-            # Create and active venv
-            python3.13 -m venv venv
-            source venv/bin/activate
-            python -m pip install --upgrade pip
-
-            # Build Backend
-            cd Glosaurus/back-end
-            pip install --no-cache-dir -r requirements.txt
-            pip install --no-cache-dir pyinstaller
-            # Install CPU torch
-            pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu torch
-            
-            pyinstaller run_backend.spec --clean
-            mkdir -p ../src-tauri/bin
-            cp -f dist/backend* ../src-tauri/bin/
-            cd ../..
-
-            # Build Frontend & Tauri
-            cd Glosaurus
-            npm install
-            
-            # Build using Tauri CLI
-            # We use npx tauri build which uses the local dependency
-            npx tauri build
-
-            # Copy Artifacts
-            mkdir -p ../release-artifacts
-            find src-tauri/target/release/bundle/deb -name "*.deb" -exec cp {} ../release-artifacts/ \;
-            find src-tauri/target/release/bundle/appimage -name "*.AppImage" -exec cp {} ../release-artifacts/ \;
-            find src-tauri/target/release/bundle/rpm -name "*.rpm" -exec cp {} ../release-artifacts/ \; || true
-
-      - name: Upload Release Assets
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/v')
-        with:
-          files: release-artifacts/*
