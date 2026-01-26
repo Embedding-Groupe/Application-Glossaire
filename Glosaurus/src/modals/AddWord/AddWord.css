@@ -1,221 +1,223 @@
 .modal-overlay {
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	background: rgba(0, 0, 0, 0.5);
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	z-index: 1000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
 }
 
 .modal {
-	display: flex;
-	width: 960px;
-	max-width: 960px;
-	padding: 12px 48px;
-	flex-direction: column;
-	justify-content: center;
-	align-items: flex-start;
-	border-radius: 16px;
-	background: #FFF;
+  display: flex;
+  width: 960px;
+  max-width: 960px;
+  padding: 12px 48px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  border-radius: 16px;
+  background: #fff;
 }
 
 .modal h2 {
-	color: #0D141C;
-	font-feature-settings: 'dlig' on;
-	font-size: 32px;
-	font-style: normal;
-	font-weight: 700;
-	line-height: 40px;
+  color: #0d141c;
+  font-feature-settings: 'dlig' on;
+  font-size: 32px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 40px;
 }
 
 label {
-	font-weight: 600;
-	color: black;
-	font-size: 16px;
+  font-weight: 600;
+  color: black;
+  font-size: 16px;
 }
 
 .input-container {
-    width: 50%;
+  width: 50%;
 }
 
 input,
 textarea {
-	width: 100%;
-	height: 50px;
-	padding: 15px;
-	border-radius: 8px;
-	border: 2px solid #ddd;
-	font-family: 'Poppins', sans-serif;
-	font-size: 16px;
-	outline: none;
-	transition: border-color 0.2s, background-color 0.2s;
-	background-color: white;
-	color: #000; 
-    box-sizing: border-box;
+  width: 100%;
+  height: 50px;
+  padding: 15px;
+  border-radius: 8px;
+  border: 2px solid #ddd;
+  font-family: 'Poppins', sans-serif;
+  font-size: 16px;
+  outline: none;
+  transition:
+    border-color 0.2s,
+    background-color 0.2s;
+  background-color: white;
+  color: #000;
+  box-sizing: border-box;
 }
 
 .char-counter {
-	width: 100%;
-    text-align: left;
-    font-size: 12px;
-    color: #888;
+  width: 100%;
+  text-align: left;
+  font-size: 12px;
+  color: #888;
 }
 
 .word-label {
-	padding-bottom: 8px;
+  padding-bottom: 8px;
 }
 
 .definition-label {
-	margin-top: 18px;
-	padding-bottom: 8px;
+  margin-top: 18px;
+  padding-bottom: 8px;
 }
 
 .definition-area {
-	height: 120px;
+  height: 120px;
+}
+
+.context-label {
+  margin-top: 18px;
+  padding-bottom: 8px;
 }
 
 .synonym-label {
-	margin-top: 18px;
-	padding-bottom: 8px;
+  margin-top: 18px;
+  padding-bottom: 8px;
 }
 
 .required {
-	color: #e63946;
-	margin-left: 2px;
-	font-size: 20px;
+  color: #e63946;
+  margin-left: 2px;
+  font-size: 20px;
 }
 
 textarea {
-	resize: none;
+  resize: none;
 }
 
 input::placeholder,
 textarea::placeholder {
-	color: #4D7399;
-	opacity: 1;
+  color: #4d7399;
+  opacity: 1;
 }
 
 input:focus,
 textarea:focus {
-	border-color: #4D7399;
+  border-color: #4d7399;
 }
 
-
 .input-error {
-	border-color: #e63946;
+  border-color: #e63946;
 }
 
 .error-text {
-	color: #e63946;
-	margin: 0; 
-	line-height: 1; 
+  color: #e63946;
+  margin: 0;
+  line-height: 1;
 }
 
-.attention{
-	display: flex;
-	align-items: center;
-	gap: 0.3rem;
-	padding-top: 6px;
+.attention {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding-top: 6px;
 }
 
 .attention img {
-	width: 18px;
-	height: 18px;
-	display: block; 
+  width: 18px;
+  height: 18px;
+  display: block;
 }
 
-
 .synonym-list {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 0.4rem;
-	margin-top: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
 }
 
 .tag {
-	background-color: #f0f2f5;
-	padding: 0.3rem 0.7rem;
-	border-radius: 15px;
-	font-size: 0.9rem;
-	color: black;
-	display: flex;
-	align-items: center;
-	gap: 0.4rem;
+  background-color: #f0f2f5;
+  padding: 0.3rem 0.7rem;
+  border-radius: 15px;
+  font-size: 0.9rem;
+  color: black;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
-
 .remove-btn {
-	background: none;
-	border: none;
-	color: black;
-	font-size: 1rem;
-	cursor: pointer;
-	line-height: 1;
-	padding: 0;
-	margin-right: 0.2rem;
-	font-weight: bold;
+  background: none;
+  border: none;
+  color: black;
+  font-size: 1rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  margin-right: 0.2rem;
+  font-weight: bold;
 }
 
 .remove-btn:hover {
-	color: #b32134;
+  color: #b32134;
 }
-
 
 .ai-suggestion {
-	font-size: 0.9rem;
-	color: black;
-	align-self: center;
+  font-size: 0.9rem;
+  color: black;
+  align-self: center;
 }
 
-.logo-ia{
-	width: 20px;
-	height: 20px;   
+.logo-ia {
+  width: 20px;
+  height: 20px;
 }
 
-
-nav{
-	display: flex;
-	align-items: center;
+nav {
+  display: flex;
+  align-items: center;
 }
 
 .modal-actions {
-	display: flex;
-	padding: 12px 16px;
-	justify-content: flex-end;
-	align-items: center;
-	gap: 12px;
-	align-self: stretch;
+  display: flex;
+  padding: 12px 16px;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  align-self: stretch;
 }
 
 .cancel,
 .add {
-	border: none;
-	border-radius: 8px;
-	padding: 0.8rem 1.4rem;
-	cursor: pointer;
-	font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  padding: 0.8rem 1.4rem;
+  cursor: pointer;
+  font-weight: 600;
 }
 
 .cancel {
-	background-color: #888;
-	color: white;
+  background-color: #888;
+  color: white;
 }
 
 .cancel:hover {
-	background-color: #555;
+  background-color: #555;
 }
 
 .add {
-	background-color: #b32134;
-	color: white;
+  background-color: #b32134;
+  color: white;
 }
 
 .add:hover {
-	background-color: #921b2a;
+  background-color: #921b2a;
 }
 
 .clickable-synonym {

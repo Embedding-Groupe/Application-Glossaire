@@ -1,64 +1,64 @@
-import { useState, useEffect, useRef } from "preact/hooks";
-import "./AddGlossary.css";
+import { useState, useEffect, useRef } from 'preact/hooks'
+import './AddGlossary.css'
 
 interface AddGlossaryModalProps {
-  onAdd: (glossary: { name: string; description: string }) => void;
-  onClose: () => void;
+  onAdd: (glossary: { name: string; description: string }) => void
+  onClose: () => void
 }
 
 export function AddGlossaryModal({ onClose, onAdd }: AddGlossaryModalProps) {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+  const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
   const [errors, setErrors] = useState<{ name?: string; description?: string }>(
     {}
-  );
+  )
 
-  const modalRef = useRef<HTMLDivElement | null>(null);
-  const firstInputRef = useRef<HTMLInputElement | null>(null);
-  const previouslyFocused = useRef<Element | null>(null);
+  const modalRef = useRef<HTMLDivElement | null>(null)
+  const firstInputRef = useRef<HTMLInputElement | null>(null)
+  const previouslyFocused = useRef<Element | null>(null)
 
-  const nameMaxLength = 30;
-  const descriptionMaxLength = 200;
+  const nameMaxLength = 30
+  const descriptionMaxLength = 200
 
   useEffect(() => {
-    previouslyFocused.current = document.activeElement;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    previouslyFocused.current = document.activeElement
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
 
     setTimeout(() => {
-      firstInputRef.current?.focus();
-    }, 0);
+      firstInputRef.current?.focus()
+    }, 0)
 
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', onKey)
     return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prev;
-      (previouslyFocused.current as HTMLElement | null)?.focus?.();
-    };
-  }, [onClose]);
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = prev
+      ;(previouslyFocused.current as HTMLElement | null)?.focus?.()
+    }
+  }, [onClose])
 
   const handleSubmit = (e?: Event) => {
-    e?.preventDefault();
+    e?.preventDefault()
 
-    const newErrors: { name?: string; description?: string } = {};
+    const newErrors: { name?: string; description?: string } = {}
 
-    if (!name.trim()) newErrors.name = "Please provide a glossary name !";
+    if (!name.trim()) newErrors.name = 'Please provide a glossary name !'
     if (!description.trim())
-      newErrors.description = "Please provide a description !";
+      newErrors.description = 'Please provide a description !'
 
-    setErrors(newErrors);
+    setErrors(newErrors)
 
     if (Object.keys(newErrors).length === 0) {
-      onAdd({ name, description });
-      setName("");
-      setDescription("");
-      setErrors({});
-      onClose();
+      onAdd({ name, description })
+      setName('')
+      setDescription('')
+      setErrors({})
+      onClose()
     }
-  };
+  }
 
   return (
     <div
@@ -82,15 +82,15 @@ export function AddGlossaryModal({ onClose, onAdd }: AddGlossaryModalProps) {
             <input
               ref={firstInputRef}
               type="text"
-              className={`input-name ${errors.name ? "input-error" : ""}`}
+              className={`input-name ${errors.name ? 'input-error' : ''}`}
               placeholder="Enter Glossary name"
               value={name}
               maxLength={nameMaxLength}
               onInput={(e) => {
-                const val = (e.target as HTMLInputElement).value;
-                setName(val);
-                if (errors.name && val.trim() !== "") {
-                  setErrors((prev) => ({ ...prev, name: undefined }));
+                const val = (e.target as HTMLInputElement).value
+                setName(val)
+                if (errors.name && val.trim() !== '') {
+                  setErrors((prev) => ({ ...prev, name: undefined }))
                 }
               }}
             />
@@ -113,15 +113,15 @@ export function AddGlossaryModal({ onClose, onAdd }: AddGlossaryModalProps) {
           </label>
           <div className="input-name-container">
             <textarea
-              className={`textarea-description ${errors.description ? "input-error" : ""}`}
+              className={`textarea-description ${errors.description ? 'input-error' : ''}`}
               placeholder="Provide a brief description of the glossary"
               value={description}
               maxLength={descriptionMaxLength}
               onInput={(e) => {
-                const val = (e.target as HTMLTextAreaElement).value;
-                setDescription(val);
-                if (errors.description && val.trim() !== "") {
-                  setErrors((prev) => ({ ...prev, description: undefined }));
+                const val = (e.target as HTMLTextAreaElement).value
+                setDescription(val)
+                if (errors.description && val.trim() !== '') {
+                  setErrors((prev) => ({ ...prev, description: undefined }))
                 }
               }}
             />
@@ -149,5 +149,5 @@ export function AddGlossaryModal({ onClose, onAdd }: AddGlossaryModalProps) {
         </form>
       </div>
     </div>
-  );
+  )
 }

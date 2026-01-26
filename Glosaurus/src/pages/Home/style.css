@@ -6,7 +6,7 @@
   --color-text: #000;
   --color-bg: #f7f8fa;
   --color-table-border: #e4e6eb;
-  --font-main: "Poppins", sans-serif;
+  --font-main: 'Poppins', sans-serif;
 }
 
 body {
@@ -52,6 +52,28 @@ body {
   font-weight: 700;
   color: var(--color-primary);
   margin: 0;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.header-title h1 {
+  margin: 0;
+}
+
+.badge-count {
+  padding: 4px 8px;
+  background: var(--color-secondary);
+  color: white;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: inline-block;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .deco {
@@ -135,7 +157,7 @@ body {
 
 .glossaire-table th {
   color: var(--color-text);
-  font-feature-settings: "dlig" on;
+  font-feature-settings: 'dlig' on;
   font-size: 18px;
   font-weight: 700;
   line-height: 21px;
@@ -147,6 +169,10 @@ body {
 
 .glossaire-table td.GlossaryDefinition {
   color: #d17178;
+}
+
+.glossaire-table td.GlossaryContext {
+  color: #000000;
 }
 
 .glossaire-table td.GlossaryWord {
@@ -174,17 +200,22 @@ body {
 
 .glossaire .glossaire-table th:nth-child(2),
 .glossaire-table td:nth-child(2) {
-  width: 35ch;
+  width: 30ch;
 }
 
 .glossaire .glossaire-table th:nth-child(3),
 .glossaire-table td:nth-child(3) {
-  width: 25ch;
+  width: 22ch;
 }
 
 .glossaire .glossaire-table th:nth-child(4),
 .glossaire-table td:nth-child(4) {
-  width: 6ch;
+  width: 22ch;
+}
+
+.glossaire .glossaire-table th:nth-child(5),
+.glossaire-table td:nth-child(5) {
+  width: 8ch;
 }
 
 .glossaire-table td.GlossaryWord:hover::after {
@@ -280,19 +311,19 @@ body {
 }
 
 .Parser {
-    background-color: var(--color-primary);
-    color: white;
-    font-weight: 600;
-    font-size: 1rem;
-    border: none;
-    border-radius: 8px;
-    padding: 0.8rem 1.5rem;
-    margin-left: 69rem;
-   
-    cursor: pointer;
-    transition:
-      background-color 0.2s,
-      transform 0.2s;
+  background-color: var(--color-primary);
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  padding: 0.8rem 1.5rem;
+  margin-left: 69rem;
+
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    transform 0.2s;
 }
 
 @media (max-width: 800px) {
@@ -317,12 +348,10 @@ body {
     width: 100%;
     justify-content: center;
   }
-
-
 }
 
 .no-synonyms {
-  color: "#d17178";
+  color: '#d17178';
 }
 
 @keyframes fadeIn {

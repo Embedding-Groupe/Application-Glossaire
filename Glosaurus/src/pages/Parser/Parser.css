@@ -6,7 +6,7 @@
   --color-text: #000;
   --color-bg: #f7f8fa;
   --color-table-border: #e4e6eb;
-  --font-main: "Poppins", sans-serif;
+  --font-main: 'Poppins', sans-serif;
 }
 
 body {
@@ -78,7 +78,7 @@ body {
 }
 
 .import-btn-parser:hover {
-    background-color: #921b2a;
+  background-color: #921b2a;
 }
 
 .header-buttons-parser {
@@ -87,8 +87,8 @@ body {
   align-items: center;
 }
 
-.back-btn{
-    display: flex;
+.back-btn {
+  display: flex;
   align-items: center;
   justify-content: center;
   background-color: var(--color-secondary);
@@ -104,7 +104,7 @@ body {
 }
 
 .back-btn:hover {
-    background-color: #b32134;
+  background-color: #b32134;
 }
 
 .parser > h1 {
@@ -113,11 +113,14 @@ body {
 }
 
 .terms-found {
-  width: 100%; 
+  width: 100%;
   align-self: flex-start;
   margin-left: 15rem;
 }
 
+.terms-found h1 {
+  color: black;
+}
 
 .parser-table {
   width: 100%;
@@ -137,18 +140,19 @@ body {
   text-align: left;
   font-size: 1rem;
   vertical-align: top;
+  color: black;
 }
 
 .parser-table th {
   color: var(--color-text);
-  font-feature-settings: "dlig" on;
+  font-feature-settings: 'dlig' on;
   font-size: 18px;
   font-weight: 700;
   line-height: 21px;
 }
 
-
 .parser-table td.GlossaryWord {
+  color: #000000;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -156,6 +160,7 @@ body {
 }
 
 .parser-table td.GlossaryDefinition {
+  color: #000000;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -176,8 +181,6 @@ body {
   text-align: right;
   padding-right: 3rem;
 }
-
-
 
 .parser-table td.GlossaryWord:hover::after {
   content: attr(data-fulltext);
@@ -208,16 +211,21 @@ body {
   gap: 0.5rem;
   border: none;
   border-radius: 8px;
-  padding: 0.25rem 1rem;
+  padding: 9px 16px;
   cursor: pointer;
   transition: all 0.2s ease;
+}
+
+.bottom-parser {
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
 }
 
 .legend {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  
 }
 
 .legend-color {
@@ -225,10 +233,19 @@ body {
   border: 1px solid #777777;
   width: 40px;
   height: 14px;
-  background-color: #FFDCF5; 
+  background-color: #ffdcf5;
   border-radius: 3px;
 }
 
-.legend-text{
+.legend-text {
   margin-top: 13px;
+  color: black;
+}
+
+.terms-column {
+  text-align: left;
+}
+
+.occurrence-column {
+  text-align: right;
 }

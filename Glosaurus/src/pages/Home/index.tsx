@@ -8,12 +8,11 @@ import { useRoute } from 'preact-iso'
 import { Trash2 } from 'lucide-preact'
 import { useLocation } from 'preact-iso'
 
-
-
 type WordItem = {
   word: string
   definition: string
   synonyms: string[]
+  boundedContext?: string
 }
 
 function isTruncated(el: HTMLElement) {
@@ -21,7 +20,6 @@ function isTruncated(el: HTMLElement) {
 }
 
 const initialWords: WordItem[] = []
-
 
 export function Glossaire() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -35,7 +33,7 @@ export function Glossaire() {
 
   const glossaryName = params.name || 'Unknown Glossary'
   const STORAGE_KEY = `glossary_${glossaryName}`
-  
+
   const [tooltip, setTooltip] = useState<{
     text: string
     x: number
@@ -75,9 +73,10 @@ export function Glossaire() {
   const handleAddWord = (
     word: string,
     definition: string,
-    synonyms: string[]
+    synonyms: string[],
+    boundedContext?: string
   ) => {
-    const entry: WordItem = { word, definition, synonyms }
+    const entry: WordItem = { word, definition, synonyms, boundedContext }
 
     if (editingWord) {
       setWords((prev) =>
@@ -121,7 +120,10 @@ export function Glossaire() {
       <div className="glossaire-header">
         <nav className="deco">
           <img src="/deco.svg" title="Decoration" alt="Decoration" />
-          <h1>{glossaryName}</h1>
+          <div className="header-title">
+            <h1>{glossaryName}</h1>
+            <span className="badge-count">{words.length} word(s)</span>
+          </div>
         </nav>
 
         <div className="header-buttons">
@@ -140,6 +142,7 @@ export function Glossaire() {
           <tr>
             <th>Word</th>
             <th>Definition</th>
+            <th>Bounded Context</th>
             <th>Synonyms</th>
             <th></th>
           </tr>
@@ -189,6 +192,27 @@ export function Glossaire() {
                 </span>
               </td>
 
+              <td className="GlossaryContext">
+                <span
+                  className="text-limit"
+                  data-fulltext={w.boundedContext || '—'}
+                  onMouseEnter={(e) => {
+                    const el = e.target as HTMLElement
+                    if (!isTruncated(el)) return
+
+                    const rect = el.getBoundingClientRect()
+                    setTooltip({
+                      text: w.boundedContext || '—',
+                      x: rect.left,
+                      y: rect.bottom + 6,
+                    })
+                  }}
+                  onMouseLeave={() => setTooltip(null)}
+                >
+                  {w.boundedContext || '—'}
+                </span>
+              </td>
+
               <td className="GlossarySynonyms">
                 {w.synonyms.length > 0 ? (
                   w.synonyms.map((syn) => (
@@ -230,14 +254,11 @@ export function Glossaire() {
       <button
         className="Parser"
         onClick={() => {
-          location.route('/parser', { state: { glossaryName } });
+          location.route(`/parser?glossary=${encodeURIComponent(glossaryName)}`)
         }}
       >
         Parser
       </button>
-
-
-
 
       <AddWordModal
         isOpen={isModalOpen}

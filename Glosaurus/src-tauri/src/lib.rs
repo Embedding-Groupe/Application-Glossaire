@@ -1,13 +1,12 @@
 use std::process::Child;
 use std::sync::Mutex;
-use tauri::{WindowEvent, Manager, State, AppHandle};
+use tauri::{AppHandle, Manager, State, WindowEvent};
 use std::fs;
 use reqwest;
 use std::process::Command;
 use serde_json::Value;
 use std::process::Stdio;
 use std::path::Path;
-use tauri::path::BaseDirectory;
 
 // State to manage the backend process
 struct BackendState {
@@ -43,98 +42,6 @@ fn proxy_request(method: String, url: String, body: Option<Value>) -> Result<Val
         Err(_) => Ok(Value::String(text)),
     }
 }
-
-#[cfg_attr(mobile, tauri::mobile_entry_point)]
-pub fn run() {
-    tauri::Builder::default()
-        .plugin(tauri_plugin_opener::init())
-        .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_fs::init())
-        .invoke_handler(tauri::generate_handler![greet, proxy_request])
-        .setup(|app| {
-            let resource_dir = app
-                .path()
-                .resource_dir()
-                .expect("Failed to get resource dir");
-
-            // Check if Ollama is installed
-            let ollama_path = find_ollama_path();
-            let has_ollama = Command::new(&ollama_path)
-                .arg("--version")
-                .output()
-                .is_ok();
-
-            if !has_ollama {
-                // Show native OS dialog asking to install Ollama
-                let confirmed = show_ollama_dialog();
-                
-                if confirmed {
-                    if let Err(e) = install_ollama_if_needed() {
-                        println!("Failed to install Ollama: {:?}", e);
-                    }
-                }
-            } else {
-                println!("Ollama already installed");
-            }
-
-            // Le backend est dans resource_dir/bin/ (préfère backend-new.* si présent)
-            let bin_dir = resource_dir.join("bin");
-            let candidates: [&str; 2] = if cfg!(target_os = "windows") {
-                ["backend-new.exe", "backend.exe"]
-            } else {
-                ["backend-new", "backend"]
-            };
-
-            let backend_path = candidates
-                .iter()
-                .map(|name| bin_dir.join(name))
-                .find(|p| p.exists())
-                .unwrap_or_else(|| bin_dir.join(candidates[1]));
-
-            println!("Backend path: {:?}", backend_path);
-
-            let child = std::process::Command::new(&backend_path)
-                .current_dir(resource_dir.join("bin"))
-                .stdout(Stdio::inherit())
-                .stderr(Stdio::inherit())
-                .spawn()
-                .expect("Failed to start backend");
-
-            // Stocker dans un Mutex pour le rendre accessible à la fermeture
-            app.manage(Mutex::new(child));
-
-            #[cfg(debug_assertions)]
-            {
-                if let Some(window) = app.get_webview_window("main") {
-                    window.open_devtools();
-                }
-            }
-
-            Ok(())
-        })
-        .on_window_event(|window, event| {
-            if let WindowEvent::CloseRequested { .. } = event {
-                let child_mutex = window.state::<Mutex<Child>>();
-                if let Ok(mut child) = child_mutex.lock() {
-                     #[cfg(unix)]
-                    {
-                        let _ = std::process::Command::new("kill")
-                            .arg("-15")
-                            .arg(child.id().to_string())
-                            .status();
-                    }
-
-                    #[cfg(windows)]
-                    {
-                        let _ = child.kill();
-                    }
-                };
-            }
-        })
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
-}
-
 
 fn show_ollama_dialog() -> bool {
     #[cfg(target_os = "macos")]
@@ -209,10 +116,11 @@ fn show_ollama_dialog() -> bool {
 
 fn install_ollama_if_needed() -> anyhow::Result<()> {
     let ollama_path = find_ollama_path();
-    Command::new(&ollama_path)
-        .arg("--version")
-        .output()
-        .is_ok()
+    if Command::new(&ollama_path).arg("--version").output()?.status.success() {
+        Ok(())
+    } else {
+        anyhow::bail!("Ollama not available")
+    }
 }
 
 #[tauri::command]
@@ -313,7 +221,10 @@ fn start_backend(app: AppHandle, state: State<'_, BackendState>) -> Result<(), S
         return Ok(());
     }
 
-    let resource_dir = app.path().resource_dir().map_err(|e| e.to_string())?;
+    let resource_dir = app
+        .path()
+        .resource_dir()
+        .map_err(|e: tauri::Error| e.to_string())?;
     
     // Le backend.exe est dans resource_dir/bin/
     let backend_path = resource_dir
@@ -335,6 +246,16 @@ fn start_backend(app: AppHandle, state: State<'_, BackendState>) -> Result<(), S
 
     *child_guard = Some(child);
     Ok(())
+}
+
+#[tauri::command]
+fn check_ollama() -> bool {
+    let ollama_path = find_ollama_path();
+    Command::new(&ollama_path)
+        .arg("--version")
+        .output()
+        .map(|o| o.status.success())
+        .unwrap_or(false)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]

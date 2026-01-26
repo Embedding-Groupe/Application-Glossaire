@@ -1,78 +1,59 @@
-import { useRef, useState } from 'preact/hooks';
-import './Parser.css';
-import { ExportModal } from "../../modals/Export/Export";
-import type { Glossary } from "../../utils/importExport";
-import { useLocation } from 'preact-iso';
-import { postJSON } from "../../utils/api";
+import { useRef, useState } from 'preact/hooks'
+import './Parser.css'
+import { ExportModal } from '../../modals/Export/Export'
+import type { Glossary } from '../../utils/importExport'
+import { useLocation } from 'preact-iso'
 
 interface ParsedTerm {
-  term: string;
-  occurrence: number;
+  term: string
+  occurrence: number
 }
 
 export function Parser() {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const location = useLocation<{ glossaryName?: string }>();
-  const previousGlossaryName = location.state?.glossaryName ?? "Unknown Glossary";
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const location = useLocation()
+  const previousGlossaryName = location.query?.glossary ?? 'Unknown Glossary'
 
-  const [fileName, setFileName] = useState<string>("No File");
-  const [terms, setTerms] = useState<ParsedTerm[]>([]);
-  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-
-  const readFileContent = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const content = e.target?.result;
-        if (typeof content === 'string') resolve(content);
-        else reject(new Error('Impossible de lire le fichier'));
-      };
-      reader.onerror = () => reject(new Error('Erreur lors de la lecture du fichier'));
-      reader.readAsText(file);
-    });
-  };
-
-
+  const [fileName, setFileName] = useState<string>('No File')
+  const [terms, setTerms] = useState<ParsedTerm[]>([])
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false)
 
   const handleFileChange = () => {
-    const files = fileInputRef.current?.files;
-    if (!files || files.length === 0) return;
+    const files = fileInputRef.current?.files
+    if (!files || files.length === 0) return
 
-    const file = files[0];
-    setFileName(file.name);
+    const file = files[0]
+    setFileName(file.name)
 
-    const formData = new FormData();
-    formData.append("file", file);
+    const formData = new FormData()
+    formData.append('file', file)
 
-    fetch("http://127.0.0.1:8000/parser/parse", {
-      method: "POST",
-      body: formData
+    fetch('http://127.0.0.1:8000/parser/parse', {
+      method: 'POST',
+      body: formData,
     })
-      .then(res => res.json())
+      .then((res) => res.json())
       .then((data: Record<string, number>) => {
-        console.log("Réponse brute API:", data);
+        console.log('Réponse brute API:', data)
 
         const parsedTerms: ParsedTerm[] = Object.entries(data).map(
           ([term, occurrence]) => ({ term, occurrence })
-        );
-        console.log("parsedTerms transformé:", parsedTerms);
+        )
+        console.log('parsedTerms transformé:', parsedTerms)
 
-        setTerms(parsedTerms);
+        setTerms(parsedTerms)
       })
-      .catch(err => {
-        console.error("Erreur parser :", err);
-        setTerms([]);
-      });
-  };
-
-
-
+      .catch((err) => {
+        console.error('Erreur parser :', err)
+        setTerms([])
+      })
+  }
 
   const glossary: Glossary = {
     name: fileName,
-    description: "Imported file analysis",
-    words: []
-  };
+    description: 'Imported file analysis',
+    words: [],
+  }
 
   return (
     <div className="parser">
@@ -92,7 +73,11 @@ export function Parser() {
 
           <button
             className="back-btn"
-            onClick={() => location.route(`/glossaire/${encodeURIComponent(previousGlossaryName)}`)}
+            onClick={() =>
+              location.route(
+                `/glossaire/${encodeURIComponent(previousGlossaryName)}`
+              )
+            }
           >
             Back
           </button>
@@ -111,29 +96,33 @@ export function Parser() {
         <table className="parser-table">
           <thead>
             <tr>
-              <th style={{ textAlign: 'left' }}>Terms</th>
-              <th style={{ textAlign: 'right' }}>Occurrence</th>
+              <th className="terms-column">Terms</th>
+              <th className="occurrence-column">Occurrence</th>
             </tr>
           </thead>
           <tbody>
-            {terms.map(t => (
+            {terms.map((t) => (
               <tr key={t.term}>
-                <td style={{ textAlign: 'left' }}>{t.term}</td>
-                <td style={{ textAlign: 'right' }}>{t.occurrence}</td>
+                <td className="terms-column">{t.term}</td>
+                <td className="occurrence-column">{t.occurrence}</td>
               </tr>
             ))}
           </tbody>
         </table>
 
-        <div className="legend">
+        <div className="bottom-parser">
           <button
             className="download-btn"
             onClick={() => setIsExportModalOpen(true)}
           >
             Download Result
           </button>
-          <span className="legend-color"></span>
-          <span className="legend-text">Words already present in the glossary</span>
+          <div className="legend">
+            <span className="legend-color"></span>
+            <span className="legend-text">
+              Words already present in the glossary
+            </span>
+          </div>
         </div>
       </div>
 
@@ -141,8 +130,7 @@ export function Parser() {
         isOpen={isExportModalOpen}
         onClose={() => setIsExportModalOpen(false)}
         glossary={glossary}
-        terms={terms}
       />
     </div>
-  );
+  )
 }

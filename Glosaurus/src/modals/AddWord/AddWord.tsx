@@ -1,66 +1,72 @@
-import { useEffect, useRef, useState, useCallback } from "preact/hooks";
-import "./AddWord.css";
-import { postJSON } from "../../utils/api";
+import { useEffect, useRef, useState, useCallback } from 'preact/hooks'
+import './AddWord.css'
+import { postJSON } from '../../utils/api'
 
 interface AddWordModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onAddWord: (word: string, definition: string, synonyms: string[]) => void;
+  isOpen: boolean
+  onClose: () => void
+  onAddWord: (
+    word: string,
+    definition: string,
+    synonyms: string[],
+    boundedContext?: string
+  ) => void
   initialData?: {
-    word: string;
-    definition: string;
-    synonyms: string[];
-  } | null;
-  isEdit?: boolean;
+    word: string
+    definition: string
+    synonyms: string[]
+    boundedContext?: string
+  } | null
+  isEdit?: boolean
 }
 
 interface SynonymResponse {
-  synonyms: string[];
+  synonyms: string[]
 }
 
 export function SynonymSuggestion({
   word,
   definition,
   userSynonyms,
-  onAddSynonym
+  onAddSynonym,
 }: {
-  word: string;
-  definition: string;
-  userSynonyms: string[];
-  onAddSynonym: (synonym: string) => void;
+  word: string
+  definition: string
+  userSynonyms: string[]
+  onAddSynonym: (synonym: string) => void
 }) {
-  const [synonyms, setSynonyms] = useState<string[]>([]);
-  const [visibleSynonyms, setVisibleSynonyms] = useState<string[]>([]);
-  const [startIndex, setStartIndex] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [synonyms, setSynonyms] = useState<string[]>([])
+  const [visibleSynonyms, setVisibleSynonyms] = useState<string[]>([])
+  const [startIndex, setStartIndex] = useState(0)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     if (
       !word ||
-      word.trim() === "" ||
+      word.trim() === '' ||
       !definition ||
-      definition.trim() === ""
+      definition.trim() === ''
     ) {
-      setSynonyms([]);
-      setVisibleSynonyms([]);
-      setStartIndex(0);
-      return;
+      setSynonyms([])
+      setVisibleSynonyms([])
+      setStartIndex(0)
+      return
     }
 
-    setSynonyms([]);
-    setVisibleSynonyms([]);
-    setStartIndex(0);
-    setLoading(true);
+    setSynonyms([])
+    setVisibleSynonyms([])
+    setStartIndex(0)
+    setLoading(true)
 
     const timeout = setTimeout(() => {
-      console.log("start fetch");
-      postJSON("http://127.0.0.1:8000/synonym/getSynonym", {
+      console.log('start fetch')
+      postJSON('http://127.0.0.1:8000/synonym/getSynonym', {
         word: word.trim(),
         definition: definition,
-        synonyms: userSynonyms || []
+        synonyms: userSynonyms || [],
       })
         .then((data: SynonymResponse) => {
-          console.log("Réponse API :", data);
+          console.log('Réponse API :', data)
           if (
             data?.synonyms &&
             Array.isArray(data.synonyms) &&
@@ -68,46 +74,46 @@ export function SynonymSuggestion({
           ) {
             const uniqueSynonyms: string[] = Array.from(
               new Set(data.synonyms as string[])
-            );
-            setSynonyms(uniqueSynonyms);
-            setVisibleSynonyms(uniqueSynonyms.slice(0, 5));
-            setStartIndex(0);
+            )
+            setSynonyms(uniqueSynonyms)
+            setVisibleSynonyms(uniqueSynonyms.slice(0, 5))
+            setStartIndex(0)
           } else {
-            setSynonyms([]);
-            setVisibleSynonyms([]);
+            setSynonyms([])
+            setVisibleSynonyms([])
           }
         })
         .catch((err) => {
-          console.error("Erreur API :", err);
-          setSynonyms([]);
-          setVisibleSynonyms([]);
+          console.error('Erreur API :', err)
+          setSynonyms([])
+          setVisibleSynonyms([])
         })
         .finally(() => {
-          console.log("fetch terminé");
-          setLoading(false);
-        });
-    }, 500);
+          console.log('fetch terminé')
+          setLoading(false)
+        })
+    }, 500)
 
-    return () => clearTimeout(timeout);
-  }, [word, userSynonyms, definition]);
+    return () => clearTimeout(timeout)
+  }, [word, userSynonyms, definition])
 
   const handleReload = () => {
-    if (synonyms.length <= 5) return;
-    const nextIndex = (startIndex + 5) % synonyms.length;
+    if (synonyms.length <= 5) return
+    const nextIndex = (startIndex + 5) % synonyms.length
     const nextSlice = [
       ...synonyms.slice(nextIndex, nextIndex + 5),
-      ...synonyms.slice(0, Math.max(0, nextIndex + 5 - synonyms.length))
-    ];
-    setVisibleSynonyms(nextSlice);
-    setStartIndex(nextIndex);
-  };
+      ...synonyms.slice(0, Math.max(0, nextIndex + 5 - synonyms.length)),
+    ]
+    setVisibleSynonyms(nextSlice)
+    setStartIndex(nextIndex)
+  }
 
   return (
     <div className="ai-suggestion">
       <p>
-        AI Suggestions:{" "}
+        AI Suggestions:{' '}
         {loading ? (
-          "Chargement..."
+          'Chargement...'
         ) : visibleSynonyms.length > 0 ? (
           <>
             {visibleSynonyms.map((syn, i) => (
@@ -118,12 +124,12 @@ export function SynonymSuggestion({
                 title="Cliquer pour ajouter ce synonyme"
               >
                 {syn}
-                {i < visibleSynonyms.length - 1 && ", "}
+                {i < visibleSynonyms.length - 1 && ', '}
               </span>
             ))}
           </>
         ) : (
-          "No suggestion found"
+          'No suggestion found'
         )}
       </p>
 
@@ -137,177 +143,183 @@ export function SynonymSuggestion({
         </button>
       )}
     </div>
-  );
+  )
 }
 
-export default SynonymSuggestion;
+export default SynonymSuggestion
 
 export function AddWordModal({
   isOpen,
   onClose,
   onAddWord,
   initialData,
-  isEdit
+  isEdit,
 }: AddWordModalProps) {
-  const [word, setWord] = useState(initialData?.word || "");
-  const [definition, setDefinition] = useState(initialData?.definition || "");
+  const [word, setWord] = useState(initialData?.word || '')
+  const [definition, setDefinition] = useState(initialData?.definition || '')
   const [synonyms, setSynonyms] = useState<string[]>(
     initialData?.synonyms || []
-  );
+  )
+  const [boundedContext, setBoundedContext] = useState(
+    initialData?.boundedContext || ''
+  )
 
-  const [currentSynonym, setCurrentSynonym] = useState("");
+  const [currentSynonym, setCurrentSynonym] = useState('')
   const [errors, setErrors] = useState<{
-    word?: string;
-    definition?: string;
-    synonyms?: string;
-    doublons?: string;
-    doublonsWord?: string;
-  }>({});
+    word?: string
+    definition?: string
+    synonyms?: string
+    doublons?: string
+    doublonsWord?: string
+  }>({})
 
-  const modalRef = useRef<HTMLDivElement | null>(null);
-  const firstInputRef = useRef<HTMLInputElement | null>(null);
-  const previouslyFocused = useRef<Element | null>(null);
+  const modalRef = useRef<HTMLDivElement | null>(null)
+  const firstInputRef = useRef<HTMLInputElement | null>(null)
+  const previouslyFocused = useRef<Element | null>(null)
 
-  const wordMaxLength = 30;
-  const definitionMaxLength = 200;
-  const synonymMaxLength = 30;
+  const wordMaxLength = 30
+  const definitionMaxLength = 200
+  const synonymMaxLength = 30
 
   useEffect(() => {
     if (initialData) {
-      setWord(initialData.word);
-      setDefinition(initialData.definition);
-      setSynonyms(initialData.synonyms);
+      setWord(initialData.word)
+      setDefinition(initialData.definition)
+      setSynonyms(initialData.synonyms)
+      setBoundedContext(initialData.boundedContext || '')
     } else {
-      setWord("");
-      setDefinition("");
-      setSynonyms([]);
+      setWord('')
+      setDefinition('')
+      setSynonyms([])
+      setBoundedContext('')
     }
-  }, [initialData, isOpen]);
+  }, [initialData, isOpen])
 
   useEffect(() => {
     if (isOpen) {
-      previouslyFocused.current = document.activeElement;
-      const prev = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
+      previouslyFocused.current = document.activeElement
+      const prev = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
 
       setTimeout(() => {
-        firstInputRef.current?.focus();
-      }, 0);
+        firstInputRef.current?.focus()
+      }, 0)
 
       const onKey = (e: KeyboardEvent) => {
-        if (e.key === "Escape") onClose();
-      };
-      document.addEventListener("keydown", onKey);
+        if (e.key === 'Escape') onClose()
+      }
+      document.addEventListener('keydown', onKey)
       return () => {
-        document.removeEventListener("keydown", onKey);
-        document.body.style.overflow = prev;
-        (previouslyFocused.current as HTMLElement | null)?.focus?.();
-      };
+        document.removeEventListener('keydown', onKey)
+        document.body.style.overflow = prev
+        ;(previouslyFocused.current as HTMLElement | null)?.focus?.()
+      }
     }
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose])
 
   const handleRemoveSynonym = useCallback((index: number) => {
-    setSynonyms((prev) => prev.filter((_, i) => i !== index));
-  }, []);
+    setSynonyms((prev) => prev.filter((_, i) => i !== index))
+  }, [])
 
   useEffect(() => {
-    const lowerWord = word.trim().toLowerCase();
+    const lowerWord = word.trim().toLowerCase()
 
     const index = synonyms.findIndex(
       (syn) => syn.trim().toLowerCase() === lowerWord
-    );
+    )
 
     if (index !== -1) {
-      handleRemoveSynonym(index);
+      handleRemoveSynonym(index)
 
       setErrors((prev) => ({
         ...prev,
-        doublonsWord: "You can't add a synonym that is the same as the word"
-      }));
+        doublonsWord: "You can't add a synonym that is the same as the word",
+      }))
     } else {
       setErrors((prev) => ({
         ...prev,
-        doublons: undefined
-      }));
+        doublons: undefined,
+      }))
     }
-  }, [word, synonyms, handleRemoveSynonym]);
+  }, [word, synonyms, handleRemoveSynonym])
 
   const CheckSynonymNotEqualToWord = (syn: string, index?: number): boolean => {
-    const lowerWord = word.trim().toLowerCase();
-    const lowerSyn = syn.trim().toLowerCase();
+    const lowerWord = word.trim().toLowerCase()
+    const lowerSyn = syn.trim().toLowerCase()
 
     if (lowerSyn === lowerWord) {
       setErrors((prev) => ({
         ...prev,
         definition: prev.definition,
         word: prev.word,
-        synonyms: "The synonym can't be the same as the word"
-      }));
+        synonyms: "The synonym can't be the same as the word",
+      }))
       if (index !== undefined) {
-        handleRemoveSynonym(index);
+        handleRemoveSynonym(index)
       }
-      return false;
+      return false
     }
 
-    setErrors((prev) => ({ ...prev, synonyms: undefined }));
-    return true;
-  };
+    setErrors((prev) => ({ ...prev, synonyms: undefined }))
+    return true
+  }
 
   const handleAddSynonym = (e: KeyboardEvent) => {
-    if (e.key === "Enter" && currentSynonym.trim() !== "") {
-      e.preventDefault();
+    if (e.key === 'Enter' && currentSynonym.trim() !== '') {
+      e.preventDefault()
 
-      const syn = currentSynonym.trim().toLowerCase();
+      const syn = currentSynonym.trim().toLowerCase()
 
       if (!CheckSynonymNotEqualToWord(syn)) {
-        return;
+        return
       }
 
       if (synonyms.some((s) => s.toLowerCase() === syn)) {
         setErrors((prev) => ({
           ...prev,
-          doublons: "This synonym has already been added"
-        }));
-        setCurrentSynonym("");
-        return;
+          doublons: 'This synonym has already been added',
+        }))
+        setCurrentSynonym('')
+        return
       }
 
       setTimeout(() => {
-        setErrors((prev) => ({ ...prev, doublons: undefined }));
-      }, 5000);
+        setErrors((prev) => ({ ...prev, doublons: undefined }))
+      }, 5000)
 
-      setSynonyms([...synonyms, syn]);
-      setCurrentSynonym("");
+      setSynonyms([...synonyms, syn])
+      setCurrentSynonym('')
     }
-  };
+  }
 
   const handleSubmit = () => {
-    const newErrors: { word?: string; definition?: string } = {};
+    const newErrors: { word?: string; definition?: string } = {}
 
-    if (!word.trim()) newErrors.word = "Please provide a word !";
+    if (!word.trim()) newErrors.word = 'Please provide a word !'
     if (!definition.trim())
-      newErrors.definition = "Please provide a description of the word !";
+      newErrors.definition = 'Please provide a description of the word !'
 
-    setErrors(newErrors);
+    setErrors(newErrors)
 
     if (Object.keys(newErrors).length === 0) {
-      onAddWord(word, definition, synonyms);
-      setWord("");
-      setDefinition("");
-      setSynonyms([]);
-      setErrors({});
-      onClose();
+      onAddWord(word, definition, synonyms, boundedContext)
+      setWord('')
+      setDefinition('')
+      setSynonyms([])
+      setBoundedContext('')
+      setErrors({})
+      onClose()
     }
-  };
+  }
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   return (
     <div className="modal-overlay" role="dialog" aria-modal="true">
       <div className="modal" ref={modalRef}>
-        <h2>{isEdit ? "Update Word" : "Add a New Word"}</h2>
+        <h2>{isEdit ? 'Update Word' : 'Add a New Word'}</h2>
 
-        <label className={"word-label"}>
+        <label className={'word-label'}>
           <span>Word</span>
           <span className="required">*</span>
         </label>
@@ -315,34 +327,34 @@ export function AddWordModal({
           <input
             ref={firstInputRef}
             type="text"
-            className={`word-area ${errors.word ? "input-error" : ""}`}
+            className={`word-area ${errors.word ? 'input-error' : ''}`}
             placeholder="Enter the word"
             value={word}
             maxLength={wordMaxLength}
             onInput={(e) => {
-              const val = (e.target as HTMLInputElement).value;
+              const val = (e.target as HTMLInputElement).value
 
-              if (val.includes(" ")) {
+              if (val.includes(' ')) {
                 setErrors((prev) => ({
                   ...prev,
-                  word: "Only one word is allowed"
-                }));
-                return;
+                  word: 'Only one word is allowed',
+                }))
+                return
               }
 
-              setWord(val);
-              setErrors((prev) => ({ ...prev, word: undefined }));
+              setWord(val)
+              setErrors((prev) => ({ ...prev, word: undefined }))
             }}
             onDragOver={(e) => e.preventDefault()}
             onDrop={(e) => {
-              e.preventDefault();
-              const dt = e.dataTransfer;
-              if (!dt) return;
-              const droppedSyn = dt.getData("text/plain");
+              e.preventDefault()
+              const dt = e.dataTransfer
+              if (!dt) return
+              const droppedSyn = dt.getData('text/plain')
               if (droppedSyn) {
-                setWord(droppedSyn);
-                const index = synonyms.findIndex((s) => s === droppedSyn);
-                if (index !== -1) handleRemoveSynonym(index);
+                setWord(droppedSyn)
+                const index = synonyms.findIndex((s) => s === droppedSyn)
+                if (index !== -1) handleRemoveSynonym(index)
               }
             }}
           />
@@ -366,15 +378,15 @@ export function AddWordModal({
         </label>
         <div className="input-container">
           <textarea
-            className={`definition-area ${errors.definition ? "input-error" : ""}`}
+            className={`definition-area ${errors.definition ? 'input-error' : ''}`}
             placeholder="Enter the definition"
             value={definition}
             maxLength={definitionMaxLength}
             onInput={(e) => {
-              const val = (e.target as HTMLTextAreaElement).value;
-              setDefinition(val);
-              if (errors.definition && val.trim() !== "") {
-                setErrors((prev) => ({ ...prev, definition: undefined }));
+              const val = (e.target as HTMLTextAreaElement).value
+              setDefinition(val)
+              if (errors.definition && val.trim() !== '') {
+                setErrors((prev) => ({ ...prev, definition: undefined }))
               }
             }}
           />
@@ -392,7 +404,20 @@ export function AddWordModal({
           )}
         </nav>
 
-        <label className={"synonym-label"}>Synonyms (Optional)</label>
+        <label className="context-label">Bounded Context (manual)</label>
+        <div className="input-container">
+          <input
+            type="text"
+            className="word-area"
+            placeholder="Enter bounded context"
+            value={boundedContext}
+            onInput={(e) =>
+              setBoundedContext((e.target as HTMLInputElement).value)
+            }
+          />
+        </div>
+
+        <label className={'synonym-label'}>Synonyms (Optional)</label>
         <div className="input-container">
           <input
             type="text"
@@ -400,16 +425,16 @@ export function AddWordModal({
             value={currentSynonym}
             maxLength={synonymMaxLength}
             onInput={(e) => {
-              const value = (e.target as HTMLInputElement).value.toLowerCase();
-              setCurrentSynonym(value);
+              const value = (e.target as HTMLInputElement).value.toLowerCase()
+              setCurrentSynonym(value)
             }}
             onKeyDown={handleAddSynonym}
             onFocus={() => {
               setErrors((prev) => ({
                 ...prev,
                 doublonsWord: undefined,
-                synonyms: undefined
-              }));
+                synonyms: undefined,
+              }))
             }}
           />
           <div className="char-counter">
@@ -443,9 +468,9 @@ export function AddWordModal({
               className="tag"
               draggable={true}
               onDragStart={(e) => {
-                const dt = e.dataTransfer;
-                if (!dt) return;
-                dt.setData("text/plain", syn);
+                const dt = e.dataTransfer
+                if (!dt) return
+                dt.setData('text/plain', syn)
               }}
             >
               <button
@@ -468,7 +493,7 @@ export function AddWordModal({
             userSynonyms={synonyms}
             onAddSynonym={(syn: string) => {
               if (!synonyms.includes(syn)) {
-                setSynonyms([...synonyms, syn]);
+                setSynonyms([...synonyms, syn])
               }
             }}
           />
@@ -478,10 +503,10 @@ export function AddWordModal({
             Cancel
           </button>
           <button className="add" onClick={handleSubmit}>
-            {isEdit ? "Save Changes" : "Add Word"}
+            {isEdit ? 'Save Changes' : 'Add Word'}
           </button>
         </div>
       </div>
     </div>
-  );
+  )
 }
