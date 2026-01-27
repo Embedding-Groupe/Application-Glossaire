@@ -25,9 +25,9 @@ A modern desktop glossary management application built with Tauri, Preact, and T
 
 | Platform | Download |
 |----------|----------|
-| 🪟 Windows | [Setup.exe](https://github.com/Embedding-Groupe/Application-Glossaire/releases/download/v1.0.5/Glosaurus_1.0.5_x64-setup.exe)
-| 🍎 macOS (Apple Silicon) | [DMG](https://github.com/Embedding-Groupe/Application-Glossaire/releases/download/v1.0.5/Glosaurus_1.0.5_aarch64.dmg)
-| Linux | [DEB](https://github.com/Embedding-Groupe/Application-Glossaire/releases/download/v1.0.5/Glosaurus_1.0.5_amd64.deb)
+| 🪟 Windows | [Setup.exe](https://github.com/Embedding-Groupe/Application-Glossaire/releases/download/v1.0.6/Glosaurus_1.0.6_x64-setup.exe)
+| 🍎 macOS (Apple Silicon) | [DMG](https://github.com/Embedding-Groupe/Application-Glossaire/releases/download/v1.0.6/Glosaurus_1.0.6_aarch64.dmg)
+| Linux | [DEB](https://github.com/Embedding-Groupe/Application-Glossaire/releases/download/v1.0.6/Glosaurus_1.0.6_amd64.deb)
 
 ### Detailed Installation Instructions
 
