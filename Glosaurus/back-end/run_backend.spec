@@ -19,7 +19,8 @@ a = Analysis(
         'uvicorn.lifespan.on',
         'fastapi',
         'sentence_transformers',
-        'ollama'
+        'ollama',
+        'python-multipart'
     ],
     hookspath=[],
     hooksconfig={},
