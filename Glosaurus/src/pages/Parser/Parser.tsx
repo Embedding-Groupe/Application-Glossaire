@@ -3,41 +3,58 @@ import './Parser.css'
 import { ExportModal } from '../../modals/Export/Export'
 import type { Glossary } from '../../utils/importExport'
 import { useLocation } from 'preact-iso'
-import { loadFromStorage } from '../../utils/storage'
+    import { loadFromStorage } from '../../utils/storage'
 
 interface ParsedTerm {
   term: string
   occurrence: number
 }
 
+
 interface WordItem {
   word: string
-  definition: string
-  synonyms: string[]
-  boundedContext?: string
 }
+
 
 export function Parser() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const location = useLocation()
+  const previousGlossaryName = location.query?.glossary ?? 'Unknown Glossary'
 
-  const previousGlossaryName =
-    location.query?.glossary ?? 'Unknown Glossary'
-
-  const [fileName] = useState<string>('example_source.py')
+  const [fileName, setFileName] = useState<string>('No File')
+  const [terms, setTerms] = useState<ParsedTerm[]>([])
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
 
+  const handleFileChange = () => {
+    const files = fileInputRef.current?.files
+    if (!files || files.length === 0) return
 
-  const [terms] = useState<ParsedTerm[]>([
-    { term: 'class', occurrence: 14 },
-    { term: 'function', occurrence: 9 },
-    { term: 'import', occurrence: 6 },
-    { term: 'async', occurrence: 4 },
-    { term: 'await', occurrence: 4 },
-    { term: 'Parser', occurrence: 3 },
-    { term: 'Glossary', occurrence: 2 },
-    { term: 'FastAPI', occurrence: 5 },
-  ])
+    const file = files[0]
+    setFileName(file.name)
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    fetch('http://127.0.0.1:8000/parser/parse', {
+      method: 'POST',
+      body: formData,
+    })
+      .then((res) => res.json())
+      .then((data: Record<string, number>) => {
+        console.log('Réponse brute API:', data)
+
+        const parsedTerms: ParsedTerm[] = Object.entries(data).map(
+          ([term, occurrence]) => ({ term, occurrence })
+        )
+        console.log('parsedTerms transformé:', parsedTerms)
+
+        setTerms(parsedTerms)
+      })
+      .catch((err) => {
+        console.error('Erreur parser :', err)
+        setTerms([])
+      })
+  }
 
   const glossaryWords = useMemo(() => {
     const storageKey = `glossary_${previousGlossaryName}`
@@ -53,14 +70,22 @@ export function Parser() {
   const glossary: Glossary = {
     name: fileName,
     description: 'Imported file analysis',
-    words: [],
+    words: terms.map((t) => ({
+      word: t.term,
+      definition: '', 
+      synonyms: [],    
+      boundedContext: undefined,
+    })),
   }
+
+
+
 
   return (
     <div className="parser">
       <div className="parser-header">
         <nav className="deco">
-          <img src="/deco.svg" alt="Decoration" />
+          <img src="/deco.svg" alt="Decoration" title="Decoration" />
           <h1>Parser</h1>
         </nav>
 
@@ -80,16 +105,21 @@ export function Parser() {
               )
             }
           >
+            <img src="/public/back.svg" alt="Back icon" />
             Back
           </button>
         </div>
 
-        <input ref={fileInputRef} type="file" hidden />
+        <input
+          ref={fileInputRef}
+          type="file"
+          hidden
+          onChange={handleFileChange}
+        />
       </div>
 
       <div className="terms-found">
         <h1>Technical terms found in {fileName} :</h1>
-
         <table className="parser-table">
           <thead>
             <tr>
@@ -97,7 +127,6 @@ export function Parser() {
               <th className="occurrence-column">Occurrence</th>
             </tr>
           </thead>
-
           <tbody>
             {terms.map((t) => {
               const alreadyExists = isAlreadyInGlossary(t.term)
@@ -130,7 +159,6 @@ export function Parser() {
           >
             Download Result
           </button>
-
           <div className="legend">
             <span className="legend-color"></span>
             <span className="legend-text">
