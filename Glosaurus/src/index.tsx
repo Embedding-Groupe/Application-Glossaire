@@ -142,8 +142,8 @@ function Bootstrapper() {
   );
 }
 
-// const root = document.getElementById("app");
-// if (root) render(<Bootstrapper />, root);
+const root = document.getElementById("app");
+ if (root) render(<Bootstrapper />, root);
 
 
 
