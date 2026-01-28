@@ -1,8 +1,9 @@
-import { useRef, useState } from 'preact/hooks'
+import { useRef, useState, useMemo } from 'preact/hooks'
 import './Parser.css'
 import { ExportModal } from '../../modals/Export/Export'
 import type { Glossary } from '../../utils/importExport'
 import { useLocation } from 'preact-iso'
+import { loadFromStorage } from '../../utils/storage'
 
 interface ParsedTerm {
   term: string
@@ -11,6 +12,10 @@ interface ParsedTerm {
 
 type SortColumn = 'term' | 'occurrence' | null
 type SortOrder = 'asc' | 'desc'
+
+interface WordItem {
+  word: string
+}
 
 export function Parser() {
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -85,10 +90,56 @@ export function Parser() {
     }
   }
 
+  const getSortedTerms = (): ParsedTerm[] => {
+    if (!sortColumn) return terms
+
+    const sorted = [...terms]
+
+    if (sortColumn === 'term') {
+      sorted.sort((a, b) => {
+        const comparison = a.term.localeCompare(b.term)
+        return sortOrder === 'asc' ? comparison : -comparison
+      })
+    } else if (sortColumn === 'occurrence') {
+      sorted.sort((a, b) => {
+        const comparison = a.occurrence - b.occurrence
+        return sortOrder === 'asc' ? comparison : -comparison
+      })
+    }
+
+    return sorted
+  }
+
+  const handleColumnSort = (column: 'term' | 'occurrence') => {
+    if (sortColumn === column) {
+      // Si on clique sur la même colonne, on inverse l'ordre
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+    } else {
+      // Si on clique sur une nouvelle colonne, on trie en ascendant
+      setSortColumn(column)
+      setSortOrder('asc')
+    }
+  }
+
+  const glossaryWords = useMemo(() => {
+    const storageKey = `glossary_${previousGlossaryName}`
+    const stored = loadFromStorage(storageKey, []) as WordItem[]
+
+    return stored.map((w) => w.word.toLowerCase())
+  }, [previousGlossaryName])
+
+  const isAlreadyInGlossary = (term: string) =>
+    glossaryWords.includes(term.toLowerCase())
+
   const glossary: Glossary = {
     name: fileName,
     description: 'Imported file analysis',
-    words: [],
+    words: terms.map((t) => ({
+      word: t.term,
+      definition: '',
+      synonyms: [],
+      boundedContext: undefined,
+    })),
   }
 
   return (
@@ -181,12 +232,25 @@ export function Parser() {
             </tr>
           </thead>
           <tbody>
-            {getSortedTerms().map((t) => (
-              <tr key={t.term}>
-                <td className="terms-column">{t.term}</td>
-                <td className="occurrence-column">{t.occurrence}</td>
-              </tr>
-            ))}
+            {getSortedTerms().map((t) => {
+              const alreadyExists = isAlreadyInGlossary(t.term)
+
+              return (
+                <tr key={t.term}>
+                  <td
+                    className={
+                      alreadyExists
+                        ? 'terms-column already-present'
+                        : 'terms-column'
+                    }
+                  >
+                    {t.term}
+                  </td>
+
+                  <td className="occurrence-column">{t.occurrence}</td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
 

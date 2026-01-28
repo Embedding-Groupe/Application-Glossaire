@@ -115,7 +115,7 @@ body {
 .terms-found {
   width: 100%;
   align-self: flex-start;
-  margin-left: 5rem;
+  margin-left: 270px;
 }
 
 .terms-found h1 {
@@ -152,7 +152,7 @@ body {
 
 .parser-table {
   width: 100%;
-  max-width: 500px;
+  max-width:400px;
   border-collapse: separate;
   border-spacing: 0;
   background-color: white;
@@ -161,6 +161,7 @@ body {
   overflow: hidden;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
   table-layout: fixed;
+ 
 }
 .parser-table th,
 .parser-table td {
@@ -227,6 +228,10 @@ body {
   margin-top: 4px;
 }
 
+.occurrence-column {
+  margin-right: 50px;
+}
+
 .download-btn {
   background-color: var(--color-primary);
   display: flex;
@@ -275,4 +280,19 @@ body {
 
 .occurrence-column {
   text-align: right;
+}
+
+
+.parser-table td:last-child {
+  text-align: right;
+  padding-right: 5.5rem;
+}
+
+.terms-column.already-present {
+  background-color: #FFDCF5;
+  font-weight: bold;
+}
+
+.already-present-row td {
+  background-color: #fff0f0;
 }
