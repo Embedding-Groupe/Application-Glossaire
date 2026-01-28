@@ -122,6 +122,34 @@ body {
   color: black;
 }
 
+.column-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+.sort-icon-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+  opacity: 0.5;
+}
+
+.sort-icon-button:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.sort-icon-button img {
+  width: 18px;
+  height: 18px;
+}
+
 .parser-table {
   width: 100%;
   max-width: 500px;
@@ -137,7 +165,7 @@ body {
 .parser-table th,
 .parser-table td {
   padding: 1rem 1.5rem;
-  text-align: left;
+  text-align: right;
   font-size: 1rem;
   vertical-align: top;
   color: black;
@@ -178,7 +206,7 @@ body {
 
 .parser-table th:last-child,
 .parser-table td:last-child {
-  text-align: right;
+  text-align: center;
   padding-right: 3rem;
 }
 
@@ -200,7 +228,6 @@ body {
 }
 
 .download-btn {
-  margin-top: 1rem;
   background-color: var(--color-primary);
   display: flex;
   align-items: center;
@@ -211,7 +238,7 @@ body {
   gap: 0.5rem;
   border: none;
   border-radius: 8px;
-  padding: 9px 16px;
+  padding: 0.75rem 1.5rem;
   cursor: pointer;
   transition: all 0.2s ease;
 }

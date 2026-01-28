@@ -9,6 +9,9 @@ interface ParsedTerm {
   occurrence: number
 }
 
+type SortColumn = 'term' | 'occurrence' | null
+type SortOrder = 'asc' | 'desc'
+
 export function Parser() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const location = useLocation()
@@ -17,6 +20,8 @@ export function Parser() {
   const [fileName, setFileName] = useState<string>('No File')
   const [terms, setTerms] = useState<ParsedTerm[]>([])
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
+  const [sortColumn, setSortColumn] = useState<SortColumn>(null)
+  const [sortOrder, setSortOrder] = useState<SortOrder>('asc')
 
   const handleFileChange = () => {
     const files = fileInputRef.current?.files
@@ -49,6 +54,37 @@ export function Parser() {
       })
   }
 
+  const getSortedTerms = (): ParsedTerm[] => {
+    if (!sortColumn) return terms
+
+    const sorted = [...terms]
+
+    if (sortColumn === 'term') {
+      sorted.sort((a, b) => {
+        const comparison = a.term.localeCompare(b.term)
+        return sortOrder === 'asc' ? comparison : -comparison
+      })
+    } else if (sortColumn === 'occurrence') {
+      sorted.sort((a, b) => {
+        const comparison = a.occurrence - b.occurrence
+        return sortOrder === 'asc' ? comparison : -comparison
+      })
+    }
+
+    return sorted
+  }
+
+  const handleColumnSort = (column: 'term' | 'occurrence') => {
+    if (sortColumn === column) {
+      // Si on clique sur la même colonne, on inverse l'ordre
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+    } else {
+      // Si on clique sur une nouvelle colonne, on trie en ascendant
+      setSortColumn(column)
+      setSortOrder('asc')
+    }
+  }
+
   const glossary: Glossary = {
     name: fileName,
     description: 'Imported file analysis',
@@ -72,6 +108,14 @@ export function Parser() {
           </button>
 
           <button
+            className="download-btn"
+            onClick={() => setIsExportModalOpen(true)}
+          >
+            <img src="/download.svg" alt="Download icon" />
+            Download Result
+          </button>
+
+          <button
             className="back-btn"
             onClick={() =>
               location.route(
@@ -79,7 +123,7 @@ export function Parser() {
               )
             }
           >
-            <img src="/public/back.svg" alt="Back icon" />
+            <img src="/back.svg" alt="Back icon" />
             Back
           </button>
         </div>
@@ -94,15 +138,50 @@ export function Parser() {
 
       <div className="terms-found">
         <h1>Technical terms found in {fileName} :</h1>
+
         <table className="parser-table">
           <thead>
             <tr>
-              <th className="terms-column">Terms</th>
-              <th className="occurrence-column">Occurrence</th>
+              <th className="terms-column">
+                <div className="column-header">
+                  <span>Terms</span>
+                  <button
+                    className="sort-icon-button"
+                    onClick={() => handleColumnSort('term')}
+                    title={
+                      sortColumn === 'term'
+                        ? sortOrder === 'asc'
+                          ? 'Sort Z-A'
+                          : 'Sort A-Z'
+                        : 'Sort A-Z'
+                    }
+                  >
+                    <img src="/arrow-up-down.svg" alt="Sort" />
+                  </button>
+                </div>
+              </th>
+              <th className="occurrence-column">
+                <div className="column-header">
+                  <span>Occurrence</span>
+                  <button
+                    className="sort-icon-button"
+                    onClick={() => handleColumnSort('occurrence')}
+                    title={
+                      sortColumn === 'occurrence'
+                        ? sortOrder === 'asc'
+                          ? 'Sort descending'
+                          : 'Sort ascending'
+                        : 'Sort ascending'
+                    }
+                  >
+                    <img src="/arrow-up-down.svg" alt="Sort" />
+                  </button>
+                </div>
+              </th>
             </tr>
           </thead>
           <tbody>
-            {terms.map((t) => (
+            {getSortedTerms().map((t) => (
               <tr key={t.term}>
                 <td className="terms-column">{t.term}</td>
                 <td className="occurrence-column">{t.occurrence}</td>
@@ -112,12 +191,6 @@ export function Parser() {
         </table>
 
         <div className="bottom-parser">
-          <button
-            className="download-btn"
-            onClick={() => setIsExportModalOpen(true)}
-          >
-            Download Result
-          </button>
           <div className="legend">
             <span className="legend-color"></span>
             <span className="legend-text">
