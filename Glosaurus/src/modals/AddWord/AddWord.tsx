@@ -36,11 +36,10 @@ export function SynonymSuggestion({
   onAddSynonym: (synonym: string) => void
 }) {
   const [synonyms, setSynonyms] = useState<string[]>([])
-  const [visibleSynonyms, setVisibleSynonyms] = useState<string[]>([])
   const [startIndex, setStartIndex] = useState(0)
   const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
+  const fetchSynonyms = useCallback(() => {
     if (
       !word ||
       word.trim() === '' ||
@@ -48,64 +47,67 @@ export function SynonymSuggestion({
       definition.trim() === ''
     ) {
       setSynonyms([])
-      setVisibleSynonyms([])
       setStartIndex(0)
       return
     }
 
-    setSynonyms([])
-    setVisibleSynonyms([])
-    setStartIndex(0)
     setLoading(true)
+    postJSON('http://127.0.0.1:8000/synonym/getSynonym', {
+      word: word.trim(),
+      definition: definition,
+      synonyms: userSynonyms || [],
+    })
+      .then((data) => {
+        const response = data as SynonymResponse
+        if (
+          response?.synonyms &&
+          Array.isArray(response.synonyms) &&
+          response.synonyms.length > 0
+        ) {
+          const uniqueSynonyms: string[] = Array.from(
+            new Set(response.synonyms as string[])
+          )
+          setSynonyms(uniqueSynonyms)
+          setStartIndex(0)
+        } else {
+          setSynonyms([])
+        }
+      })
+      .catch((err) => {
+        console.error('Erreur API :', err)
+        setSynonyms([])
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }, [word, definition, userSynonyms])
+
+  // Initial fetch when word or definition changes (debounced)
+  useEffect(() => {
+    if (!word?.trim() || !definition?.trim()) {
+      setSynonyms([])
+      setStartIndex(0)
+      return
+    }
 
     const timeout = setTimeout(() => {
-      console.log('start fetch')
-      postJSON('http://127.0.0.1:8000/synonym/getSynonym', {
-        word: word.trim(),
-        definition: definition,
-        synonyms: userSynonyms || [],
-      })
-        .then((data) => {
-          console.log('Réponse API :', data)
-          const response = data as SynonymResponse
-          if (
-            response?.synonyms &&
-            Array.isArray(response.synonyms) &&
-            response.synonyms.length > 0
-          ) {
-            const uniqueSynonyms: string[] = Array.from(
-              new Set(response.synonyms as string[])
-            )
-            setSynonyms(uniqueSynonyms)
-            setVisibleSynonyms(uniqueSynonyms.slice(0, 5))
-            setStartIndex(0)
-          } else {
-            setSynonyms([])
-            setVisibleSynonyms([])
-          }
-        })
-        .catch((err) => {
-          console.error('Erreur API :', err)
-          setSynonyms([])
-          setVisibleSynonyms([])
-        })
-        .finally(() => {
-          console.log('fetch terminé')
-          setLoading(false)
-        })
+      fetchSynonyms()
     }, 500)
 
     return () => clearTimeout(timeout)
-  }, [word, userSynonyms, definition])
+  }, [word, definition])
 
-  const handleReload = () => {
-    if (synonyms.length <= 5) return
-    const nextIndex = (startIndex + 5) % synonyms.length
-    const nextSlice = [
-      ...synonyms.slice(nextIndex, nextIndex + 5),
-      ...synonyms.slice(0, Math.max(0, nextIndex + 5 - synonyms.length)),
-    ]
-    setVisibleSynonyms(nextSlice)
+  // Filter out synonyms already added by the user
+  const availableSynonyms = synonyms.filter(
+    (s) => !userSynonyms.map((us) => us.toLowerCase()).includes(s.toLowerCase())
+  )
+
+  // Determine current slice for display
+  const visibleSynonyms = availableSynonyms.slice(startIndex, startIndex + 5)
+
+  const handleDisplayNext = () => {
+    if (availableSynonyms.length <= 5) return
+    const nextIndex = (startIndex + 5) % availableSynonyms.length
     setStartIndex(nextIndex)
   }
 
@@ -114,7 +116,7 @@ export function SynonymSuggestion({
       <p>
         AI Suggestions:{' '}
         {loading ? (
-          'Chargement...'
+          'Loading...'
         ) : visibleSynonyms.length > 0 ? (
           <>
             {visibleSynonyms.map((syn, i) => (
@@ -134,15 +136,26 @@ export function SynonymSuggestion({
         )}
       </p>
 
-      {!loading && synonyms.length > 5 && (
+      <div className="suggestion-actions">
+        {!loading && availableSynonyms.length > 5 && (
+          <button
+            onClick={handleDisplayNext}
+            className="action-link-btn"
+            title="Show more synonyms"
+          >
+            More
+          </button>
+        )}
+
         <button
-          onClick={handleReload}
-          className="reload-btn"
-          title="Afficher d'autres synonymes"
+          onClick={fetchSynonyms}
+          className="action-link-btn"
+          disabled={loading}
+          title="Refresh suggestions"
         >
-          🔁
+          {loading ? 'Loading...' : 'Refresh'}
         </button>
-      )}
+      </div>
     </div>
   )
 }
@@ -213,7 +226,7 @@ export function AddWordModal({
       return () => {
         document.removeEventListener('keydown', onKey)
         document.body.style.overflow = prev
-        ;(previouslyFocused.current as HTMLElement | null)?.focus?.()
+          ; (previouslyFocused.current as HTMLElement | null)?.focus?.()
       }
     }
   }, [isOpen, onClose])

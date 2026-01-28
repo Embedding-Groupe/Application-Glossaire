@@ -224,3 +224,41 @@ nav {
   cursor: pointer;
   transition: color 0.2s;
 }
+
+.clickable-synonym:hover {
+  color: #b32134;
+  text-decoration: underline;
+}
+
+.suggestion-actions {
+  display: flex;
+  gap: 12px;
+  margin-left: 15px;
+}
+
+.action-link-btn {
+  background: none;
+  border: none;
+  color: #4d7399;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  text-decoration: underline;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-link-btn:hover {
+  background-color: #f0f2f5;
+  color: #b32134;
+}
+
+.action-link-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  text-decoration: none;
+}
