@@ -12,6 +12,7 @@ interface ParsedTerm {
 
 type SortColumn = 'term' | 'occurrence' | null
 type SortOrder = 'asc' | 'desc'
+type FilterType = null | 'included' | 'not-included'
 
 interface WordItem {
   word: string
@@ -27,6 +28,7 @@ export function Parser() {
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
   const [sortColumn, setSortColumn] = useState<SortColumn>(null)
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc')
+  const [filter, setFilter] = useState<FilterType>(null)
 
   const handleFileChange = () => {
     const files = fileInputRef.current?.files
@@ -60,9 +62,18 @@ export function Parser() {
   }
 
   const getSortedTerms = (): ParsedTerm[] => {
-    if (!sortColumn) return terms
+    // Filtrage d'abord
+    let filtered = terms
+    if (filter === 'included') {
+      filtered = terms.filter((t) => isAlreadyInGlossary(t.term))
+    } else if (filter === 'not-included') {
+      filtered = terms.filter((t) => !isAlreadyInGlossary(t.term))
+    }
 
-    const sorted = [...terms]
+    // Tri ensuite
+    if (!sortColumn) return filtered
+
+    const sorted = [...filtered]
 
     if (sortColumn === 'term') {
       sorted.sort((a, b) => {
@@ -90,34 +101,13 @@ export function Parser() {
     }
   }
 
-  const getSortedTerms = (): ParsedTerm[] => {
-    if (!sortColumn) return terms
-
-    const sorted = [...terms]
-
-    if (sortColumn === 'term') {
-      sorted.sort((a, b) => {
-        const comparison = a.term.localeCompare(b.term)
-        return sortOrder === 'asc' ? comparison : -comparison
-      })
-    } else if (sortColumn === 'occurrence') {
-      sorted.sort((a, b) => {
-        const comparison = a.occurrence - b.occurrence
-        return sortOrder === 'asc' ? comparison : -comparison
-      })
-    }
-
-    return sorted
-  }
-
-  const handleColumnSort = (column: 'term' | 'occurrence') => {
-    if (sortColumn === column) {
-      // Si on clique sur la même colonne, on inverse l'ordre
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+  const handleFilterClick = (filterType: 'included' | 'not-included') => {
+    // Si on clique sur le filtre déjà actif, on le désactive
+    if (filter === filterType) {
+      setFilter(null)
     } else {
-      // Si on clique sur une nouvelle colonne, on trie en ascendant
-      setSortColumn(column)
-      setSortOrder('asc')
+      // Sinon, on active le nouveau filtre
+      setFilter(filterType)
     }
   }
 
@@ -190,6 +180,28 @@ export function Parser() {
       <div className="terms-found">
         <h1>Technical terms found in {fileName} :</h1>
 
+        <div className="filter-buttons">
+          <button
+            className={`filter-btn ${filter === 'included' ? 'active' : ''}`}
+            onClick={() => handleFilterClick('included')}
+          >
+            Included in the glossary
+          </button>
+          <button
+            className={`filter-btn ${filter === 'not-included' ? 'active' : ''}`}
+            onClick={() => handleFilterClick('not-included')}
+          >
+            Not included in the glossary
+          </button>
+
+          <div className="legend">
+            <span className="legend-color"></span>
+            <span className="legend-text">
+              Words already present in the glossary
+            </span>
+          </div>
+        </div>
+
         <table className="parser-table">
           <thead>
             <tr>
@@ -253,15 +265,6 @@ export function Parser() {
             })}
           </tbody>
         </table>
-
-        <div className="bottom-parser">
-          <div className="legend">
-            <span className="legend-color"></span>
-            <span className="legend-text">
-              Words already present in the glossary
-            </span>
-          </div>
-        </div>
       </div>
 
       <ExportModal
