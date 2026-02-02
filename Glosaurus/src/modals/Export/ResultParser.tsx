@@ -104,14 +104,13 @@ export function ExportModal({
   ]
 
   return (
-    <div
+    <button
+      type="button"
       className="export-modal-overlay"
-      role="button"
-      tabIndex={0}
       aria-label="Close dialog"
       onClick={onClose}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') onClose()
+        if (e.key === 'Escape') onClose()
       }}
     >
       <div
@@ -183,6 +182,6 @@ export function ExportModal({
           </button>
         </div>
       </div>
-    </div>
+    </button>
   )
 }

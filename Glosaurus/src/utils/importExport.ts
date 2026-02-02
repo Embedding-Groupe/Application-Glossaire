@@ -32,7 +32,7 @@ export function exportToJSON(glossary: Glossary): string {
 export function exportToMarkdown(glossary: Glossary): string {
   // Helper function to escape pipe characters in table cells
   const escapeCell = (text: string): string => {
-    return text.replaceAll('|', '\\|')
+    return text.replace('|', '\\|')
   }
 
   let markdown = `# ${glossary.name}\n`
@@ -243,7 +243,7 @@ export async function downloadGlossaryAsJSON(
   glossary: Glossary
 ): Promise<void> {
   const json = exportToJSON(glossary)
-  const filename = `${glossary.name.replaceAll(/[^a-z0-9]/gi, '_').toLowerCase()}.json`
+  const filename = `${glossary.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`
   await downloadFile(json, filename, 'application/json')
 }
 
@@ -254,7 +254,7 @@ export async function downloadGlossaryAsMarkdown(
   glossary: Glossary
 ): Promise<void> {
   const markdown = exportToMarkdown(glossary)
-  const filename = `${glossary.name.replaceAll(/[^a-z0-9]/gi, '_').toLowerCase()}.md`
+  const filename = `${glossary.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.md`
   await downloadFile(markdown, filename, 'text/markdown')
 }
 

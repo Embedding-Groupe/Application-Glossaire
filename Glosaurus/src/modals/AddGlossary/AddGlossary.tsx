@@ -61,14 +61,13 @@ export function AddGlossaryModal({ onClose, onAdd }: AddGlossaryModalProps) {
   }
 
   return (
-    <div
+    <button
+      type="button"
       className="modal-backdrop"
-      role="button"
-      tabIndex={0}
       aria-label="Close dialog"
       onClick={onClose}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') onClose()
+        if (e.key === 'Escape') onClose()
       }}
     >
       <div
@@ -157,6 +156,6 @@ export function AddGlossaryModal({ onClose, onAdd }: AddGlossaryModalProps) {
           </div>
         </form>
       </div>
-    </div>
+    </button>
   )
 }
