@@ -1,85 +1,96 @@
-import { useState } from "preact/hooks";
-import type { Glossary } from "../../utils/importExport";
+import { useState } from 'preact/hooks'
+import type { Glossary } from '../../utils/importExport'
 import {
   downloadGlossaryAsJSON,
   downloadGlossaryAsMarkdown,
   exportToJSON,
-  exportToMarkdown
-} from "../../utils/importExport";
-import "./Export.css";
+  exportToMarkdown,
+} from '../../utils/importExport'
+import './Export.css'
 
 interface ExportModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  glossary: Glossary;
+  isOpen: boolean
+  onClose: () => void
+  glossary: Glossary
 }
 
 export function ExportModal({ isOpen, onClose, glossary }: ExportModalProps) {
-  const [error, setError] = useState<string>("");
-  const [success, setSuccess] = useState<string>("");
-  const [isExporting, setIsExporting] = useState<boolean>(false);
-  const [previewContent, setPreviewContent] = useState<string | null>(null);
+  const [error, setError] = useState<string>('')
+  const [success, setSuccess] = useState<string>('')
+  const [isExporting, setIsExporting] = useState<boolean>(false)
+  const [previewContent, setPreviewContent] = useState<string | null>(null)
   const [previewFormat, setPreviewFormat] = useState<
-    "JSON" | "Markdown" | null
-  >(null);
+    'JSON' | 'Markdown' | null
+  >(null)
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   const handleExportJSON = async () => {
-    setIsExporting(true);
-    setError("");
-    setSuccess("");
+    setIsExporting(true)
+    setError('')
+    setSuccess('')
     try {
-      await downloadGlossaryAsJSON(glossary);
-      setSuccess("Glossaire exporté en JSON avec succès !");
+      await downloadGlossaryAsJSON(glossary)
+      setSuccess('Glossaire exporté en JSON avec succès !')
       setTimeout(() => {
-        setSuccess("");
-        onClose();
-      }, 2000);
+        setSuccess('')
+        onClose()
+      }, 2000)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur lors de l'export");
+      setError(err instanceof Error ? err.message : "Erreur lors de l'export")
     } finally {
-      setIsExporting(false);
+      setIsExporting(false)
     }
-  };
+  }
 
   const handleExportMarkdown = async () => {
-    setIsExporting(true);
-    setError("");
-    setSuccess("");
+    setIsExporting(true)
+    setError('')
+    setSuccess('')
     try {
-      await downloadGlossaryAsMarkdown(glossary);
-      setSuccess("Glossaire exporté en Markdown avec succès !");
+      await downloadGlossaryAsMarkdown(glossary)
+      setSuccess('Glossaire exporté en Markdown avec succès !')
       setTimeout(() => {
-        setSuccess("");
-        onClose();
-      }, 2000);
+        setSuccess('')
+        onClose()
+      }, 2000)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur lors de l'export");
+      setError(err instanceof Error ? err.message : "Erreur lors de l'export")
     } finally {
-      setIsExporting(false);
+      setIsExporting(false)
     }
-  };
+  }
 
   const handlePreviewJSON = () => {
-    setPreviewContent(exportToJSON(glossary));
-    setPreviewFormat("JSON");
-  };
+    setPreviewContent(exportToJSON(glossary))
+    setPreviewFormat('JSON')
+  }
 
   const handlePreviewMarkdown = () => {
-    setPreviewContent(exportToMarkdown(glossary));
-    setPreviewFormat("Markdown");
-  };
+    setPreviewContent(exportToMarkdown(glossary))
+    setPreviewFormat('Markdown')
+  }
 
   const handleClosePreview = () => {
-    setPreviewContent(null);
-    setPreviewFormat(null);
-  };
+    setPreviewContent(null)
+    setPreviewFormat(null)
+  }
 
   return (
-    <div className="export-modal-overlay" onClick={onClose}>
+    <div
+      className="export-modal-overlay"
+      role="button"
+      tabIndex={0}
+      aria-label="Close dialog"
+      onClick={onClose}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') onClose()
+      }}
+    >
       <div
         className="export-modal-content export-modal"
+        role="dialog"
+        aria-modal="true"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="export-modal-main">
@@ -108,7 +119,7 @@ export function ExportModal({ isOpen, onClose, glossary }: ExportModalProps) {
                   Export your glossary &ldquo;<strong>{glossary.name}</strong>
                   &rdquo; containing <strong>
                     {glossary.words.length}
-                  </strong>{" "}
+                  </strong>{' '}
                   word(s).
                 </p>
 
@@ -118,7 +129,7 @@ export function ExportModal({ isOpen, onClose, glossary }: ExportModalProps) {
                     onClick={handleExportJSON}
                     disabled={isExporting}
                   >
-                    {isExporting ? "Exporting…" : "Export as JSON"}
+                    {isExporting ? 'Exporting…' : 'Export as JSON'}
                   </button>
 
                   <button
@@ -126,7 +137,7 @@ export function ExportModal({ isOpen, onClose, glossary }: ExportModalProps) {
                     onClick={handleExportMarkdown}
                     disabled={isExporting}
                   >
-                    {isExporting ? "Exporting…" : "Export as Markdown"}
+                    {isExporting ? 'Exporting…' : 'Export as Markdown'}
                   </button>
                 </div>
                 <div className="preview-options">
@@ -157,5 +168,5 @@ export function ExportModal({ isOpen, onClose, glossary }: ExportModalProps) {
         </div>
       </div>
     </div>
-  );
+  )
 }

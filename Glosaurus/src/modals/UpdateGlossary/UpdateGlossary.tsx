@@ -85,9 +85,12 @@ export function UpdateGlossary({
       <div className="modal" ref={modalRef}>
         <h2>Update Glossary</h2>
 
-        <label className="word-label">Word</label>
+        <label className="word-label" htmlFor="update-word-input">
+          Word
+        </label>
         <div className="input-container">
           <input
+            id="update-word-input"
             ref={firstInputRef}
             type="text"
             className={`word-area ${errors.word ? 'input-error' : ''}`}
@@ -113,9 +116,12 @@ export function UpdateGlossary({
           </nav>
         )}
 
-        <label className="definition-label">Definition</label>
+        <label className="definition-label" htmlFor="update-definition-input">
+          Definition
+        </label>
         <div className="input-container">
           <textarea
+            id="update-definition-input"
             className={`definition-area ${errors.definition ? 'input-error' : ''}`}
             placeholder="Enter the definition"
             value={definition}

@@ -152,8 +152,7 @@ export function Parser() {
             className="download-btn"
             onClick={() => setIsExportModalOpen(true)}
           >
-            <img src="/download.svg" alt="Download icon" />
-            Download Result
+            <img src="/download.svg" alt="Download icon" /> Download Result
           </button>
 
           <button
