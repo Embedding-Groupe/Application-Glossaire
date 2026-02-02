@@ -104,9 +104,19 @@ export function ExportModal({
   ]
 
   return (
-    <div className="export-modal-overlay" onClick={onClose}>
+    <button
+      type="button"
+      className="export-modal-overlay"
+      aria-label="Close dialog"
+      onClick={onClose}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') onClose()
+      }}
+    >
       <div
         className="export-modal-content export-modal"
+        role="dialog"
+        aria-modal="true"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="export-modal-main">
@@ -132,8 +142,8 @@ export function ExportModal({
             ) : (
               <>
                 <p className="section-description">
-                  Export your result containing
-                  <strong> {terms.length}</strong> term(s).
+                  Export your result containing <strong>{terms.length}</strong>{' '}
+                  term(s).
                 </p>
 
                 <div className="export-options">
@@ -172,6 +182,6 @@ export function ExportModal({
           </button>
         </div>
       </div>
-    </div>
+    </button>
   )
 }

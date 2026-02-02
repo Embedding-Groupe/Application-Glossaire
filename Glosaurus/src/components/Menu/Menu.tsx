@@ -129,8 +129,7 @@ export function Menu() {
             className="import-btn"
             onClick={() => fileInputRef.current?.click()}
           >
-            <img src="/import.svg" alt="Import icon" />
-            Import
+            <img src="/import.svg" alt="Import icon" /> Import
           </button>
           <button className="new-word" onClick={() => setIsModalOpen(true)}>
             Create New Glossary
@@ -169,9 +168,11 @@ export function Menu() {
         <tbody>
           {filteredGlossaries.map((g, index) => (
             <tr key={index}>
-              <td className="Name" onClick={() => handleOpenGlossary(g.name)}>
-                <span
+              <td className="Name">
+                <button
+                  type="button"
                   className="text-label"
+                  onClick={() => handleOpenGlossary(g.name)}
                   onMouseEnter={(e) => {
                     const rect = (
                       e.target as HTMLElement
@@ -185,7 +186,7 @@ export function Menu() {
                   onMouseLeave={() => setTooltip(null)}
                 >
                   {g.name}
-                </span>
+                </button>
               </td>
               <td>
                 <span className="badge-count">
@@ -193,12 +194,11 @@ export function Menu() {
                 </span>
               </td>
 
-              <td
-                className="clickable"
-                onClick={() => handleOpenGlossary(g.name)}
-              >
-                <span
+              <td className="clickable">
+                <button
+                  type="button"
                   className="text-label"
+                  onClick={() => handleOpenGlossary(g.name)}
                   onMouseEnter={(e) => {
                     const rect = (
                       e.target as HTMLElement
@@ -212,7 +212,7 @@ export function Menu() {
                   onMouseLeave={() => setTooltip(null)}
                 >
                   {g.description}
-                </span>
+                </button>
               </td>
 
               <td>{g.lastModified || 'Never'}</td>

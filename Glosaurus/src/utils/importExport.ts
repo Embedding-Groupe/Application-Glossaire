@@ -32,7 +32,7 @@ export function exportToJSON(glossary: Glossary): string {
 export function exportToMarkdown(glossary: Glossary): string {
   // Helper function to escape pipe characters in table cells
   const escapeCell = (text: string): string => {
-    return text.replace(/\|/g, '\\|')
+    return text.replace('|', '\\|')
   }
 
   let markdown = `# ${glossary.name}\n`
