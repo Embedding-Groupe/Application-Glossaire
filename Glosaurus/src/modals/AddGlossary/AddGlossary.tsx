@@ -61,25 +61,32 @@ export function AddGlossaryModal({ onClose, onAdd }: AddGlossaryModalProps) {
   }
 
   return (
-    <div
+    <button
+      type="button"
       className="modal-backdrop"
-      role="dialog"
-      aria-modal="true"
+      aria-label="Close dialog"
       onClick={onClose}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') onClose()
+      }}
     >
       <div
         className="modal-content"
         ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="add-glossary-title"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2>Create a new glossary</h2>
+        <h2 id="add-glossary-title">Create a new glossary</h2>
         <form className="modal-form" onSubmit={handleSubmit}>
-          <label className="name-label">
+          <label className="name-label" htmlFor="glossary-name">
             <span>Name</span>
             <span className="glossary-required">*</span>
           </label>
           <div className="input-name-container">
             <input
+              id="glossary-name"
               ref={firstInputRef}
               type="text"
               className={`input-name ${errors.name ? 'input-error' : ''}`}
@@ -107,12 +114,13 @@ export function AddGlossaryModal({ onClose, onAdd }: AddGlossaryModalProps) {
             )}
           </nav>
 
-          <label className="description-label">
+          <label className="description-label" htmlFor="glossary-description">
             <span>Description</span>
             <span className="glossary-required">*</span>
           </label>
           <div className="input-name-container">
             <textarea
+              id="glossary-description"
               className={`textarea-description ${errors.description ? 'input-error' : ''}`}
               placeholder="Provide a brief description of the glossary"
               value={description}
@@ -148,6 +156,6 @@ export function AddGlossaryModal({ onClose, onAdd }: AddGlossaryModalProps) {
           </div>
         </form>
       </div>
-    </div>
+    </button>
   )
 }

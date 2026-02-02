@@ -154,6 +154,8 @@ export function Glossaire() {
                 <span
                   className="text-limit"
                   data-fulltext={w.word}
+                  role="button"
+                  tabIndex={0}
                   onMouseEnter={(e) => {
                     const el = e.target as HTMLElement
                     if (!isTruncated(el)) return
@@ -166,6 +168,19 @@ export function Glossaire() {
                     })
                   }}
                   onMouseLeave={() => setTooltip(null)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      const el = e.target as HTMLElement
+                      if (!isTruncated(el)) return
+
+                      const rect = el.getBoundingClientRect()
+                      setTooltip({
+                        text: w.word,
+                        x: rect.left,
+                        y: rect.bottom + 6,
+                      })
+                    }
+                  }}
                 >
                   {w.word}
                 </span>
@@ -175,6 +190,8 @@ export function Glossaire() {
                 <span
                   className="text-limit"
                   data-fulltext={w.definition}
+                  role="button"
+                  tabIndex={0}
                   onMouseEnter={(e) => {
                     const el = e.target as HTMLElement
                     if (!isTruncated(el)) return
@@ -187,6 +204,19 @@ export function Glossaire() {
                     })
                   }}
                   onMouseLeave={() => setTooltip(null)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      const el = e.target as HTMLElement
+                      if (!isTruncated(el)) return
+
+                      const rect = el.getBoundingClientRect()
+                      setTooltip({
+                        text: w.definition,
+                        x: rect.left,
+                        y: rect.bottom + 6,
+                      })
+                    }
+                  }}
                 >
                   {w.definition}
                 </span>
@@ -196,6 +226,8 @@ export function Glossaire() {
                 <span
                   className="text-limit"
                   data-fulltext={w.boundedContext || '—'}
+                  role="button"
+                  tabIndex={0}
                   onMouseEnter={(e) => {
                     const el = e.target as HTMLElement
                     if (!isTruncated(el)) return
@@ -208,6 +240,19 @@ export function Glossaire() {
                     })
                   }}
                   onMouseLeave={() => setTooltip(null)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      const el = e.target as HTMLElement
+                      if (!isTruncated(el)) return
+
+                      const rect = el.getBoundingClientRect()
+                      setTooltip({
+                        text: w.boundedContext || '—',
+                        x: rect.left,
+                        y: rect.bottom + 6,
+                      })
+                    }
+                  }}
                 >
                   {w.boundedContext || '—'}
                 </span>

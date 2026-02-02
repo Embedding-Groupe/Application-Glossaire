@@ -131,15 +131,16 @@ export function SynonymSuggestion({
         ) : visibleSynonyms.length > 0 ? (
           <>
             {visibleSynonyms.map((syn, i) => (
-              <span
+              <button
                 key={i}
+                type="button"
                 className="clickable-synonym"
                 onClick={() => onAddSynonym(syn)}
                 title="Cliquer pour ajouter ce synonyme"
               >
                 {syn}
                 {i < visibleSynonyms.length - 1 && ', '}
-              </span>
+              </button>
             ))}
           </>
         ) : (
@@ -346,12 +347,13 @@ export function AddWordModal({
       <div className="modal" ref={modalRef}>
         <h2>{isEdit ? 'Update Word' : 'Add a New Word'}</h2>
 
-        <label className={'word-label'}>
+        <label className={'word-label'} htmlFor="word-input">
           <span>Word</span>
           <span className="required">*</span>
         </label>
         <div className="input-container">
           <input
+            id="word-input"
             ref={firstInputRef}
             type="text"
             className={`word-area ${errors.word ? 'input-error' : ''}`}
@@ -390,12 +392,13 @@ export function AddWordModal({
           )}
         </nav>
 
-        <label className="definition-label">
+        <label className="definition-label" htmlFor="definition-input">
           <span>Definition</span>
           <span className="required">*</span>
         </label>
         <div className="input-container">
           <textarea
+            id="definition-input"
             className={`definition-area ${errors.definition ? 'input-error' : ''}`}
             placeholder="Enter the definition"
             value={definition}
@@ -422,9 +425,12 @@ export function AddWordModal({
           )}
         </nav>
 
-        <label className="context-label">Bounded Context (manual)</label>
+        <label className="context-label" htmlFor="context-input">
+          Bounded Context (Optional)
+        </label>
         <div className="input-container">
           <input
+            id="context-input"
             type="text"
             className="word-area"
             placeholder="Enter bounded context"
@@ -435,9 +441,12 @@ export function AddWordModal({
           />
         </div>
 
-        <label className={'synonym-label'}>Synonyms (Optional)</label>
+        <label className={'synonym-label'} htmlFor="synonym-input">
+          Synonyms (Optional)
+        </label>
         <div className="input-container">
           <input
+            id="synonym-input"
             type="text"
             placeholder="Press enter to add a synonym"
             value={currentSynonym}
@@ -490,6 +499,16 @@ export function AddWordModal({
                 if (!dt) return
                 dt.setData('text/plain', syn)
               }}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  setWord(syn)
+                  const index = synonyms.findIndex((s) => s === syn)
+                  if (index !== -1) handleRemoveSynonym(index)
+                }
+              }}
             >
               <button
                 className="remove-btn"
@@ -504,7 +523,12 @@ export function AddWordModal({
         </div>
 
         <nav>
-          <img src="/ia.png" className="logo-ia" title="AI Suggestions" />
+          <img
+            src="/ia.png"
+            className="logo-ia"
+            title="AI Suggestions"
+            alt=""
+          />
           <SynonymSuggestion
             word={word}
             definition={definition}

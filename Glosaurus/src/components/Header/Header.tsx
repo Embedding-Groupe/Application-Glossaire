@@ -31,7 +31,12 @@ export function Header() {
           onClick={handleHomeClick}
           aria-label="Back to Home"
         >
-          <img src="/logo.png" className="logo" title="Glosaurus" />
+          <img
+            src="/logo.png"
+            className="logo"
+            title="Glosaurus"
+            alt="Glosaurus Logo"
+          />
           <h1 className="app-name">Glosaurus</h1>
         </button>
 

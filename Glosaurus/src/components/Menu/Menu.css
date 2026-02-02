@@ -179,6 +179,10 @@
   overflow: hidden;
   text-overflow: ellipsis;
   position: relative;
+  background-color: transparent;
+  color: #000000;
+  border-color: transparent;
+  font-size: medium;
 }
 
 .tooltip-popup {
