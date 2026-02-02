@@ -272,11 +272,11 @@ export function Menu() {
               glossaries.map((g) =>
                 g.name === editingGlossary.name
                   ? {
-                      ...g,
-                      name: newName,
-                      description: newDescription,
-                      lastModified: new Date().toLocaleString(),
-                    }
+                    ...g,
+                    name: newName,
+                    description: newDescription,
+                    lastModified: new Date().toLocaleString(),
+                  }
                   : g
               )
             )

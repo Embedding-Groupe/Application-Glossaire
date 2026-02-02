@@ -18,6 +18,8 @@ interface AddWordModalProps {
     boundedContext?: string
   } | null
   isEdit?: boolean
+  glossaryName?: string
+  glossaryDescription?: string
 }
 
 interface SynonymResponse {
@@ -29,11 +31,17 @@ export function SynonymSuggestion({
   definition,
   userSynonyms,
   onAddSynonym,
+  glossaryName,
+  glossaryDescription,
+  boundedContext,
 }: {
   word: string
   definition: string
   userSynonyms: string[]
   onAddSynonym: (synonym: string) => void
+  glossaryName?: string
+  glossaryDescription?: string
+  boundedContext?: string
 }) {
   const [synonyms, setSynonyms] = useState<string[]>([])
   const [startIndex, setStartIndex] = useState(0)
@@ -56,6 +64,9 @@ export function SynonymSuggestion({
       word: word.trim(),
       definition: definition,
       synonyms: userSynonyms || [],
+      glossary_name: glossaryName,
+      glossary_description: glossaryDescription,
+      bounded_context: boundedContext,
     })
       .then((data) => {
         const response = data as SynonymResponse
@@ -168,6 +179,8 @@ export function AddWordModal({
   onAddWord,
   initialData,
   isEdit,
+  glossaryName,
+  glossaryDescription,
 }: AddWordModalProps) {
   const [word, setWord] = useState(initialData?.word || '')
   const [definition, setDefinition] = useState(initialData?.definition || '')
@@ -347,15 +360,6 @@ export function AddWordModal({
             maxLength={wordMaxLength}
             onInput={(e) => {
               const val = (e.target as HTMLInputElement).value
-
-              if (val.includes(' ')) {
-                setErrors((prev) => ({
-                  ...prev,
-                  word: 'Only one word is allowed',
-                }))
-                return
-              }
-
               setWord(val)
               setErrors((prev) => ({ ...prev, word: undefined }))
             }}
@@ -505,6 +509,9 @@ export function AddWordModal({
             word={word}
             definition={definition}
             userSynonyms={synonyms}
+            glossaryName={glossaryName}
+            glossaryDescription={glossaryDescription}
+            boundedContext={boundedContext}
             onAddSynonym={(syn: string) => {
               if (!synonyms.includes(syn)) {
                 setSynonyms([...synonyms, syn])

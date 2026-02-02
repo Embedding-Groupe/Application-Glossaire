@@ -269,6 +269,8 @@ export function Glossaire() {
         onAddWord={handleAddWord}
         initialData={editingWord}
         isEdit={!!editingWord}
+        glossaryName={glossaryName}
+        glossaryDescription={glossaryDescription}
       />
 
       <ExportModal

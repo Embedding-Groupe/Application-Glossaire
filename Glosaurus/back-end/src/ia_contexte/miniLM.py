@@ -14,22 +14,44 @@ class miniLM:
         print("model qwen3:0.6b pullé")
 
 
-    def getSynonyms(self, word, definition, synonyms):
-        # Règle de base : comment le modèle doit se comporter
-        system_prompt = f"""
-            I have the word "{word}" with the definition: "{definition}"
-            Some synonyms of the word are: "{synonyms}"
-            Give me a list of synonyms for the word "{word}" based on its definition except already given synonyms.
-            Respond only with the list of synonyms  in CSV format, without determiners, sentences, or punctuation.
-            Do not include any spaces between the synonyms, only commas.
-            """
+    def getSynonyms(self, word, definition, synonyms, glossary_name=None, glossary_description=None, bounded_context=None):
+        # Build the context string
+        context_parts = []
+        if glossary_name:
+            context_parts.append(f"Glossary Name: {glossary_name}")
+        if glossary_description:
+            context_parts.append(f"Glossary Description: {glossary_description}")
+        if bounded_context:
+            context_parts.append(f"Bounded Context: {bounded_context}")
+        
+        context_str = "\n".join(context_parts)
+        synonyms_str = f"Some synonyms already provided are: {', '.join(synonyms)}" if synonyms else ""
 
-        response = ollama.generate(model="qwen3:0.6b", prompt = system_prompt,options={
+        system_prompt = f"""
+        You are an expert lexicographer.
+        Context information:
+        {context_str}
+
+        I have the word "{word}" with the definition: "{definition}"
+        {synonyms_str}
+
+        Task: Give me a list of synonyms for the word "{word}" strictly based on the provided definition and context.
+        Constraint: Except already given synonyms (if any).
+        Format: Respond only with the list of synonyms in CSV format, without determiners, sentences, or punctuation. Do not include any spaces between the synonyms, only commas.
+        """
+
+        response = ollama.generate(model="qwen3:0.6b", prompt = system_prompt, options={
             "thinking": False, 
             "num_predict": 300   
         })
 
-        return response['response']
+        suggestions = response['response']
+        if suggestions == "":
+            return None
+        for suggestion in suggestions.split(","):
+            if suggestion in synonyms:
+                suggestions.replace(suggestion, "") 
+        return suggestions
 
 
     @staticmethod
