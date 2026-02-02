@@ -405,7 +405,7 @@ export function AddWordModal({
           )}
         </nav>
 
-        <label className="context-label">Bounded Context (manual)</label>
+        <label className="context-label">Bounded Context (Optional)</label>
         <div className="input-container">
           <input
             type="text"
