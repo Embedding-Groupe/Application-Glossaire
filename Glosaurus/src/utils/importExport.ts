@@ -11,6 +11,7 @@ export interface WordItem {
   word: string
   definition: string
   synonyms: string[]
+  boundedContext?: string
 }
 
 export interface Glossary {
@@ -45,8 +46,8 @@ export function exportToMarkdown(glossary: Glossary): string {
   }
 
   // Table header
-  markdown += `| Word | Definition | Synonyms |\n`
-  markdown += `| --- | --- | --- |\n`
+  markdown += `| Word | Definition | Bounded Context | Synonyms |\n`
+  markdown += `| --- | --- | --- | --- |\n`
 
   // Table rows
   glossary.words.forEach((word) => {
@@ -54,7 +55,8 @@ export function exportToMarkdown(glossary: Glossary): string {
       word.synonyms && word.synonyms.length > 0
         ? word.synonyms.join(', ')
         : '_None_'
-    markdown += `| ${escapeCell(word.word)} | ${escapeCell(word.definition)} | ${escapeCell(synonymsText)} |\n`
+    const contextText = word.boundedContext || '_None_'
+    markdown += `| ${escapeCell(word.word)} | ${escapeCell(word.definition)} | ${escapeCell(contextText)} | ${escapeCell(synonymsText)} |\n`
   })
 
   return markdown
@@ -162,7 +164,18 @@ export function importFromMarkdown(markdownString: string): Glossary {
       if (cells.length >= 3) {
         const word = cells[0]
         const definition = cells[1]
-        const synonymsText = cells[2]
+        // Handle both old format (3 cells) and new format (4 cells with bounded context)
+        let boundedContext: string | undefined
+        let synonymsText: string
+
+        if (cells.length >= 4) {
+          // New format with bounded context
+          boundedContext = cells[2]
+          synonymsText = cells[3]
+        } else {
+          // Old format without bounded context
+          synonymsText = cells[2]
+        }
 
         // Parse synonyms
         let synonyms: string[] = []
@@ -176,11 +189,15 @@ export function importFromMarkdown(markdownString: string): Glossary {
             .map((s) => s.trim())
             .filter((s) => s)
         }
+        if (boundedContext === '_None_' || !boundedContext) {
+          boundedContext = undefined
+        }
 
         words.push({
           word,
           definition,
           synonyms,
+          boundedContext,
         })
       }
     }
