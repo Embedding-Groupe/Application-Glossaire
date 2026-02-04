@@ -109,11 +109,13 @@
 
 .name-label{
 	padding-bottom: 8px;
+	text-align: left;
 }
 
 .description-label {
 	padding-top: 8px;
 	padding-bottom: 8px;
+	text-align: left;
 }
 
 .glossary-required {
