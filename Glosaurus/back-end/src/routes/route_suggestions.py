@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Request
 import json
-from src.ia_contexte.miniLM import miniLM
+from src.ia_contexte.ia_suggestion import ia_suggestion
 
 
-router = APIRouter(prefix="/synonym", tags=["synonyms"])
+router = APIRouter(prefix="/suggestions", tags=["suggestions"])
 
-lm = miniLM()
+lm = ia_suggestion()
 
 @router.post("/getSynonym")
 async def getSynonym(request: Request):

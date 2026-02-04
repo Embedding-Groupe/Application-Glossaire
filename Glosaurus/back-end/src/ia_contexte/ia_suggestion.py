@@ -3,7 +3,7 @@ import ollama
 import os
 import sys
 
-class miniLM:
+class ia_suggestion:
 
     def __init__(self):
         print("client ollama se lance")

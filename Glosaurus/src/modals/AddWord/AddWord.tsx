@@ -60,7 +60,7 @@ export function SynonymSuggestion({
     }
 
     setLoading(true)
-    postJSON('http://127.0.0.1:8000/synonym/getSynonym', {
+    postJSON('http://127.0.0.1:8000/suggestions/getSynonym', {
       word: word.trim(),
       definition: definition,
       synonyms: userSynonyms || [],
