@@ -23,6 +23,14 @@ interface WordItem {
   word: string
 }
 
+interface TermDetails {
+  total_occurrences: number
+  files_occurrences: Record<string, number>
+}
+
+
+
+
 export function Parser() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const location = useLocation()
@@ -78,24 +86,15 @@ export function Parser() {
         multiple: false,
       });
 
-      if (selected === null) {
-        // User cancelled the selection
-        return;
-      }
-
-      // selected is the absolute path string
-      console.log("Selected folder:", selected);
+      if (selected === null) return;
 
       setFileName(selected as string);
       setTerms([]);
       setError(null);
 
-      // Call backend
       const response = await fetch('http://127.0.0.1:8000/parser/parse_directory', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ path: selected }),
       });
 
@@ -104,18 +103,28 @@ export function Parser() {
         throw new Error(errorData.error || 'Network response was not ok');
       }
 
-      const data = await response.json();
+      interface TermDetails {
+        total_occurrences: number
+        files_occurrences: Record<string, number>
+      }
+
+      const data: Record<string, TermDetails> = await response.json();
       console.log('API response:', data);
 
-      // Transform backend response to frontend format
-      const parsedTerms: ParsedTerm[] = Object.entries(data).map(
-        ([term, details]: [string, any]) => ({
+      const parsedTerms: ParsedTerm[] = [];
+      const distribution: Record<string, Record<string, number>> = {};
+
+      for (const [term, details] of Object.entries(data)) {
+        parsedTerms.push({
           term,
           occurrence: details.total_occurrences
-        })
-      );
+        });
+
+        distribution[term] = details.files_occurrences;
+      }
 
       setTerms(parsedTerms);
+      setWordDistribution(distribution);
       setIsImportModalOpen(false);
 
     } catch (err) {
@@ -124,6 +133,7 @@ export function Parser() {
       setTerms([]);
     }
   };
+
   const [selectedWord, setSelectedWord] = useState<string | null>(null)
 
   const getSortedTerms = (): ParsedTerm[] => {
@@ -411,11 +421,7 @@ export function Parser() {
                   <tr key={t.term}>
                     <td
                       className={alreadyExists ? 'terms-column already-present' : 'terms-column'}
-                      onClick={() => {
-                        if (Object.keys(wordDistribution).length > 0) {
-                          setSelectedWord(t.term)
-                        }
-                      }}
+                      onClick={() => setSelectedWord(t.term)} // plus besoin de tester wordDistribution.length
                       style={{ cursor: Object.keys(wordDistribution).length > 0 ? 'pointer' : 'default' }}
                     >
                       {t.term}
