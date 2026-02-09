@@ -214,11 +214,9 @@ export function Parser() {
   }
 
   const handleFilterClick = (filterType: 'included' | 'not-included') => {
-    // Si on clique sur le filtre déjà actif, on le désactive
     if (filter === filterType) {
       setFilter(null)
     } else {
-      // Sinon, on active le nouveau filtre
       setFilter(filterType)
     }
   }
@@ -278,6 +276,47 @@ export function Parser() {
       alignment,
     }
   }, [terms, glossaryWords])
+
+
+const pieDataPoints = useMemo(() => {
+    if (!selectedWord) return []
+
+    const distribution = wordDistribution[selectedWord] || {}
+
+    return Object.entries(distribution).map(([file, count]) => ({
+      y: count,
+      label: file
+    }))
+  }, [selectedWord, wordDistribution])
+
+
+  useEffect(() => {
+    if (!canvasReady || !chartRef.current || pieDataPoints.length === 0) return
+
+    const chart = new CanvasJS.Chart(chartRef.current, {
+      theme: "light2",
+      animationEnabled: true,
+      exportEnabled: true,
+      title: {
+        text: `Répartition des occurrences de "${selectedWord}"`
+      },
+      data: [
+        {
+          type: "pie",
+          startAngle: 25,
+          toolTipContent: "<b>{label}</b>: {y} occurrences",
+          showInLegend: true,
+          legendText: "{label}",
+          indexLabelFontSize: 16,
+          indexLabel: "{label} - {y} occurrences",
+          dataPoints: pieDataPoints
+        }
+      ]
+    })
+
+    chart.render()
+  }, [pieDataPoints, selectedWord, canvasReady])
+
 
   return (
     <div className="parser">
