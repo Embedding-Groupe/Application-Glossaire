@@ -168,16 +168,24 @@ export function Parser() {
   const [canvasReady, setCanvasReady] = useState(false)
 
   useEffect(() => {
+    console.log('Tentative chargement CanvasJS')
+
     if ((window as any).CanvasJS) {
+      console.log('CanvasJS déjà chargé')
       setCanvasReady(true)
       return
     }
 
     const script = document.createElement('script')
     script.src = 'https://cdn.canvasjs.com/canvasjs.min.js'
-    script.onload = () => setCanvasReady(true)
+    script.onload = () => {
+      console.log(' CanvasJS chargé depuis CDN')
+      setCanvasReady(true)
+    }
+
     document.body.appendChild(script)
   }, [])
+
 
 
 
@@ -264,18 +272,30 @@ export function Parser() {
 
 
   const pieDataPoints = useMemo(() => {
-    if (!selectedWord) return []
+    if (!selectedWord) {
+      console.log('ℹ️ Aucun mot sélectionné')
+      return []
+    }
+
+    console.log('🔤 selectedWord:', selectedWord)
+    console.log('📦 wordDistribution[selectedWord]:', wordDistribution[selectedWord])
 
     const distribution = wordDistribution[selectedWord] || {}
-    return Object.entries(distribution).map(([file, count]) => ({
+
+    const points = Object.entries(distribution).map(([file, count]) => ({
       y: count,
       label: file
     }))
+
+    console.log('🥧 pieDataPoints:', points)
+    return points
   }, [selectedWord, wordDistribution])
+
 
   const chartRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    
     if (!canvasReady || !chartRef.current || pieDataPoints.length === 0) return
 
     const chart = new CanvasJS.Chart(chartRef.current, {
@@ -438,7 +458,8 @@ export function Parser() {
                   <tr key={t.term}>
                     <td
                       className={alreadyExists ? 'terms-column already-present' : 'terms-column'}
-                      onClick={() => setSelectedWord(t.term)} // plus besoin de tester wordDistribution.length
+                      onClick={() => setSelectedWord(t.term) } 
+                      
                       style={{ cursor: Object.keys(wordDistribution).length > 0 ? 'pointer' : 'default' }}
                     >
                       {t.term}
