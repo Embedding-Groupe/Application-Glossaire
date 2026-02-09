@@ -25,10 +25,13 @@ interface WordItem {
 
 interface TermDetails {
   total_occurrences: number
-  files_occurrences: Record<string, number>
+  files: { name: string; count: number }[]
 }
 
-
+interface ApiTermDetails {
+  total_occurrences: number;
+  files: { name: string; count: number }[];
+}
 
 
 export function Parser() {
@@ -103,12 +106,7 @@ export function Parser() {
         throw new Error(errorData.error || 'Network response was not ok');
       }
 
-      interface TermDetails {
-        total_occurrences: number
-        files_occurrences: Record<string, number>
-      }
-
-      const data: Record<string, TermDetails> = await response.json();
+      const data: Record<string, ApiTermDetails> = await response.json();
       console.log('API response:', data);
 
       const parsedTerms: ParsedTerm[] = [];
@@ -117,10 +115,15 @@ export function Parser() {
       for (const [term, details] of Object.entries(data)) {
         parsedTerms.push({
           term,
-          occurrence: details.total_occurrences
+          occurrence: details.total_occurrences,
         });
 
-        distribution[term] = details.files_occurrences;
+        const filesObj: Record<string, number> = {};
+        details.files.forEach(f => {
+          filesObj[f.name] = f.count;
+        });
+
+        distribution[term] = filesObj;
       }
 
       setTerms(parsedTerms);
