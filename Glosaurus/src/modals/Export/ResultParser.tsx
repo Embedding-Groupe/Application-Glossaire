@@ -1,10 +1,10 @@
 import { useState } from 'preact/hooks'
-import type { Glossary } from '../../utils/importExport'
+import type { ParserResult } from '../../utils/importExport'
 import {
-  downloadGlossaryAsJSON,
-  downloadGlossaryAsMarkdown,
-  exportToJSON,
-  exportToMarkdown,
+  downloadParserResultsAsJSON,
+  downloadParserResultsAsMarkdown,
+  exportParserResultsToJSON,
+  exportParserResultsToMarkdown,
 } from '../../utils/importExport'
 import './Export.css'
 
@@ -16,19 +16,23 @@ interface ParsedTerm {
 interface ExportModalProps {
   isOpen: boolean
   onClose: () => void
-  glossary: Glossary
+  fileName: string
   terms: ParsedTerm[]
+  glossaryWords: string[]
 }
 
 export function ExportModal({
   isOpen,
   onClose,
-  glossary,
+  fileName,
   terms,
+  glossaryWords,
 }: ExportModalProps) {
   const [error, setError] = useState<string>('')
   const [success, setSuccess] = useState<string>('')
-  const [isExporting, setIsExporting] = useState<boolean>(false)
+  const [exportingFormat, setExportingFormat] = useState<
+    'JSON' | 'Markdown' | null
+  >(null)
   const [previewContent, setPreviewContent] = useState<string | null>(null)
   const [previewFormat, setPreviewFormat] = useState<
     'JSON' | 'Markdown' | null
@@ -36,39 +40,44 @@ export function ExportModal({
 
   if (!isOpen) return null
 
-  const glossaryWithTerms: Glossary = {
-    ...glossary,
-    words: terms.map((t) => ({
-      word: t.term,
-      definition: `Occurrence count: ${t.occurrence}`,
-      synonyms: [],
+  const parserResult: ParserResult = {
+    fileName,
+    terms: terms.map((t) => ({
+      term: t.term,
+      occurrence: t.occurrence,
+      inGlossary: glossaryWords.includes(t.term.toLowerCase()),
     })),
   }
 
   const handleExport = async (
-    exporter: (glossary: Glossary) => Promise<void>,
-    format: string
+    exporter: (result: ParserResult) => Promise<void>,
+    format: 'JSON' | 'Markdown'
   ) => {
-    setIsExporting(true)
+    setExportingFormat(format)
     setError('')
-    setSuccess('')
     try {
-      await exporter(glossaryWithTerms)
-      setSuccess(`Glossaire exporté en ${format} avec succès !`)
+      await exporter(parserResult)
+      setSuccess(`Résultats exportés en ${format} avec succès !`)
       setTimeout(() => {
         setSuccess('')
         onClose()
       }, 2000)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur lors de l'export")
+      const errorMessage =
+        err instanceof Error ? err.message : "Erreur lors de l'export"
+      // Don't show error message if operation was cancelled
+      if (errorMessage !== 'Opération annulée') {
+        setError(errorMessage)
+      }
     } finally {
-      setIsExporting(false)
+      setExportingFormat(null)
     }
   }
 
-  const handleExportJSON = () => handleExport(downloadGlossaryAsJSON, 'JSON')
+  const handleExportJSON = () =>
+    handleExport(downloadParserResultsAsJSON, 'JSON')
   const handleExportMarkdown = () =>
-    handleExport(downloadGlossaryAsMarkdown, 'Markdown')
+    handleExport(downloadParserResultsAsMarkdown, 'Markdown')
 
   const handlePreview = (content: string, format: 'JSON' | 'Markdown') => {
     setPreviewContent(content)
@@ -76,9 +85,9 @@ export function ExportModal({
   }
 
   const handlePreviewJSON = () =>
-    handlePreview(exportToJSON(glossaryWithTerms), 'JSON')
+    handlePreview(exportParserResultsToJSON(parserResult), 'JSON')
   const handlePreviewMarkdown = () =>
-    handlePreview(exportToMarkdown(glossaryWithTerms), 'Markdown')
+    handlePreview(exportParserResultsToMarkdown(parserResult), 'Markdown')
 
   const handleClosePreview = () => {
     setPreviewContent(null)
@@ -142,8 +151,24 @@ export function ExportModal({
             ) : (
               <>
                 <p className="section-description">
-                  Export your result containing <strong>{terms.length}</strong>{' '}
-                  term(s).
+                  Export your analysis containing{' '}
+                  <strong>{terms.length}</strong> term(s) with{' '}
+                  <strong>
+                    {
+                      terms.filter((t) =>
+                        glossaryWords.includes(t.term.toLowerCase())
+                      ).length
+                    }
+                  </strong>{' '}
+                  in glossary and{' '}
+                  <strong>
+                    {
+                      terms.filter(
+                        (t) => !glossaryWords.includes(t.term.toLowerCase())
+                      ).length
+                    }
+                  </strong>{' '}
+                  not in glossary.
                 </p>
 
                 <div className="export-options">
@@ -152,9 +177,9 @@ export function ExportModal({
                       key={label}
                       className="btn btn-primary"
                       onClick={handler}
-                      disabled={isExporting}
+                      disabled={exportingFormat !== null}
                     >
-                      {isExporting ? 'Exporting…' : label}
+                      {label}
                     </button>
                   ))}
                 </div>
@@ -165,7 +190,7 @@ export function ExportModal({
                       key={label}
                       className="btn btn-secondary"
                       onClick={handler}
-                      disabled={isExporting}
+                      disabled={exportingFormat !== null}
                     >
                       {label}
                     </button>

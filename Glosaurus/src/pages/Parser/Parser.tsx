@@ -5,10 +5,9 @@ import { ImportChoiceModal } from '../../modals/Import/ImportChoiceModal'
 import type { Glossary } from '../../utils/importExport'
 import { useLocation } from 'preact-iso'
 import { loadFromStorage } from '../../utils/storage'
-import { open } from '@tauri-apps/plugin-dialog';
+import { open } from '@tauri-apps/plugin-dialog'
 
-
-declare var CanvasJS: any 
+declare let CanvasJS: any
 
 interface ParsedTerm {
   term: string
@@ -36,6 +35,7 @@ interface ApiTermDetails {
 
 export function Parser() {
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const chartRef = useRef<HTMLDivElement>(null)
   const location = useLocation()
   const previousGlossaryName = location.query?.glossary ?? 'Unknown Glossary'
 
@@ -47,7 +47,9 @@ export function Parser() {
   const [sortColumn, setSortColumn] = useState<SortColumn>(null)
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc')
   const [filter, setFilter] = useState<FilterType>(null)
-  const [wordDistribution, setWordDistribution] = useState<Record<string, Record<string, number>>>({})
+  const [wordDistribution, setWordDistribution] = useState<
+    Record<string, Record<string, number>>
+  >({})
 
   const handleFileChange = () => {
     const files = fileInputRef.current?.files
@@ -87,30 +89,42 @@ export function Parser() {
       const selected = await open({
         directory: true,
         multiple: false,
-      });
+      })
 
-      if (selected === null) return;
+      if (selected === null) {
+        // User cancelled the selection
+        return
+      }
 
-      setFileName(selected as string);
-      setTerms([]);
-      setError(null);
+      // selected is the absolute path string
+      console.log('Selected folder:', selected)
 
-      const response = await fetch('http://127.0.0.1:8000/parser/parse_directory', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ path: selected }),
-      });
+      setFileName(selected as string)
+      setTerms([])
+      setError(null)
+
+      // Call backend
+      const response = await fetch(
+        'http://127.0.0.1:8000/parser/parse_directory',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ path: selected }),
+        }
+      )
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Network response was not ok');
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Network response was not ok')
       }
 
       const data: Record<string, ApiTermDetails> = await response.json();
       console.log('API response:', data);
 
-      const parsedTerms: ParsedTerm[] = [];
-      const distribution: Record<string, Record<string, number>> = {};
+      const parsedTerms: ParsedTerm[] = []
+      const distribution: Record<string, Record<string, number>> = {}
 
       for (const [term, details] of Object.entries(data)) {
         parsedTerms.push({
@@ -126,16 +140,15 @@ export function Parser() {
         distribution[term] = filesObj;
       }
 
-      setTerms(parsedTerms);
-      setWordDistribution(distribution);
-      setIsImportModalOpen(false);
-
+      setTerms(parsedTerms)
+      setWordDistribution(distribution)
+      setIsImportModalOpen(false)
     } catch (err) {
-      console.error('Error importing folder:', err);
-      setError(err instanceof Error ? err.message : 'Unknown error occurred');
-      setTerms([]);
+      console.error('Error importing folder:', err)
+      setError(err instanceof Error ? err.message : 'Unknown error occurred')
+      setTerms([])
     }
-  };
+  }
 
   const [selectedWord, setSelectedWord] = useState<string | null>(null)
 
@@ -189,10 +202,6 @@ export function Parser() {
     document.body.appendChild(script)
   }, [])
 
-
-
-
-
   const handleColumnSort = (column: 'term' | 'occurrence') => {
     if (sortColumn === column) {
       // Si on clique sur la même colonne, on inverse l'ordre
@@ -233,13 +242,10 @@ export function Parser() {
       synonyms: [],
       boundedContext: undefined,
     })),
-
-
   }
 
-
   const glossaryStats = useMemo(() => {
-    const parsedInGlossary = terms.filter(t =>
+    const parsedInGlossary = terms.filter((t) =>
       glossaryWords.includes(t.term.toLowerCase())
     ).length
 
@@ -254,7 +260,7 @@ export function Parser() {
     )
 
     const alignedOccurrences = terms
-      .filter(t => glossaryWords.includes(t.term.toLowerCase()))
+      .filter((t) => glossaryWords.includes(t.term.toLowerCase()))
       .reduce((sum, t) => sum + t.occurrence, 0)
 
     const alignment =
@@ -272,59 +278,6 @@ export function Parser() {
       alignment,
     }
   }, [terms, glossaryWords])
-
-
-  const pieDataPoints = useMemo(() => {
-    if (!selectedWord) {
-      console.log('ℹ️ Aucun mot sélectionné')
-      return []
-    }
-
-    console.log('🔤 selectedWord:', selectedWord)
-    console.log('📦 wordDistribution[selectedWord]:', wordDistribution[selectedWord])
-
-    const distribution = wordDistribution[selectedWord] || {}
-
-    const points = Object.entries(distribution).map(([file, count]) => ({
-      y: count,
-      label: file
-    }))
-
-    console.log('🥧 pieDataPoints:', points)
-    return points
-  }, [selectedWord, wordDistribution])
-
-
-  const chartRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    
-    if (!canvasReady || !chartRef.current || pieDataPoints.length === 0) return
-
-    const chart = new CanvasJS.Chart(chartRef.current, {
-      theme: "light2",
-      animationEnabled: true,
-      exportEnabled: true,
-      title: { text: `Répartition des occurrences de "${selectedWord}"` },
-      data: [{
-        type: "pie",
-        startAngle: 25,
-        toolTipContent: "<b>{label}</b>: {y} occurrences",
-        showInLegend: true,
-        legendText: "{label}",
-        indexLabelFontSize: 16,
-        indexLabel: "{label} - {y} occurrences",
-        dataPoints: pieDataPoints
-      }]
-    })
-
-    chart.render()
-  }, [pieDataPoints, selectedWord, canvasReady])
-
-
-
-  
-
 
   return (
     <div className="parser">
@@ -379,9 +332,9 @@ export function Parser() {
           error={error}
           onSelectOption={(option) => {
             if (option === 'file') {
-              fileInputRef.current?.click();
+              fileInputRef.current?.click()
             } else {
-              handleFolderImport();
+              handleFolderImport()
             }
           }}
         />
@@ -460,10 +413,18 @@ export function Parser() {
                 return (
                   <tr key={t.term}>
                     <td
-                      className={alreadyExists ? 'terms-column already-present' : 'terms-column'}
-                      onClick={() => setSelectedWord(t.term) } 
-                      
-                      style={{ cursor: Object.keys(wordDistribution).length > 0 ? 'pointer' : 'default' }}
+                      className={
+                        alreadyExists
+                          ? 'terms-column already-present'
+                          : 'terms-column'
+                      }
+                      onClick={() => setSelectedWord(t.term)}
+                      style={{
+                        cursor:
+                          Object.keys(wordDistribution).length > 0
+                            ? 'pointer'
+                            : 'default',
+                      }}
                     >
                       {t.term}
                     </td>
@@ -476,8 +437,9 @@ export function Parser() {
           </table>
           <div className="UL">
             <span className="coverage-UL">
-              UL Coverage = {glossaryStats.parsedInGlossary}/{glossaryStats.totalGlossary}
-              {' '}({glossaryStats.coverage.toFixed(1)}%)
+              UL Coverage = {glossaryStats.parsedInGlossary}/
+              {glossaryStats.totalGlossary} ({glossaryStats.coverage.toFixed(1)}
+              %)
             </span>
             <div className="progress-bar">
               <div
@@ -485,18 +447,18 @@ export function Parser() {
                   glossaryStats.coverage <= 25
                     ? 'red'
                     : glossaryStats.coverage <= 50
-                    ? 'yellow'
-                    : glossaryStats.coverage <= 75
-                    ? 'green-light'
-                    : 'green-dark'
+                      ? 'yellow'
+                      : glossaryStats.coverage <= 75
+                        ? 'green-light'
+                        : 'green-dark'
                 }`}
                 style={{ width: `${glossaryStats.coverage}%` }}
               />
             </div>
             <span className="alignement-UL">
               UL Alignment = {glossaryStats.alignedOccurrences}/
-              {glossaryStats.totalParsedOccurrences}
-              {' '}({glossaryStats.alignment.toFixed(1)}%)
+              {glossaryStats.totalParsedOccurrences} (
+              {glossaryStats.alignment.toFixed(1)}%)
             </span>
 
             <div className="progress-bar">
@@ -505,30 +467,36 @@ export function Parser() {
                   glossaryStats.alignment <= 25
                     ? 'red'
                     : glossaryStats.alignment <= 50
-                    ? 'yellow'
-                    : glossaryStats.alignment <= 75
-                    ? 'green-light'
-                    : 'green-dark'
+                      ? 'yellow'
+                      : glossaryStats.alignment <= 75
+                        ? 'green-light'
+                        : 'green-dark'
                 }`}
                 style={{ width: `${glossaryStats.alignment}%` }}
               />
             </div>
           </div>
         </div>
-
       </div>
       {selectedWord && (
-        <div ref={chartRef} style={{ height: '370px', width: '100%', marginTop: '30px' }} />
-  
+        <div
+          ref={chartRef}
+          style={{ height: '370px', width: '100%', marginTop: '30px' }}
+        />
       )}
-
-      
 
       <ExportModal
         isOpen={isExportModalOpen}
         onClose={() => setIsExportModalOpen(false)}
-        glossary={glossary}
+        parserResult={{
+          fileName,
+          terms: terms.map((t) => ({
+            term: t.term,
+            occurrence: t.occurrence,
+            inGlossary: isAlreadyInGlossary(t.term),
+          })),
+        }}
       />
-    </div >
+    </div>
   )
 }

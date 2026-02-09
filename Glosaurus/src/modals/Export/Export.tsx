@@ -1,23 +1,35 @@
 import { useState } from 'preact/hooks'
-import type { Glossary } from '../../utils/importExport'
+import type { Glossary, ParserResult } from '../../utils/importExport'
 import {
   downloadGlossaryAsJSON,
   downloadGlossaryAsMarkdown,
   exportToJSON,
   exportToMarkdown,
+  downloadParserResultsAsJSON,
+  downloadParserResultsAsMarkdown,
+  exportParserResultsToJSON,
+  exportParserResultsToMarkdown,
 } from '../../utils/importExport'
 import './Export.css'
 
 interface ExportModalProps {
   isOpen: boolean
   onClose: () => void
-  glossary: Glossary
+  glossary?: Glossary
+  parserResult?: ParserResult
 }
 
-export function ExportModal({ isOpen, onClose, glossary }: ExportModalProps) {
+export function ExportModal({
+  isOpen,
+  onClose,
+  glossary,
+  parserResult,
+}: ExportModalProps) {
   const [error, setError] = useState<string>('')
   const [success, setSuccess] = useState<string>('')
-  const [isExporting, setIsExporting] = useState<boolean>(false)
+  const [exportingFormat, setExportingFormat] = useState<
+    'JSON' | 'Markdown' | null
+  >(null)
   const [previewContent, setPreviewContent] = useState<string | null>(null)
   const [previewFormat, setPreviewFormat] = useState<
     'JSON' | 'Markdown' | null
@@ -25,49 +37,82 @@ export function ExportModal({ isOpen, onClose, glossary }: ExportModalProps) {
 
   if (!isOpen) return null
 
+  const isParserMode = !!parserResult
+  const dataTitle = isParserMode
+    ? 'Export your Parser Results'
+    : 'Export your Glossary'
+
   const handleExportJSON = async () => {
-    setIsExporting(true)
+    setExportingFormat('JSON')
     setError('')
     setSuccess('')
     try {
-      await downloadGlossaryAsJSON(glossary)
-      setSuccess('Glossaire exporté en JSON avec succès !')
+      if (isParserMode && parserResult) {
+        await downloadParserResultsAsJSON(parserResult)
+        setSuccess('Résultats exportés en JSON avec succès !')
+      } else if (glossary) {
+        await downloadGlossaryAsJSON(glossary)
+        setSuccess('Glossaire exporté en JSON avec succès !')
+      }
       setTimeout(() => {
         setSuccess('')
         onClose()
       }, 2000)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur lors de l'export")
+      const errorMessage =
+        err instanceof Error ? err.message : "Erreur lors de l'export"
+      // Don't show error message if operation was cancelled
+      if (errorMessage !== 'Opération annulée') {
+        setError(errorMessage)
+      }
     } finally {
-      setIsExporting(false)
+      setExportingFormat(null)
     }
   }
 
   const handleExportMarkdown = async () => {
-    setIsExporting(true)
+    setExportingFormat('Markdown')
     setError('')
     setSuccess('')
     try {
-      await downloadGlossaryAsMarkdown(glossary)
-      setSuccess('Glossaire exporté en Markdown avec succès !')
+      if (isParserMode && parserResult) {
+        await downloadParserResultsAsMarkdown(parserResult)
+        setSuccess('Résultats exportés en Markdown avec succès !')
+      } else if (glossary) {
+        await downloadGlossaryAsMarkdown(glossary)
+        setSuccess('Glossaire exporté en Markdown avec succès !')
+      }
       setTimeout(() => {
         setSuccess('')
         onClose()
       }, 2000)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur lors de l'export")
+      const errorMessage =
+        err instanceof Error ? err.message : "Erreur lors de l'export"
+      // Don't show error message if operation was cancelled
+      if (errorMessage !== 'Opération annulée') {
+        setError(errorMessage)
+      }
     } finally {
-      setIsExporting(false)
+      setExportingFormat(null)
     }
   }
 
   const handlePreviewJSON = () => {
-    setPreviewContent(exportToJSON(glossary))
+    if (isParserMode && parserResult) {
+      setPreviewContent(exportParserResultsToJSON(parserResult))
+    } else if (glossary) {
+      setPreviewContent(exportToJSON(glossary))
+    }
     setPreviewFormat('JSON')
   }
 
   const handlePreviewMarkdown = () => {
-    setPreviewContent(exportToMarkdown(glossary))
+    if (isParserMode && parserResult) {
+      setPreviewContent(exportParserResultsToMarkdown(parserResult))
+    } else if (glossary) {
+      setPreviewContent(exportToMarkdown(glossary))
+    }
     setPreviewFormat('Markdown')
   }
 
@@ -93,7 +138,7 @@ export function ExportModal({ isOpen, onClose, glossary }: ExportModalProps) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="export-modal-main">
-          <h2>Export your Glossary</h2>
+          <h2>{dataTitle}</h2>
 
           <div className="export-modal-body">
             {error && <div className="alert alert-error">{error}</div>}
@@ -114,43 +159,58 @@ export function ExportModal({ isOpen, onClose, glossary }: ExportModalProps) {
               </div>
             ) : (
               <>
-                <p className="section-description">
-                  Export your glossary &ldquo;<strong>{glossary.name}</strong>
-                  &rdquo; containing <strong>
-                    {glossary.words.length}
-                  </strong>{' '}
-                  word(s).
-                </p>
+                {isParserMode && parserResult ? (
+                  <p className="section-description">
+                    Export your analysis containing{' '}
+                    <strong>{parserResult.terms.length}</strong> term(s) with{' '}
+                    <strong>
+                      {parserResult.terms.filter((t) => t.inGlossary).length}
+                    </strong>{' '}
+                    in glossary and{' '}
+                    <strong>
+                      {parserResult.terms.filter((t) => !t.inGlossary).length}
+                    </strong>{' '}
+                    not in glossary.
+                  </p>
+                ) : glossary ? (
+                  <p className="section-description">
+                    Export your glossary &ldquo;<strong>{glossary.name}</strong>
+                    &rdquo; containing <strong>
+                      {glossary.words.length}
+                    </strong>{' '}
+                    word(s).
+                  </p>
+                ) : null}
 
                 <div className="export-options">
                   <button
                     className="btn btn-primary"
                     onClick={handleExportJSON}
-                    disabled={isExporting}
+                    disabled={exportingFormat !== null}
                   >
-                    {isExporting ? 'Exporting…' : 'Export as JSON'}
+                    Export as JSON
                   </button>
 
                   <button
                     className="btn btn-primary"
                     onClick={handleExportMarkdown}
-                    disabled={isExporting}
+                    disabled={exportingFormat !== null}
                   >
-                    {isExporting ? 'Exporting…' : 'Export as Markdown'}
+                    Export as Markdown
                   </button>
                 </div>
                 <div className="preview-options">
                   <button
                     className="btn btn-secondary"
                     onClick={handlePreviewJSON}
-                    disabled={isExporting}
+                    disabled={exportingFormat !== null}
                   >
                     JSON File Preview
                   </button>
                   <button
                     className="btn btn-secondary"
                     onClick={handlePreviewMarkdown}
-                    disabled={isExporting}
+                    disabled={exportingFormat !== null}
                   >
                     Markdown File Preview
                   </button>
