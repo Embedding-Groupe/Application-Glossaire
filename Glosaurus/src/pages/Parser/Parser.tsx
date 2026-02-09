@@ -165,6 +165,21 @@ export function Parser() {
     return sorted
   }
 
+  const [canvasReady, setCanvasReady] = useState(false)
+
+  useEffect(() => {
+    if ((window as any).CanvasJS) {
+      setCanvasReady(true)
+      return
+    }
+
+    const script = document.createElement('script')
+    script.src = 'https://cdn.canvasjs.com/canvasjs.min.js'
+    script.onload = () => setCanvasReady(true)
+    document.body.appendChild(script)
+  }, [])
+
+
 
 
   const handleColumnSort = (column: 'term' | 'occurrence') => {
@@ -261,7 +276,7 @@ export function Parser() {
   const chartRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!chartRef.current || pieDataPoints.length === 0) return
+    if (!canvasReady || !chartRef.current || pieDataPoints.length === 0) return
 
     const chart = new CanvasJS.Chart(chartRef.current, {
       theme: "light2",
@@ -279,8 +294,10 @@ export function Parser() {
         dataPoints: pieDataPoints
       }]
     })
+
     chart.render()
-  }, [pieDataPoints, selectedWord])
+  }, [pieDataPoints, selectedWord, canvasReady])
+
 
 
   
@@ -478,7 +495,10 @@ export function Parser() {
       </div>
       {selectedWord && (
         <div ref={chartRef} style={{ height: '370px', width: '100%', marginTop: '30px' }} />
+  
       )}
+
+      
 
       <ExportModal
         isOpen={isExportModalOpen}
