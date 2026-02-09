@@ -208,6 +208,7 @@ export function AddWordModal({
   const wordMaxLength = 30
   const definitionMaxLength = 200
   const synonymMaxLength = 30
+  const boundedContextMaxLength = 30
 
   useEffect(() => {
     if (initialData) {
@@ -240,7 +241,7 @@ export function AddWordModal({
       return () => {
         document.removeEventListener('keydown', onKey)
         document.body.style.overflow = prev
-          ; (previouslyFocused.current as HTMLElement | null)?.focus?.()
+        ;(previouslyFocused.current as HTMLElement | null)?.focus?.()
       }
     }
   }, [isOpen, onClose])
@@ -435,10 +436,14 @@ export function AddWordModal({
             className="word-area"
             placeholder="Enter bounded context"
             value={boundedContext}
+            maxLength={boundedContextMaxLength}
             onInput={(e) =>
               setBoundedContext((e.target as HTMLInputElement).value)
             }
           />
+          <div className="char-counter">
+            {boundedContext.length}/{boundedContextMaxLength}
+          </div>
         </div>
 
         <label className={'synonym-label'} htmlFor="synonym-input">
