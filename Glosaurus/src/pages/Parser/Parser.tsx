@@ -1,4 +1,4 @@
-import { useRef, useState, useMemo } from 'preact/hooks'
+import { useRef, useState, useMemo, useEffect } from 'preact/hooks'
 import './Parser.css'
 import { ExportModal } from '../../modals/Export/Export'
 import { ImportChoiceModal } from '../../modals/Import/ImportChoiceModal'
@@ -6,6 +6,9 @@ import type { Glossary } from '../../utils/importExport'
 import { useLocation } from 'preact-iso'
 import { loadFromStorage } from '../../utils/storage'
 import { open } from '@tauri-apps/plugin-dialog';
+
+
+declare var CanvasJS: any 
 
 interface ParsedTerm {
   term: string
@@ -33,6 +36,7 @@ export function Parser() {
   const [sortColumn, setSortColumn] = useState<SortColumn>(null)
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc')
   const [filter, setFilter] = useState<FilterType>(null)
+  const [wordDistribution, setWordDistribution] = useState<Record<string, Record<string, number>>>({})
 
   const handleFileChange = () => {
     const files = fileInputRef.current?.files
@@ -120,6 +124,7 @@ export function Parser() {
       setTerms([]);
     }
   };
+  const [selectedWord, setSelectedWord] = useState<string | null>(null)
 
   const getSortedTerms = (): ParsedTerm[] => {
     // Filtrage d'abord
@@ -231,6 +236,44 @@ export function Parser() {
       alignment,
     }
   }, [terms, glossaryWords])
+
+
+  const pieDataPoints = useMemo(() => {
+    if (!selectedWord) return []
+
+    const distribution = wordDistribution[selectedWord] || {}
+    return Object.entries(distribution).map(([file, count]) => ({
+      y: count,
+      label: file
+    }))
+  }, [selectedWord, wordDistribution])
+
+  const chartRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!chartRef.current || pieDataPoints.length === 0) return
+
+    const chart = new CanvasJS.Chart(chartRef.current, {
+      theme: "light2",
+      animationEnabled: true,
+      exportEnabled: true,
+      title: { text: `Répartition des occurrences de "${selectedWord}"` },
+      data: [{
+        type: "pie",
+        startAngle: 25,
+        toolTipContent: "<b>{label}</b>: {y} occurrences",
+        showInLegend: true,
+        legendText: "{label}",
+        indexLabelFontSize: 16,
+        indexLabel: "{label} - {y} occurrences",
+        dataPoints: pieDataPoints
+      }]
+    })
+    chart.render()
+  }, [pieDataPoints, selectedWord])
+
+
+  
 
 
   return (
@@ -367,11 +410,13 @@ export function Parser() {
                 return (
                   <tr key={t.term}>
                     <td
-                      className={
-                        alreadyExists
-                          ? 'terms-column already-present'
-                          : 'terms-column'
-                      }
+                      className={alreadyExists ? 'terms-column already-present' : 'terms-column'}
+                      onClick={() => {
+                        if (Object.keys(wordDistribution).length > 0) {
+                          setSelectedWord(t.term)
+                        }
+                      }}
+                      style={{ cursor: Object.keys(wordDistribution).length > 0 ? 'pointer' : 'default' }}
                     >
                       {t.term}
                     </td>
@@ -425,6 +470,9 @@ export function Parser() {
         </div>
 
       </div>
+      {selectedWord && (
+        <div ref={chartRef} style={{ height: '370px', width: '100%', marginTop: '30px' }} />
+      )}
 
       <ExportModal
         isOpen={isExportModalOpen}

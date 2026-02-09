@@ -19,6 +19,7 @@
     "@tauri-apps/plugin-dialog": "^2.4.2",
     "@tauri-apps/plugin-fs": "^2.4.4",
     "@tauri-apps/plugin-opener": "^2",
+    "canvasjs": "^1.8.3",
     "lucide-preact": "^0.553.0",
     "parse5": "^6.0.1",
     "preact": "^10.25.1",
