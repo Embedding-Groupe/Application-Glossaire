@@ -316,3 +316,10 @@ body {
 .already-present-row td {
   background-color: #fff0f0;
 }
+
+
+.table-with-coverage {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+}

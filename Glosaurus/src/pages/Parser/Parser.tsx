@@ -150,6 +150,8 @@ export function Parser() {
     return sorted
   }
 
+
+
   const handleColumnSort = (column: 'term' | 'occurrence') => {
     if (sortColumn === column) {
       // Si on clique sur la même colonne, on inverse l'ordre
@@ -190,7 +192,26 @@ export function Parser() {
       synonyms: [],
       boundedContext: undefined,
     })),
+
+    
   }
+  const glossaryStats = useMemo(() => {
+    const parsedInGlossary = terms.filter(t =>
+      glossaryWords.includes(t.term.toLowerCase())
+    ).length
+
+    const totalGlossary = glossaryWords.length
+
+    const coverage =
+      totalGlossary === 0 ? 0 : (parsedInGlossary / totalGlossary) * 100
+
+    return {
+      parsedInGlossary,
+      totalGlossary,
+      coverage,
+    }
+  }, [terms, glossaryWords])
+
 
   return (
     <div className="parser">
@@ -277,70 +298,76 @@ export function Parser() {
             </span>
           </div>
         </div>
-
-        <table className="parser-table">
-          <thead>
-            <tr>
-              <th className="terms-column">
-                <div className="column-header">
-                  <span>Terms</span>
-                  <button
-                    className="sort-icon-button"
-                    onClick={() => handleColumnSort('term')}
-                    title={
-                      sortColumn === 'term'
-                        ? sortOrder === 'asc'
-                          ? 'Sort Z-A'
-                          : 'Sort A-Z'
-                        : 'Sort A-Z'
-                    }
-                  >
-                    <img src="/arrow-up-down.svg" alt="Sort" />
-                  </button>
-                </div>
-              </th>
-              <th className="occurrence-column">
-                <div className="column-header">
-                  <span>Occurrence</span>
-                  <button
-                    className="sort-icon-button"
-                    onClick={() => handleColumnSort('occurrence')}
-                    title={
-                      sortColumn === 'occurrence'
-                        ? sortOrder === 'asc'
-                          ? 'Sort descending'
-                          : 'Sort ascending'
-                        : 'Sort ascending'
-                    }
-                  >
-                    <img src="/arrow-up-down.svg" alt="Sort" />
-                  </button>
-                </div>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {getSortedTerms().map((t) => {
-              const alreadyExists = isAlreadyInGlossary(t.term)
-
-              return (
-                <tr key={t.term}>
-                  <td
-                    className={
-                      alreadyExists
-                        ? 'terms-column already-present'
-                        : 'terms-column'
-                    }
-                  >
-                    {t.term}
-                  </td>
-
-                  <td className="occurrence-column">{t.occurrence}</td>
+          <div className="table-with-coverage">
+            <table className="parser-table">
+              <thead>
+                <tr>
+                  <th className="terms-column">
+                    <div className="column-header">
+                      <span>Terms</span>
+                      <button
+                        className="sort-icon-button"
+                        onClick={() => handleColumnSort('term')}
+                        title={
+                          sortColumn === 'term'
+                            ? sortOrder === 'asc'
+                              ? 'Sort Z-A'
+                              : 'Sort A-Z'
+                            : 'Sort A-Z'
+                        }
+                      >
+                        <img src="/arrow-up-down.svg" alt="Sort" />
+                      </button>
+                    </div>
+                  </th>
+                  <th className="occurrence-column">
+                    <div className="column-header">
+                      <span>Occurrence</span>
+                      <button
+                        className="sort-icon-button"
+                        onClick={() => handleColumnSort('occurrence')}
+                        title={
+                          sortColumn === 'occurrence'
+                            ? sortOrder === 'asc'
+                              ? 'Sort descending'
+                              : 'Sort ascending'
+                            : 'Sort ascending'
+                        }
+                      >
+                        <img src="/arrow-up-down.svg" alt="Sort" />
+                      </button>
+                    </div>
+                  </th>
                 </tr>
-              )
-            })}
-          </tbody>
-        </table>
+              </thead>
+              <tbody>
+                {getSortedTerms().map((t) => {
+                  const alreadyExists = isAlreadyInGlossary(t.term)
+
+                  return (
+                    <tr key={t.term}>
+                      <td
+                        className={
+                          alreadyExists
+                            ? 'terms-column already-present'
+                            : 'terms-column'
+                        }
+                      >
+                        {t.term}
+                      </td>
+
+                      <td className="occurrence-column">{t.occurrence}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+            <span>
+              UL Coverage = {glossaryStats.parsedInGlossary}/{glossaryStats.totalGlossary}
+              {' '}({glossaryStats.coverage.toFixed(1)}%)
+            </span>
+          </div>       
+
       </div>
 
       <ExportModal
