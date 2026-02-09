@@ -106,7 +106,7 @@ body {
   background-color: #b32134;
 }
 
-.parser > h1 {
+.parser>h1 {
   font-size: 1.5rem;
   margin-right: 65rem;
 }
@@ -190,6 +190,11 @@ body {
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
   table-layout: fixed;
 }
+
+.coverage-UL {
+  color: black;
+}
+
 .parser-table th,
 .parser-table td {
   padding: 1rem 1.5rem;

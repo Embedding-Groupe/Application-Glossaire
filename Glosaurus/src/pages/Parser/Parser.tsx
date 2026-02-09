@@ -193,7 +193,7 @@ export function Parser() {
       boundedContext: undefined,
     })),
 
-    
+
   }
   const glossaryStats = useMemo(() => {
     const parsedInGlossary = terms.filter(t =>
@@ -298,75 +298,75 @@ export function Parser() {
             </span>
           </div>
         </div>
-          <div className="table-with-coverage">
-            <table className="parser-table">
-              <thead>
-                <tr>
-                  <th className="terms-column">
-                    <div className="column-header">
-                      <span>Terms</span>
-                      <button
-                        className="sort-icon-button"
-                        onClick={() => handleColumnSort('term')}
-                        title={
-                          sortColumn === 'term'
-                            ? sortOrder === 'asc'
-                              ? 'Sort Z-A'
-                              : 'Sort A-Z'
+        <div className="table-with-coverage">
+          <table className="parser-table">
+            <thead>
+              <tr>
+                <th className="terms-column">
+                  <div className="column-header">
+                    <span>Terms</span>
+                    <button
+                      className="sort-icon-button"
+                      onClick={() => handleColumnSort('term')}
+                      title={
+                        sortColumn === 'term'
+                          ? sortOrder === 'asc'
+                            ? 'Sort Z-A'
                             : 'Sort A-Z'
-                        }
-                      >
-                        <img src="/arrow-up-down.svg" alt="Sort" />
-                      </button>
-                    </div>
-                  </th>
-                  <th className="occurrence-column">
-                    <div className="column-header">
-                      <span>Occurrence</span>
-                      <button
-                        className="sort-icon-button"
-                        onClick={() => handleColumnSort('occurrence')}
-                        title={
-                          sortColumn === 'occurrence'
-                            ? sortOrder === 'asc'
-                              ? 'Sort descending'
-                              : 'Sort ascending'
+                          : 'Sort A-Z'
+                      }
+                    >
+                      <img src="/arrow-up-down.svg" alt="Sort" />
+                    </button>
+                  </div>
+                </th>
+                <th className="occurrence-column">
+                  <div className="column-header">
+                    <span>Occurrence</span>
+                    <button
+                      className="sort-icon-button"
+                      onClick={() => handleColumnSort('occurrence')}
+                      title={
+                        sortColumn === 'occurrence'
+                          ? sortOrder === 'asc'
+                            ? 'Sort descending'
                             : 'Sort ascending'
-                        }
-                      >
-                        <img src="/arrow-up-down.svg" alt="Sort" />
-                      </button>
-                    </div>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {getSortedTerms().map((t) => {
-                  const alreadyExists = isAlreadyInGlossary(t.term)
+                          : 'Sort ascending'
+                      }
+                    >
+                      <img src="/arrow-up-down.svg" alt="Sort" />
+                    </button>
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {getSortedTerms().map((t) => {
+                const alreadyExists = isAlreadyInGlossary(t.term)
 
-                  return (
-                    <tr key={t.term}>
-                      <td
-                        className={
-                          alreadyExists
-                            ? 'terms-column already-present'
-                            : 'terms-column'
-                        }
-                      >
-                        {t.term}
-                      </td>
+                return (
+                  <tr key={t.term}>
+                    <td
+                      className={
+                        alreadyExists
+                          ? 'terms-column already-present'
+                          : 'terms-column'
+                      }
+                    >
+                      {t.term}
+                    </td>
 
-                      <td className="occurrence-column">{t.occurrence}</td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-            <span>
-              UL Coverage = {glossaryStats.parsedInGlossary}/{glossaryStats.totalGlossary}
-              {' '}({glossaryStats.coverage.toFixed(1)}%)
-            </span>
-          </div>       
+                    <td className="occurrence-column">{t.occurrence}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+          <span className="coverage-UL">
+            UL Coverage = {glossaryStats.parsedInGlossary}/{glossaryStats.totalGlossary}
+            {' '}({glossaryStats.coverage.toFixed(1)}%)
+          </span>
+        </div>
 
       </div>
 
