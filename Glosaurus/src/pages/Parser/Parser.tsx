@@ -195,6 +195,8 @@ export function Parser() {
 
 
   }
+
+
   const glossaryStats = useMemo(() => {
     const parsedInGlossary = terms.filter(t =>
       glossaryWords.includes(t.term.toLowerCase())
@@ -205,10 +207,28 @@ export function Parser() {
     const coverage =
       totalGlossary === 0 ? 0 : (parsedInGlossary / totalGlossary) * 100
 
+    const totalParsedOccurrences = terms.reduce(
+      (sum, t) => sum + t.occurrence,
+      0
+    )
+
+    const alignedOccurrences = terms
+      .filter(t => glossaryWords.includes(t.term.toLowerCase()))
+      .reduce((sum, t) => sum + t.occurrence, 0)
+
+    const alignment =
+      totalParsedOccurrences === 0
+        ? 0
+        : (alignedOccurrences / totalParsedOccurrences) * 100
+
     return {
       parsedInGlossary,
       totalGlossary,
       coverage,
+
+      alignedOccurrences,
+      totalParsedOccurrences,
+      alignment,
     }
   }, [terms, glossaryWords])
 
@@ -362,10 +382,46 @@ export function Parser() {
               })}
             </tbody>
           </table>
-          <span className="coverage-UL">
-            UL Coverage = {glossaryStats.parsedInGlossary}/{glossaryStats.totalGlossary}
-            {' '}({glossaryStats.coverage.toFixed(1)}%)
-          </span>
+          <div className="UL">
+            <span className="coverage-UL">
+              UL Coverage = {glossaryStats.parsedInGlossary}/{glossaryStats.totalGlossary}
+              {' '}({glossaryStats.coverage.toFixed(1)}%)
+            </span>
+            <div className="progress-bar">
+              <div
+                className={`progress-fill ${
+                  glossaryStats.coverage <= 25
+                    ? 'red'
+                    : glossaryStats.coverage <= 50
+                    ? 'yellow'
+                    : glossaryStats.coverage <= 75
+                    ? 'green-light'
+                    : 'green-dark'
+                }`}
+                style={{ width: `${glossaryStats.coverage}%` }}
+              />
+            </div>
+            <span className="alignement-UL">
+              UL Alignment = {glossaryStats.alignedOccurrences}/
+              {glossaryStats.totalParsedOccurrences}
+              {' '}({glossaryStats.alignment.toFixed(1)}%)
+            </span>
+
+            <div className="progress-bar">
+              <div
+                className={`progress-fill ${
+                  glossaryStats.alignment <= 25
+                    ? 'red'
+                    : glossaryStats.alignment <= 50
+                    ? 'yellow'
+                    : glossaryStats.alignment <= 75
+                    ? 'green-light'
+                    : 'green-dark'
+                }`}
+                style={{ width: `${glossaryStats.alignment}%` }}
+              />
+            </div>
+          </div>
         </div>
 
       </div>
