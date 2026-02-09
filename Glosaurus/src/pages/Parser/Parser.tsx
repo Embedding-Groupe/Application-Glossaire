@@ -1,4 +1,4 @@
-import { useRef, useState, useMemo } from 'preact/hooks'
+import { useRef, useState, useMemo, useEffect } from 'preact/hooks'
 import './Parser.css'
 import { ExportModal } from '../../modals/Export/Export'
 import { ImportChoiceModal } from '../../modals/Import/ImportChoiceModal'
@@ -6,6 +6,8 @@ import type { Glossary } from '../../utils/importExport'
 import { useLocation } from 'preact-iso'
 import { loadFromStorage } from '../../utils/storage'
 import { open } from '@tauri-apps/plugin-dialog'
+
+declare let CanvasJS: any
 
 interface ParsedTerm {
   term: string
@@ -20,8 +22,14 @@ interface WordItem {
   word: string
 }
 
+interface TermDetails {
+  total_occurrences: number
+  files_occurrences: Record<string, number>
+}
+
 export function Parser() {
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const chartRef = useRef<HTMLDivElement>(null)
   const location = useLocation()
   const previousGlossaryName = location.query?.glossary ?? 'Unknown Glossary'
 
@@ -33,6 +41,9 @@ export function Parser() {
   const [sortColumn, setSortColumn] = useState<SortColumn>(null)
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc')
   const [filter, setFilter] = useState<FilterType>(null)
+  const [wordDistribution, setWordDistribution] = useState<
+    Record<string, Record<string, number>>
+  >({})
 
   const handleFileChange = () => {
     const files = fileInputRef.current?.files
@@ -103,18 +114,23 @@ export function Parser() {
         throw new Error(errorData.error || 'Network response was not ok')
       }
 
-      const data = await response.json()
+      const data: Record<string, TermDetails> = await response.json()
       console.log('API response:', data)
 
-      // Transform backend response to frontend format
-      const parsedTerms: ParsedTerm[] = Object.entries(data).map(
-        ([term, details]: [string, any]) => ({
+      const parsedTerms: ParsedTerm[] = []
+      const distribution: Record<string, Record<string, number>> = {}
+
+      for (const [term, details] of Object.entries(data)) {
+        parsedTerms.push({
           term,
           occurrence: details.total_occurrences,
         })
-      )
+
+        distribution[term] = details.files_occurrences
+      }
 
       setTerms(parsedTerms)
+      setWordDistribution(distribution)
       setIsImportModalOpen(false)
     } catch (err) {
       console.error('Error importing folder:', err)
@@ -122,6 +138,8 @@ export function Parser() {
       setTerms([])
     }
   }
+
+  const [selectedWord, setSelectedWord] = useState<string | null>(null)
 
   const getSortedTerms = (): ParsedTerm[] => {
     // Filtrage d'abord
@@ -151,6 +169,27 @@ export function Parser() {
 
     return sorted
   }
+
+  const [canvasReady, setCanvasReady] = useState(false)
+
+  useEffect(() => {
+    console.log('Tentative chargement CanvasJS')
+
+    if ((window as any).CanvasJS) {
+      console.log('CanvasJS déjà chargé')
+      setCanvasReady(true)
+      return
+    }
+
+    const script = document.createElement('script')
+    script.src = 'https://cdn.canvasjs.com/canvasjs.min.js'
+    script.onload = () => {
+      console.log(' CanvasJS chargé depuis CDN')
+      setCanvasReady(true)
+    }
+
+    document.body.appendChild(script)
+  }, [])
 
   const handleColumnSort = (column: 'term' | 'occurrence') => {
     if (sortColumn === column) {
@@ -368,6 +407,13 @@ export function Parser() {
                           ? 'terms-column already-present'
                           : 'terms-column'
                       }
+                      onClick={() => setSelectedWord(t.term)}
+                      style={{
+                        cursor:
+                          Object.keys(wordDistribution).length > 0
+                            ? 'pointer'
+                            : 'default',
+                      }}
                     >
                       {t.term}
                     </td>
@@ -421,6 +467,12 @@ export function Parser() {
           </div>
         </div>
       </div>
+      {selectedWord && (
+        <div
+          ref={chartRef}
+          style={{ height: '370px', width: '100%', marginTop: '30px' }}
+        />
+      )}
 
       <ExportModal
         isOpen={isExportModalOpen}
