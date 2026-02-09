@@ -36,9 +36,7 @@ def main(target_file=None):
     counter = Counter(filtered_data)
 
     # Convertir en dictionnaire pour la sortie JSON
-    # Nous pourrions juste utiliser dict(counter) ou garder l'ordre trié si nous voulons faire sophistiqué,
-    # mais les dicts JSON standard sont non ordonnés (bien que Python 3.7+ préserve l'ordre d'insertion).
-    # Trions-le par fréquence pour la lisibilité dans le fichier.
+    # Trions par fréquence décroissante
     sorted_counts = sorted(counter.items(), key=lambda item: (-item[1], item[0]))
     result_dict = {word: count for word, count in sorted_counts}
 

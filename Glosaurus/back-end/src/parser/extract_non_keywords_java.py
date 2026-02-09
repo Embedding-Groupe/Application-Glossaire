@@ -102,7 +102,6 @@ def main(target_file=None):
 
     traverse(root_node)
     
-    # Ici on garde la logique "interne" simple pour le standalone:
     output_filename = os.path.splitext(target_file)[0] + ".json"
     
     with open(output_filename, "w", encoding="utf8") as f:

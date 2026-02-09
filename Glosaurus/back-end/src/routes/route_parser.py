@@ -46,3 +46,23 @@ async def parse(file: UploadFile = File(...)):
         for gen_file in possible_generated_files:
             if os.path.exists(gen_file):
                 os.remove(gen_file)
+
+from pydantic import BaseModel
+
+class DirectoryRequest(BaseModel):
+    path: str
+
+@router.post("/parse_directory")
+async def parse_directory(request: DirectoryRequest):
+    """
+    Route permettant de parser un dossier entier.
+    Attend un chemin absolu vers le dossier en entrée.
+    """
+    if not os.path.exists(request.path):
+        return {"error": f"Path not found: {request.path}"}
+    
+    if not os.path.isdir(request.path):
+        return {"error": f"Not a directory: {request.path}"}
+
+    result = orchestrator.get_directory_words(request.path)
+    return result

@@ -1,10 +1,11 @@
-import { useRef, useState, useMemo, useEffect } from 'preact/hooks'
+import { useRef, useState, useMemo } from 'preact/hooks'
 import './Parser.css'
 import { ExportModal } from '../../modals/Export/Export'
 import { ImportChoiceModal } from '../../modals/Import/ImportChoiceModal'
 import type { Glossary } from '../../utils/importExport'
 import { useLocation } from 'preact-iso'
 import { loadFromStorage } from '../../utils/storage'
+import { open } from '@tauri-apps/plugin-dialog';
 
 interface ParsedTerm {
   term: string
@@ -21,16 +22,8 @@ interface WordItem {
 
 export function Parser() {
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const folderInputRef = useRef<HTMLInputElement>(null)
   const location = useLocation()
   const previousGlossaryName = location.query?.glossary ?? 'Unknown Glossary'
-
-  useEffect(() => {
-    if (folderInputRef.current) {
-      folderInputRef.current.setAttribute("webkitdirectory", "");
-      folderInputRef.current.setAttribute("directory", "");
-    }
-  }, []);
 
   const [fileName, setFileName] = useState<string>('No File')
   const [error, setError] = useState<string | null>(null)
@@ -74,87 +67,59 @@ export function Parser() {
       })
   }
 
-  const handleFolderChange = async () => {
-    const files = folderInputRef.current?.files
-    if (!files || files.length === 0) return
+  const handleFolderImport = async () => {
+    try {
+      const selected = await open({
+        directory: true,
+        multiple: false,
+      });
 
-    setError(null)
+      if (selected === null) {
+        // User cancelled the selection
+        return;
+      }
 
-    const firstFile = files[0];
-    const folderName = firstFile.webkitRelativePath.split('/')[0] || 'Unknown Folder';
+      // selected is the absolute path string
+      console.log("Selected folder:", selected);
 
-    const allowedExtensions = ['.py', '.java'];
-    let detectedExtension: string | null = null;
-
-    const fileList = Array.from(files).filter(f => !f.name.startsWith('.'));
-
-    if (fileList.length === 0) {
-      setError("The selected folder is empty or contains only hidden files.");
+      setFileName(selected as string);
       setTerms([]);
-      setFileName('No File');
-      return;
-    }
+      setError(null);
 
-    for (const file of fileList) {
-      const fileExt = file.name.substring(file.name.lastIndexOf('.'));
+      // Call backend
+      const response = await fetch('http://127.0.0.1:8000/parser/parse_directory', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ path: selected }),
+      });
 
-      if (!allowedExtensions.includes(fileExt)) {
-        setError("Error: The folder contains unsupported files. Only .py and .java files are allowed.");
-        setTerms([]);
-        setFileName('No File');
-        return;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Network response was not ok');
       }
 
-      if (detectedExtension === null) {
-        detectedExtension = fileExt;
-      } else if (fileExt !== detectedExtension) {
-        setError("Error: The folder must contain files of the same format (either all .py or all .java).");
-        setTerms([]);
-        setFileName('No File');
-        return;
-      }
-    }
+      const data = await response.json();
+      console.log('API response:', data);
 
-    setFileName(folderName)
-    setTerms([])
-
-    const allTerms: Record<string, number> = {}
-    const promises = fileList.map(async (file) => {
-      const formData = new FormData()
-      formData.append('file', file)
-
-      try {
-        const res = await fetch('http://127.0.0.1:8000/parser/parse', {
-          method: 'POST',
-          body: formData,
+      // Transform backend response to frontend format
+      const parsedTerms: ParsedTerm[] = Object.entries(data).map(
+        ([term, details]: [string, any]) => ({
+          term,
+          occurrence: details.total_occurrences
         })
-        if (!res.ok) throw new Error('Network response was not ok')
-        const data: Record<string, number> = await res.json()
+      );
 
-        return data
-      } catch (err) {
-        console.error(`Error parsing file ${file.name}:`, err)
-        return null
-      }
-    })
+      setTerms(parsedTerms);
+      setIsImportModalOpen(false);
 
-    const results = await Promise.all(promises)
-
-    results.forEach(data => {
-      if (data) {
-        for (const [term, occurrence] of Object.entries(data)) {
-          allTerms[term] = (allTerms[term] || 0) + (occurrence as number)
-        }
-      }
-    })
-
-    const parsedTerms: ParsedTerm[] = Object.entries(allTerms).map(
-      ([term, occurrence]) => ({ term, occurrence })
-    )
-
-    setTerms(parsedTerms)
-    setIsImportModalOpen(false)
-  }
+    } catch (err) {
+      console.error('Error importing folder:', err);
+      setError(err instanceof Error ? err.message : 'Unknown error occurred');
+      setTerms([]);
+    }
+  };
 
   const getSortedTerms = (): ParsedTerm[] => {
     // Filtrage d'abord
@@ -269,17 +234,6 @@ export function Parser() {
           hidden
           onChange={handleFileChange}
         />
-        <input
-          ref={folderInputRef}
-          type="file"
-          hidden
-          // @ts-ignore
-          webkitdirectory=""
-          // @ts-ignore
-          directory=""
-          multiple
-          onChange={handleFolderChange}
-        />
 
         <ImportChoiceModal
           isOpen={isImportModalOpen}
@@ -287,12 +241,13 @@ export function Parser() {
             setIsImportModalOpen(false)
             setError(null)
           }}
+          // @ts-ignore
           error={error}
           onSelectOption={(option) => {
             if (option === 'file') {
               fileInputRef.current?.click();
             } else {
-              folderInputRef.current?.click();
+              handleFolderImport();
             }
           }}
         />

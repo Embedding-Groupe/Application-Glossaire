@@ -4,10 +4,9 @@ interface ImportChoiceModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSelectOption: (option: 'file' | 'folder') => void;
-    error?: string | null;
 }
 
-export function ImportChoiceModal({ isOpen, onClose, onSelectOption, error }: ImportChoiceModalProps) {
+export function ImportChoiceModal({ isOpen, onClose, onSelectOption }: ImportChoiceModalProps) {
     if (!isOpen) return null;
 
     return (
@@ -20,11 +19,6 @@ export function ImportChoiceModal({ isOpen, onClose, onSelectOption, error }: Im
                     <h2>Select Import Type</h2>
 
                     <div className="import-choice-modal-body">
-                        {error && (
-                            <div className="alert alert-error">
-                                {error}
-                            </div>
-                        )}
                         <p className="section-description">
                             Choose how you want to import your glossary files. All files must be in the same format, .py or .java.
                         </p>

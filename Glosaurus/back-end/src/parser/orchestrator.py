@@ -93,18 +93,93 @@ def get_word(input_script: str):
         return {"error": "Failed to decode final JSON file"}
 
 
+
+
+
+def get_directory_words(directory_path: str):
+    """
+    Analyse récursivement un dossier pour trouver les fichiers .java et .py,
+    les parse, et agrège les résultats.
+
+    Retour attendu :
+    {
+        "word": {
+            "total_occurrences": int,
+            "file_count": int,
+            "files": [
+                {"name": "filename", "count": int},
+                ...
+            ]
+        },
+        ...
+    }
+    """
+    if not os.path.isdir(directory_path):
+        return {"error": f"Directory not found: {directory_path}"}
+
+    aggregated_results = {}
+
+    for root, _, files in os.walk(directory_path):
+        for file in files:
+            file_path = os.path.join(root, file)
+            _, ext = os.path.splitext(file)
+            
+            if ext.lower() in ['.py', '.java']:
+                # Parse individual file
+                file_result = get_word(file_path)
+                
+                # Cleanup generated JSON files
+                base_name = os.path.splitext(file_path)[0]
+                _, ext = os.path.splitext(file_path)
+                language = "python" if ext.lower() == ".py" else "java"
+                final_json = f"{base_name}_{language}.json"
+                default_json = base_name + ".json"
+                
+                if os.path.exists(final_json):
+                    os.remove(final_json)
+                if os.path.exists(default_json):
+                    os.remove(default_json)
+
+                if "error" in file_result:
+                    print(f"Error parsing {file_path}: {file_result['error']}")
+                    continue
+                
+                # Aggregate results
+                # file_result is { "word": count, ... }
+                for word, count in file_result.items():
+                    if word not in aggregated_results:
+                        aggregated_results[word] = {
+                            "total_occurrences": 0,
+                            "file_count": 0,
+                            "files": []
+                        }
+                    
+                    aggregated_results[word]["total_occurrences"] += count
+                    aggregated_results[word]["file_count"] += 1
+                    aggregated_results[word]["files"].append({
+                        "name": os.path.basename(file_path),
+                        "count": count
+                    })
+
+    return aggregated_results
+
+
 def main():
     """
     Exécution en ligne de commande :
 
-    python orchestrator.py <path_to_source_file>
+    python orchestrator.py <path_to_source_file_or_directory>
     """
     if len(sys.argv) < 2:
-        print("Usage: python orchestrator.py <path_to_source_file>")
+        print("Usage: python orchestrator.py <path_to_source_file_or_directory>")
         sys.exit(1)
 
-    input_script = sys.argv[1]
-    result = get_word(input_script)
+    input_path = sys.argv[1]
+    
+    if os.path.isdir(input_path):
+        result = get_directory_words(input_path)
+    else:
+        result = get_word(input_path)
 
     print(json.dumps(result, indent=4, ensure_ascii=False))
 
