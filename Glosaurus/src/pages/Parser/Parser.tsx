@@ -5,7 +5,7 @@ import { ImportChoiceModal } from '../../modals/Import/ImportChoiceModal'
 import type { Glossary } from '../../utils/importExport'
 import { useLocation } from 'preact-iso'
 import { loadFromStorage } from '../../utils/storage'
-import { open } from '@tauri-apps/plugin-dialog';
+import { open } from '@tauri-apps/plugin-dialog'
 
 interface ParsedTerm {
   term: string
@@ -72,54 +72,56 @@ export function Parser() {
       const selected = await open({
         directory: true,
         multiple: false,
-      });
+      })
 
       if (selected === null) {
         // User cancelled the selection
-        return;
+        return
       }
 
       // selected is the absolute path string
-      console.log("Selected folder:", selected);
+      console.log('Selected folder:', selected)
 
-      setFileName(selected as string);
-      setTerms([]);
-      setError(null);
+      setFileName(selected as string)
+      setTerms([])
+      setError(null)
 
       // Call backend
-      const response = await fetch('http://127.0.0.1:8000/parser/parse_directory', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ path: selected }),
-      });
+      const response = await fetch(
+        'http://127.0.0.1:8000/parser/parse_directory',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ path: selected }),
+        }
+      )
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Network response was not ok');
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Network response was not ok')
       }
 
-      const data = await response.json();
-      console.log('API response:', data);
+      const data = await response.json()
+      console.log('API response:', data)
 
       // Transform backend response to frontend format
       const parsedTerms: ParsedTerm[] = Object.entries(data).map(
         ([term, details]: [string, any]) => ({
           term,
-          occurrence: details.total_occurrences
+          occurrence: details.total_occurrences,
         })
-      );
+      )
 
-      setTerms(parsedTerms);
-      setIsImportModalOpen(false);
-
+      setTerms(parsedTerms)
+      setIsImportModalOpen(false)
     } catch (err) {
-      console.error('Error importing folder:', err);
-      setError(err instanceof Error ? err.message : 'Unknown error occurred');
-      setTerms([]);
+      console.error('Error importing folder:', err)
+      setError(err instanceof Error ? err.message : 'Unknown error occurred')
+      setTerms([])
     }
-  };
+  }
 
   const getSortedTerms = (): ParsedTerm[] => {
     // Filtrage d'abord
@@ -149,8 +151,6 @@ export function Parser() {
 
     return sorted
   }
-
-
 
   const handleColumnSort = (column: 'term' | 'occurrence') => {
     if (sortColumn === column) {
@@ -192,13 +192,10 @@ export function Parser() {
       synonyms: [],
       boundedContext: undefined,
     })),
-
-
   }
 
-
   const glossaryStats = useMemo(() => {
-    const parsedInGlossary = terms.filter(t =>
+    const parsedInGlossary = terms.filter((t) =>
       glossaryWords.includes(t.term.toLowerCase())
     ).length
 
@@ -213,7 +210,7 @@ export function Parser() {
     )
 
     const alignedOccurrences = terms
-      .filter(t => glossaryWords.includes(t.term.toLowerCase()))
+      .filter((t) => glossaryWords.includes(t.term.toLowerCase()))
       .reduce((sum, t) => sum + t.occurrence, 0)
 
     const alignment =
@@ -231,7 +228,6 @@ export function Parser() {
       alignment,
     }
   }, [terms, glossaryWords])
-
 
   return (
     <div className="parser">
@@ -286,9 +282,9 @@ export function Parser() {
           error={error}
           onSelectOption={(option) => {
             if (option === 'file') {
-              fileInputRef.current?.click();
+              fileInputRef.current?.click()
             } else {
-              handleFolderImport();
+              handleFolderImport()
             }
           }}
         />
@@ -384,8 +380,9 @@ export function Parser() {
           </table>
           <div className="UL">
             <span className="coverage-UL">
-              UL Coverage = {glossaryStats.parsedInGlossary}/{glossaryStats.totalGlossary}
-              {' '}({glossaryStats.coverage.toFixed(1)}%)
+              UL Coverage = {glossaryStats.parsedInGlossary}/
+              {glossaryStats.totalGlossary} ({glossaryStats.coverage.toFixed(1)}
+              %)
             </span>
             <div className="progress-bar">
               <div
@@ -393,18 +390,18 @@ export function Parser() {
                   glossaryStats.coverage <= 25
                     ? 'red'
                     : glossaryStats.coverage <= 50
-                    ? 'yellow'
-                    : glossaryStats.coverage <= 75
-                    ? 'green-light'
-                    : 'green-dark'
+                      ? 'yellow'
+                      : glossaryStats.coverage <= 75
+                        ? 'green-light'
+                        : 'green-dark'
                 }`}
                 style={{ width: `${glossaryStats.coverage}%` }}
               />
             </div>
             <span className="alignement-UL">
               UL Alignment = {glossaryStats.alignedOccurrences}/
-              {glossaryStats.totalParsedOccurrences}
-              {' '}({glossaryStats.alignment.toFixed(1)}%)
+              {glossaryStats.totalParsedOccurrences} (
+              {glossaryStats.alignment.toFixed(1)}%)
             </span>
 
             <div className="progress-bar">
@@ -413,24 +410,30 @@ export function Parser() {
                   glossaryStats.alignment <= 25
                     ? 'red'
                     : glossaryStats.alignment <= 50
-                    ? 'yellow'
-                    : glossaryStats.alignment <= 75
-                    ? 'green-light'
-                    : 'green-dark'
+                      ? 'yellow'
+                      : glossaryStats.alignment <= 75
+                        ? 'green-light'
+                        : 'green-dark'
                 }`}
                 style={{ width: `${glossaryStats.alignment}%` }}
               />
             </div>
           </div>
         </div>
-
       </div>
 
       <ExportModal
         isOpen={isExportModalOpen}
         onClose={() => setIsExportModalOpen(false)}
-        glossary={glossary}
+        parserResult={{
+          fileName,
+          terms: terms.map((t) => ({
+            term: t.term,
+            occurrence: t.occurrence,
+            inGlossary: isAlreadyInGlossary(t.term),
+          })),
+        }}
       />
-    </div >
+    </div>
   )
 }

@@ -237,8 +237,16 @@ export async function downloadFile(
     if (filePath) {
       // Write file to selected location
       await writeTextFile(filePath, content)
+    } else {
+      // User cancelled the dialog
+      throw new Error('Opération annulée')
     }
   } catch (error) {
+    // If user cancelled, re-throw the error
+    if (error instanceof Error && error.message === 'Opération annulée') {
+      throw error
+    }
+
     // If Tauri API is not available, fallback to browser download
     console.log('Tauri not available, using browser download')
     const blob = new Blob([content], { type: mimeType })
@@ -310,4 +318,86 @@ export async function importGlossaryFromFile(file: File): Promise<Glossary> {
   } else {
     throw new Error('Format de fichier non supporté. Utilisez .json ou .md')
   }
+}
+
+/**
+ * Interface for parser results
+ */
+export interface ParserResult {
+  fileName: string
+  terms: Array<{
+    term: string
+    occurrence: number
+    inGlossary: boolean
+  }>
+}
+
+/**
+ * Export parser results to JSON format
+ */
+export function exportParserResultsToJSON(result: ParserResult): string {
+  return JSON.stringify(
+    {
+      fileName: result.fileName,
+      exportDate: new Date().toISOString(),
+      totalTerms: result.terms.length,
+      termsInGlossary: result.terms.filter((t) => t.inGlossary).length,
+      termsNotInGlossary: result.terms.filter((t) => !t.inGlossary).length,
+      terms: result.terms,
+    },
+    null,
+    2
+  )
+}
+
+/**
+ * Export parser results to Markdown format (table format)
+ */
+export function exportParserResultsToMarkdown(result: ParserResult): string {
+  const escapeCell = (text: string): string => {
+    return text.replace('|', '\\|')
+  }
+
+  let markdown = `# Parser Analysis Results\n\n`
+  markdown += `**File/Folder:** ${escapeCell(result.fileName)}\n\n`
+  markdown += `**Export Date:** ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}\n\n`
+  markdown += `**Summary:**\n`
+  markdown += `- Total terms found: ${result.terms.length}\n`
+  markdown += `- Terms in glossary: ${result.terms.filter((t) => t.inGlossary).length}\n`
+  markdown += `- Terms not in glossary: ${result.terms.filter((t) => !t.inGlossary).length}\n\n`
+
+  markdown += `## Results\n\n`
+  markdown += `| Term | Occurrences | In Glossary |\n`
+  markdown += `| --- | --- | --- |\n`
+
+  result.terms.forEach((term) => {
+    const inGlossary = term.inGlossary ? '✓ Yes' : '✗ No'
+    markdown += `| ${escapeCell(term.term)} | ${term.occurrence} | ${inGlossary} |\n`
+  })
+
+  return markdown
+}
+
+/**
+ * Download parser results as JSON
+ */
+export async function downloadParserResultsAsJSON(
+  result: ParserResult
+): Promise<void> {
+  const json = exportParserResultsToJSON(result)
+  const timestamp = new Date().toISOString().split('T')[0]
+  const filename = `parser_results_${timestamp}.json`
+  await downloadFile(json, filename, 'application/json')
+}
+
+/**
+ * Download parser results as Markdown
+ */
+export async function downloadParserResultsAsMarkdown(
+  result: ParserResult
+): Promise<void> {
+  const markdown = exportParserResultsToMarkdown(result)
+  const timestamp = new Date().toISOString().split('T')[0]
+  const filename = `parser_results_${timestamp}.md`
+  await downloadFile(markdown, filename, 'text/markdown')
 }
