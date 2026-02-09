@@ -278,7 +278,7 @@ export function Parser() {
   }, [terms, glossaryWords])
 
 
-const pieDataPoints = useMemo(() => {
+  const pieDataPoints = useMemo(() => {
     if (!selectedWord) return []
 
     const distribution = wordDistribution[selectedWord] || {}
@@ -298,7 +298,7 @@ const pieDataPoints = useMemo(() => {
       animationEnabled: true,
       exportEnabled: true,
       title: {
-        text: `Répartition des occurrences de "${selectedWord}"`
+        text: `Distribution of occurences of "${selectedWord}"`
       },
       data: [
         {
@@ -482,15 +482,14 @@ const pieDataPoints = useMemo(() => {
             </span>
             <div className="progress-bar">
               <div
-                className={`progress-fill ${
-                  glossaryStats.coverage <= 25
-                    ? 'red'
-                    : glossaryStats.coverage <= 50
-                      ? 'yellow'
-                      : glossaryStats.coverage <= 75
-                        ? 'green-light'
-                        : 'green-dark'
-                }`}
+                className={`progress-fill ${glossaryStats.coverage <= 25
+                  ? 'red'
+                  : glossaryStats.coverage <= 50
+                    ? 'yellow'
+                    : glossaryStats.coverage <= 75
+                      ? 'green-light'
+                      : 'green-dark'
+                  }`}
                 style={{ width: `${glossaryStats.coverage}%` }}
               />
             </div>
@@ -502,27 +501,26 @@ const pieDataPoints = useMemo(() => {
 
             <div className="progress-bar">
               <div
-                className={`progress-fill ${
-                  glossaryStats.alignment <= 25
-                    ? 'red'
-                    : glossaryStats.alignment <= 50
-                      ? 'yellow'
-                      : glossaryStats.alignment <= 75
-                        ? 'green-light'
-                        : 'green-dark'
-                }`}
+                className={`progress-fill ${glossaryStats.alignment <= 25
+                  ? 'red'
+                  : glossaryStats.alignment <= 50
+                    ? 'yellow'
+                    : glossaryStats.alignment <= 75
+                      ? 'green-light'
+                      : 'green-dark'
+                  }`}
                 style={{ width: `${glossaryStats.alignment}%` }}
               />
             </div>
           </div>
+          {selectedWord && (
+            <div
+              ref={chartRef}
+              style={{ height: '370px', width: '100%', marginTop: '30px' }}
+            />
+          )}
         </div>
       </div>
-      {selectedWord && (
-        <div
-          ref={chartRef}
-          style={{ height: '370px', width: '100%', marginTop: '30px' }}
-        />
-      )}
 
       <ExportModal
         isOpen={isExportModalOpen}
