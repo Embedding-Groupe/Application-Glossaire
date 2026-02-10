@@ -317,6 +317,28 @@ export function Parser() {
     chart.render()
   }, [pieDataPoints, selectedWord, canvasReady])
 
+  const addWordToGlossary = (term: string) => {
+    const storageKey = `glossary_${previousGlossaryName}`
+    const existing = loadFromStorage(storageKey, []) as WordItem[]
+
+    if (existing.some(w => w.word.toLowerCase() === term.toLowerCase())) {
+      return
+    }
+
+    const updated = [
+      ...existing,
+      {
+        word: term,
+        definition: '',
+        synonyms: [],
+        boundedContext: undefined
+      }
+    ]
+
+    localStorage.setItem(storageKey, JSON.stringify(updated))
+  }
+
+
 
   return (
     <div className="parser">
@@ -465,7 +487,20 @@ export function Parser() {
                             : 'default',
                       }}
                     >
-                      {t.term}
+                      <span className="term-text">{t.term}</span>
+
+                      {!alreadyExists && (
+                        <button
+                          className="add-to-glossary-btn"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            addWordToGlossary(t.term)
+                          }}
+                          title="Add to glossary"
+                        >
+                          <img src="/download.svg" alt="Download icon" />
+                        </button>
+                      )}
                     </td>
 
                     <td className="occurrence-column">{t.occurrence}</td>
