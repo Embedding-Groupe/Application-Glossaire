@@ -16,6 +16,14 @@ body {
   font-family: var(--font-main);
 }
 
+.graphe-UL {
+  height: 500px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 800px;
+}
+
 .parser {
   display: flex;
   flex-direction: column;
@@ -378,10 +386,16 @@ body {
 }
 
 .graphe {
-  width: 100;
+  margin-top: 20px;
+  height: 700px;
+  width: 50%;
   display: flex;
   padding: 16px 18px;
   border: 1px solid #ddd;
   border-radius: 12px;
   background-color: #fafafa;
+}
+
+.canvasjs-chart-credit {
+  display: none;
 }

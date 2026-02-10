@@ -296,7 +296,7 @@ export function Parser() {
     const chart = new CanvasJS.Chart(chartRef.current, {
       theme: "light2",
       animationEnabled: true,
-      exportEnabled: true,
+      exportEnabled: false,
       title: {
         text: `Distribution of occurences of "${selectedWord}"`
       },
@@ -474,53 +474,56 @@ export function Parser() {
               })}
             </tbody>
           </table>
-          <div className="UL">
-            <span className="coverage-UL">
-              UL Coverage = {glossaryStats.parsedInGlossary}/
-              {glossaryStats.totalGlossary} ({glossaryStats.coverage.toFixed(1)}
-              %)
-            </span>
-            <div className="progress-bar">
-              <div
-                className={`progress-fill ${glossaryStats.coverage <= 25
-                  ? 'red'
-                  : glossaryStats.coverage <= 50
-                    ? 'yellow'
-                    : glossaryStats.coverage <= 75
-                      ? 'green-light'
-                      : 'green-dark'
-                  }`}
-                style={{ width: `${glossaryStats.coverage}%` }}
-              />
-            </div>
-            <span className="alignement-UL">
-              UL Alignment = {glossaryStats.alignedOccurrences}/
-              {glossaryStats.totalParsedOccurrences} (
-              {glossaryStats.alignment.toFixed(1)}%)
-            </span>
+          <div className="graphe-UL">
 
-            <div className="progress-bar">
-              <div
-                className={`progress-fill ${glossaryStats.alignment <= 25
-                  ? 'red'
-                  : glossaryStats.alignment <= 50
-                    ? 'yellow'
-                    : glossaryStats.alignment <= 75
-                      ? 'green-light'
-                      : 'green-dark'
-                  }`}
-                style={{ width: `${glossaryStats.alignment}%` }}
-              />
+
+            <div className="UL">
+              <span className="coverage-UL">
+                UL Coverage = {glossaryStats.parsedInGlossary}/
+                {glossaryStats.totalGlossary} ({glossaryStats.coverage.toFixed(1)}
+                %)
+              </span>
+              <div className="progress-bar">
+                <div
+                  className={`progress-fill ${glossaryStats.coverage <= 25
+                    ? 'red'
+                    : glossaryStats.coverage <= 50
+                      ? 'yellow'
+                      : glossaryStats.coverage <= 75
+                        ? 'green-light'
+                        : 'green-dark'
+                    }`}
+                  style={{ width: `${glossaryStats.coverage}%` }}
+                />
+              </div>
+              <span className="alignement-UL">
+                UL Alignment = {glossaryStats.alignedOccurrences}/
+                {glossaryStats.totalParsedOccurrences} (
+                {glossaryStats.alignment.toFixed(1)}%)
+              </span>
+
+              <div className="progress-bar">
+                <div
+                  className={`progress-fill ${glossaryStats.alignment <= 25
+                    ? 'red'
+                    : glossaryStats.alignment <= 50
+                      ? 'yellow'
+                      : glossaryStats.alignment <= 75
+                        ? 'green-light'
+                        : 'green-dark'
+                    }`}
+                  style={{ width: `${glossaryStats.alignment}%` }}
+                />
+              </div>
             </div>
+            {selectedWord && (
+              <div
+                ref={chartRef}
+                className="graphe"
+
+              />
+            )}
           </div>
-          {selectedWord && (
-            <div
-              ref={chartRef}
-              className="graphe"
-              style={{ height: '370px', width: '100%', marginTop: '30px' }}
-            />
-          )}
-
         </div>
       </div>
 
