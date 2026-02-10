@@ -516,9 +516,11 @@ export function Parser() {
           {selectedWord && (
             <div
               ref={chartRef}
+              className="graphe"
               style={{ height: '370px', width: '100%', marginTop: '30px' }}
             />
           )}
+
         </div>
       </div>
 

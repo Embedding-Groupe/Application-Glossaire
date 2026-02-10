@@ -376,3 +376,12 @@ body {
   border-radius: 12px;
   background-color: #fafafa;
 }
+
+.graphe {
+  width: 100;
+  display: flex;
+  padding: 16px 18px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  background-color: #fafafa;
+}
