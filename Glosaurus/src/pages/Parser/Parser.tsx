@@ -24,11 +24,6 @@ interface WordItem {
   word: string
 }
 
-interface TermDetails {
-  total_occurrences: number
-  files: { name: string; count: number }[]
-}
-
 interface ApiTermDetails {
   total_occurrences: number;
   files: { name: string; count: number }[];
@@ -240,17 +235,6 @@ export function Parser() {
 
   const isAlreadyInGlossary = (term: string) =>
     glossaryWords.includes(term.toLowerCase())
-
-  const glossary: Glossary = {
-    name: fileName,
-    description: 'Imported file analysis',
-    words: terms.map((t) => ({
-      word: t.term,
-      definition: '',
-      synonyms: [],
-      boundedContext: undefined,
-    })),
-  }
 
   const glossaryStats = useMemo(() => {
     const parsedInGlossary = terms.filter((t) =>
@@ -611,10 +595,10 @@ export function Parser() {
         initialData={
           wordToAdd
             ? {
-                word: wordToAdd,
-                definition: '',
-                synonyms: [],
-              }
+              word: wordToAdd,
+              definition: '',
+              synonyms: [],
+            }
             : null
         }
         glossaryName={previousGlossaryName}
