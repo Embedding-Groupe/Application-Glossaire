@@ -6,6 +6,8 @@ import type { Glossary } from '../../utils/importExport'
 import { useLocation } from 'preact-iso'
 import { loadFromStorage } from '../../utils/storage'
 import { open } from '@tauri-apps/plugin-dialog'
+import { AddWordModal } from '../../modals/AddWord/AddWord'
+
 
 declare let CanvasJS: any
 
@@ -50,6 +52,13 @@ export function Parser() {
   const [wordDistribution, setWordDistribution] = useState<
     Record<string, Record<string, number>>
   >({})
+
+  const [glossaryVersion, setGlossaryVersion] = useState(0)
+
+  const [isAddWordOpen, setIsAddWordOpen] = useState(false)
+  const [wordToAdd, setWordToAdd] = useState<string | null>(null)
+
+
 
   const handleFileChange = () => {
     const files = fileInputRef.current?.files
@@ -226,7 +235,8 @@ export function Parser() {
     const stored = loadFromStorage(storageKey, []) as WordItem[]
 
     return stored.map((w) => w.word.toLowerCase())
-  }, [previousGlossaryName])
+  }, [previousGlossaryName, glossaryVersion])
+
 
   const isAlreadyInGlossary = (term: string) =>
     glossaryWords.includes(term.toLowerCase())
@@ -331,11 +341,12 @@ export function Parser() {
         word: term,
         definition: '',
         synonyms: [],
-        boundedContext: undefined
-      }
+        boundedContext: undefined,
+      },
     ]
 
     localStorage.setItem(storageKey, JSON.stringify(updated))
+    setGlossaryVersion(v => v + 1)
   }
 
 
@@ -571,6 +582,41 @@ export function Parser() {
           })),
         }}
       />
+      <AddWordModal
+        isOpen={isAddWordOpen}
+        onClose={() => {
+          setIsAddWordOpen(false)
+          setWordToAdd(null)
+        }}
+        onAddWord={(word, definition, synonyms, boundedContext) => {
+          const storageKey = `glossary_${previousGlossaryName}`
+          const existing = loadFromStorage(storageKey, []) as any[]
+
+          const updated = [
+            ...existing,
+            {
+              word,
+              definition,
+              synonyms,
+              boundedContext,
+            },
+          ]
+
+          localStorage.setItem(storageKey, JSON.stringify(updated))
+          setGlossaryVersion(v => v + 1)
+        }}
+        initialData={
+          wordToAdd
+            ? {
+                word: wordToAdd,
+                definition: '',
+                synonyms: [],
+              }
+            : null
+        }
+        glossaryName={previousGlossaryName}
+      />
+
     </div>
   )
 }
