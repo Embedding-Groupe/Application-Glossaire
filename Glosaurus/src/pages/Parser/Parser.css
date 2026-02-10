@@ -247,6 +247,8 @@ body {
 .parser-table th:first-child,
 .parser-table td:first-child {
   text-align: left;
+  display: flex;
+  justify-content: space-between;
 }
 
 .parser-table th:last-child,
@@ -398,4 +400,10 @@ body {
 
 .canvasjs-chart-credit {
   display: none;
+}
+
+.add-to-glossary-btn {
+  background-color: grey;
+  border: none;
+  cursor: pointer;
 }
