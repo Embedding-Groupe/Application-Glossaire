@@ -2,10 +2,11 @@ import { useRef, useState, useMemo, useEffect } from 'preact/hooks'
 import './Parser.css'
 import { ExportModal } from '../../modals/Export/Export'
 import { ImportChoiceModal } from '../../modals/Import/ImportChoiceModal'
-import type { Glossary } from '../../utils/importExport'
 import { useLocation } from 'preact-iso'
 import { loadFromStorage } from '../../utils/storage'
 import { open } from '@tauri-apps/plugin-dialog'
+import { AddWordModal } from '../../modals/AddWord/AddWord'
+
 
 declare let CanvasJS: any
 
@@ -22,10 +23,11 @@ interface WordItem {
   word: string
 }
 
-interface TermDetails {
-  total_occurrences: number
-  files_occurrences: Record<string, number>
+interface ApiTermDetails {
+  total_occurrences: number;
+  files: { name: string; count: number }[];
 }
+
 
 export function Parser() {
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -44,6 +46,13 @@ export function Parser() {
   const [wordDistribution, setWordDistribution] = useState<
     Record<string, Record<string, number>>
   >({})
+
+  const [glossaryVersion, setGlossaryVersion] = useState(0)
+
+  const [isAddWordOpen, setIsAddWordOpen] = useState(false)
+  const [wordToAdd, setWordToAdd] = useState<string | null>(null)
+
+
 
   const handleFileChange = () => {
     const files = fileInputRef.current?.files
@@ -114,8 +123,8 @@ export function Parser() {
         throw new Error(errorData.error || 'Network response was not ok')
       }
 
-      const data: Record<string, TermDetails> = await response.json()
-      console.log('API response:', data)
+      const data: Record<string, ApiTermDetails> = await response.json();
+      console.log('API response:', data);
 
       const parsedTerms: ParsedTerm[] = []
       const distribution: Record<string, Record<string, number>> = {}
@@ -124,9 +133,14 @@ export function Parser() {
         parsedTerms.push({
           term,
           occurrence: details.total_occurrences,
-        })
+        });
 
-        distribution[term] = details.files_occurrences
+        const filesObj: Record<string, number> = {};
+        details.files.forEach(f => {
+          filesObj[f.name] = f.count;
+        });
+
+        distribution[term] = filesObj;
       }
 
       setTerms(parsedTerms)
@@ -203,11 +217,9 @@ export function Parser() {
   }
 
   const handleFilterClick = (filterType: 'included' | 'not-included') => {
-    // Si on clique sur le filtre déjà actif, on le désactive
     if (filter === filterType) {
       setFilter(null)
     } else {
-      // Sinon, on active le nouveau filtre
       setFilter(filterType)
     }
   }
@@ -217,21 +229,11 @@ export function Parser() {
     const stored = loadFromStorage(storageKey, []) as WordItem[]
 
     return stored.map((w) => w.word.toLowerCase())
-  }, [previousGlossaryName])
+  }, [previousGlossaryName, glossaryVersion])
+
 
   const isAlreadyInGlossary = (term: string) =>
     glossaryWords.includes(term.toLowerCase())
-
-  const glossary: Glossary = {
-    name: fileName,
-    description: 'Imported file analysis',
-    words: terms.map((t) => ({
-      word: t.term,
-      definition: '',
-      synonyms: [],
-      boundedContext: undefined,
-    })),
-  }
 
   const glossaryStats = useMemo(() => {
     const parsedInGlossary = terms.filter((t) =>
@@ -267,6 +269,70 @@ export function Parser() {
       alignment,
     }
   }, [terms, glossaryWords])
+
+
+  const pieDataPoints = useMemo(() => {
+    if (!selectedWord) return []
+
+    const distribution = wordDistribution[selectedWord] || {}
+
+    return Object.entries(distribution).map(([file, count]) => ({
+      y: count,
+      label: file
+    }))
+  }, [selectedWord, wordDistribution])
+
+
+  useEffect(() => {
+    if (!canvasReady || !chartRef.current || pieDataPoints.length === 0) return
+
+    const chart = new CanvasJS.Chart(chartRef.current, {
+      theme: "light2",
+      animationEnabled: true,
+      exportEnabled: false,
+      title: {
+        text: `Distribution of occurences of "${selectedWord}"`
+      },
+      data: [
+        {
+          type: "pie",
+          startAngle: 25,
+          toolTipContent: "<b>{label}</b>: {y} occurrences",
+          showInLegend: true,
+          legendText: "{label}",
+          indexLabelFontSize: 16,
+          indexLabel: "{label} - {y} occurrences",
+          dataPoints: pieDataPoints
+        }
+      ]
+    })
+
+    chart.render()
+  }, [pieDataPoints, selectedWord, canvasReady])
+
+  const addWordToGlossary = (term: string) => {
+    const storageKey = `glossary_${previousGlossaryName}`
+    const existing = loadFromStorage(storageKey, []) as WordItem[]
+
+    if (existing.some(w => w.word.toLowerCase() === term.toLowerCase())) {
+      return
+    }
+
+    const updated = [
+      ...existing,
+      {
+        word: term,
+        definition: '',
+        synonyms: [],
+        boundedContext: undefined,
+      },
+    ]
+
+    localStorage.setItem(storageKey, JSON.stringify(updated))
+    setGlossaryVersion(v => v + 1)
+  }
+
+
 
   return (
     <div className="parser">
@@ -415,7 +481,20 @@ export function Parser() {
                             : 'default',
                       }}
                     >
-                      {t.term}
+                      <span className="term-text">{t.term}</span>
+
+                      {!alreadyExists && (
+                        <button
+                          className="add-to-glossary-btn"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            addWordToGlossary(t.term)
+                          }}
+                          title="Add to glossary"
+                        >
+                          <img src="/download.svg" alt="Download icon" />
+                        </button>
+                      )}
                     </td>
 
                     <td className="occurrence-column">{t.occurrence}</td>
@@ -424,55 +503,58 @@ export function Parser() {
               })}
             </tbody>
           </table>
-          <div className="UL">
-            <span className="coverage-UL">
-              UL Coverage = {glossaryStats.parsedInGlossary}/
-              {glossaryStats.totalGlossary} ({glossaryStats.coverage.toFixed(1)}
-              %)
-            </span>
-            <div className="progress-bar">
-              <div
-                className={`progress-fill ${
-                  glossaryStats.coverage <= 25
+          <div className="graphe-UL">
+
+
+            <div className="UL">
+              <span className="coverage-UL">
+                UL Coverage = {glossaryStats.parsedInGlossary}/
+                {glossaryStats.totalGlossary} ({glossaryStats.coverage.toFixed(1)}
+                %)
+              </span>
+              <div className="progress-bar">
+                <div
+                  className={`progress-fill ${glossaryStats.coverage <= 25
                     ? 'red'
                     : glossaryStats.coverage <= 50
                       ? 'yellow'
                       : glossaryStats.coverage <= 75
                         ? 'green-light'
                         : 'green-dark'
-                }`}
-                style={{ width: `${glossaryStats.coverage}%` }}
-              />
-            </div>
-            <span className="alignement-UL">
-              UL Alignment = {glossaryStats.alignedOccurrences}/
-              {glossaryStats.totalParsedOccurrences} (
-              {glossaryStats.alignment.toFixed(1)}%)
-            </span>
+                    }`}
+                  style={{ width: `${glossaryStats.coverage}%` }}
+                />
+              </div>
+              <span className="alignement-UL">
+                UL Alignment = {glossaryStats.alignedOccurrences}/
+                {glossaryStats.totalParsedOccurrences} (
+                {glossaryStats.alignment.toFixed(1)}%)
+              </span>
 
-            <div className="progress-bar">
-              <div
-                className={`progress-fill ${
-                  glossaryStats.alignment <= 25
+              <div className="progress-bar">
+                <div
+                  className={`progress-fill ${glossaryStats.alignment <= 25
                     ? 'red'
                     : glossaryStats.alignment <= 50
                       ? 'yellow'
                       : glossaryStats.alignment <= 75
                         ? 'green-light'
                         : 'green-dark'
-                }`}
-                style={{ width: `${glossaryStats.alignment}%` }}
-              />
+                    }`}
+                  style={{ width: `${glossaryStats.alignment}%` }}
+                />
+              </div>
             </div>
+            {selectedWord && (
+              <div
+                ref={chartRef}
+                className="graphe"
+
+              />
+            )}
           </div>
         </div>
       </div>
-      {selectedWord && (
-        <div
-          ref={chartRef}
-          style={{ height: '370px', width: '100%', marginTop: '30px' }}
-        />
-      )}
 
       <ExportModal
         isOpen={isExportModalOpen}
@@ -486,6 +568,41 @@ export function Parser() {
           })),
         }}
       />
+      <AddWordModal
+        isOpen={isAddWordOpen}
+        onClose={() => {
+          setIsAddWordOpen(false)
+          setWordToAdd(null)
+        }}
+        onAddWord={(word, definition, synonyms, boundedContext) => {
+          const storageKey = `glossary_${previousGlossaryName}`
+          const existing = loadFromStorage(storageKey, []) as any[]
+
+          const updated = [
+            ...existing,
+            {
+              word,
+              definition,
+              synonyms,
+              boundedContext,
+            },
+          ]
+
+          localStorage.setItem(storageKey, JSON.stringify(updated))
+          setGlossaryVersion(v => v + 1)
+        }}
+        initialData={
+          wordToAdd
+            ? {
+              word: wordToAdd,
+              definition: '',
+              synonyms: [],
+            }
+            : null
+        }
+        glossaryName={previousGlossaryName}
+      />
+
     </div>
   )
 }
