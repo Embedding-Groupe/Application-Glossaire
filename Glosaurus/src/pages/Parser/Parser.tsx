@@ -52,7 +52,7 @@ export function Parser() {
   >({})
 
   const [glossaryVersion, setGlossaryVersion] = useState(0)
-
+            
   const [isAddWordOpen, setIsAddWordOpen] = useState(false)
   const [wordToAdd, setWordToAdd] = useState<string | null>(null)
 
