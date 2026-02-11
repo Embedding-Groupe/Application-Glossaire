@@ -2,7 +2,7 @@
 import { useRef, useState, useMemo, useEffect } from 'preact/hooks'
 import './Parser.css'
 import { ExportModal } from '../../modals/Export/Export'
-import { ImportChoiceModal } from '../../modals/UpdateGlossary/ImportChoiceModal'
+import { ImportChoiceModal } from '../../modals/Import/ImportChoiceModal'
 import { useLocation } from 'preact-iso'
 import { loadFromStorage } from '../../utils/storage'
 import { open } from '@tauri-apps/plugin-dialog'
@@ -343,10 +343,10 @@ export function Parser() {
           </button>
 
           <button
-            className="download-btn"
+            className="export-btn"
             onClick={() => setIsExportModalOpen(true)}
           >
-            <img src="/download.svg" alt="Download icon" /> Download Result
+            <img src="/export.svg" alt="Export icon" /> Export Result
           </button>
 
           <button
@@ -485,7 +485,7 @@ export function Parser() {
                           title="Add to glossary"
                         >
                           <img
-                            src="/circle-plus.svg"
+                            src="/book-plus.svg"
                             alt="Add to glossary icon"
                           />
                         </button>

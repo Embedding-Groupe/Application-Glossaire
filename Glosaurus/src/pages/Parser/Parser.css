@@ -114,7 +114,7 @@ body {
   background-color: #b32134;
 }
 
-.parser>h1 {
+.parser > h1 {
   font-size: 1.5rem;
   margin-right: 65rem;
 }
@@ -278,7 +278,7 @@ body {
   margin-right: 50px;
 }
 
-.download-btn {
+.export-btn {
   background-color: var(--color-primary);
   display: flex;
   align-items: center;
@@ -336,7 +336,6 @@ body {
   background-color: #fff0f0;
 }
 
-
 .table-with-coverage {
   display: flex;
   align-items: flex-start;
@@ -351,10 +350,11 @@ body {
   overflow: hidden;
 }
 
-
 .progress-fill {
   height: 100%;
-  transition: width 0.3s ease-in-out, background-color 0.3s ease-in-out;
+  transition:
+    width 0.3s ease-in-out,
+    background-color 0.3s ease-in-out;
   border-radius: 10px;
 }
 
@@ -403,7 +403,7 @@ body {
 }
 
 .add-to-glossary-btn {
-  background-color: grey;
+  background-color: white;
   border: none;
   cursor: pointer;
 }
