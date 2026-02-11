@@ -20,7 +20,7 @@ export function ImportChoiceModal({ isOpen, onClose, onSelectOption }: ImportCho
 
                     <div className="import-choice-modal-body">
                         <p className="section-description">
-                            Choose how you want to import your glossary files. All files must be in the same format, .py or .java.
+                            Choose how you want to import your glossary files. Format taken in charge : <b>.py, .java, .php, .js, .ts</b>.
                         </p>
 
                         <div className="import-options">

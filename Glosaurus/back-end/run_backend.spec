@@ -20,7 +20,10 @@ a = Analysis(
         'fastapi',
         'sentence_transformers',
         'ollama',
-        'python-multipart'
+        'python-multipart',
+        'tree_sitter_php',
+        'tree_sitter_javascript',
+        'tree_sitter_typescript'
     ],
     hookspath=[],
     hooksconfig={},
