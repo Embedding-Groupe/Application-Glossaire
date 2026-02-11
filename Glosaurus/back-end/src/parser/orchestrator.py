@@ -6,12 +6,18 @@ import json
 try:
     from . import extract_non_keywords_python
     from . import extract_non_keywords_java
+    from . import extract_non_keywords_php
+    from . import extract_non_keywords_javascript
+    from . import extract_non_keywords_typescript
     from . import split_identifiers
     from . import get_word_presence
 except ImportError:
     # Imports absolus (exécution standalone)
     import extract_non_keywords_python
     import extract_non_keywords_java
+    import extract_non_keywords_php
+    import extract_non_keywords_javascript
+    import extract_non_keywords_typescript
     import split_identifiers
     import get_word_presence
 
@@ -47,6 +53,15 @@ def get_word(input_script: str):
     elif ext == ".java":
         language = "java"
         extractor = extract_non_keywords_java
+    elif ext == ".php":
+        language = "php"
+        extractor = extract_non_keywords_php
+    elif ext == ".js":
+        language = "javascript"
+        extractor = extract_non_keywords_javascript
+    elif ext == ".ts":
+        language = "typescript"
+        extractor = extract_non_keywords_typescript
     else:
         return {"error": f"Unsupported file extension: {ext}"}
 
@@ -93,9 +108,6 @@ def get_word(input_script: str):
         return {"error": "Failed to decode final JSON file"}
 
 
-
-
-
 def get_directory_words(directory_path: str):
     """
     Analyse récursivement un dossier pour trouver les fichiers .java et .py,
@@ -124,14 +136,20 @@ def get_directory_words(directory_path: str):
             file_path = os.path.join(root, file)
             _, ext = os.path.splitext(file)
             
-            if ext.lower() in ['.py', '.java']:
+            if ext.lower() in ['.py', '.java', '.php', '.js', '.ts']:
                 # Parse individual file
                 file_result = get_word(file_path)
                 
                 # Cleanup generated JSON files
                 base_name = os.path.splitext(file_path)[0]
                 _, ext = os.path.splitext(file_path)
-                language = "python" if ext.lower() == ".py" else "java"
+                
+                language = "python"
+                if ext.lower() == ".java": language = "java"
+                elif ext.lower() == ".php": language = "php"
+                elif ext.lower() == ".js": language = "javascript"
+                elif ext.lower() == ".ts": language = "typescript"
+
                 final_json = f"{base_name}_{language}.json"
                 default_json = base_name + ".json"
                 

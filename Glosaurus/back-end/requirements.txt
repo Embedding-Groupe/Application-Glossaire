@@ -5,4 +5,7 @@ pyinstaller
 tree-sitter
 tree-sitter-python
 tree-sitter-java
+tree-sitter-php
+tree-sitter-javascript
+tree-sitter-typescript
 python-multipart
