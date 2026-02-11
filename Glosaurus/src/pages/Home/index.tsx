@@ -121,6 +121,7 @@ export function Glossaire() {
     }
   }
 
+
   return (
     <div className="glossaire">
       <div className="glossaire-header">
@@ -195,7 +196,7 @@ export function Glossaire() {
                     }
                   }}
                 >
-                  {w.word}
+                  {(w.word.charAt(0).toUpperCase() + w.word.slice(1))}
                 </span>
               </td>
 

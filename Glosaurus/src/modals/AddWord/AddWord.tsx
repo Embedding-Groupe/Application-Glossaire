@@ -358,7 +358,9 @@ export function AddWordModal({
     setErrors(newErrors)
 
     if (Object.keys(newErrors).length === 0) {
-      onAddWord(word, definition, synonyms, boundedContext)
+      let final_word: string = word.toLowerCase()
+
+      onAddWord(final_word, definition, synonyms, boundedContext)
       setWord('')
       setDefinition('')
       setSynonyms([])
