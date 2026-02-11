@@ -66,3 +66,32 @@ async def parse_directory(request: DirectoryRequest):
 
     result = orchestrator.get_directory_words(request.path)
     return result
+
+class GitHubRepoRequest(BaseModel):
+    url: str
+
+@router.post("/parse_github")
+async def parse_github(request: GitHubRepoRequest):
+    """
+    Route permettant de parser un repository GitHub public.
+    Attend une URL GitHub en entrée.
+    """
+    try:
+        from src.parser import github_cloner
+    except ImportError:
+        sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
+        from src.parser import github_cloner
+    
+    # Clone the repository
+    temp_dir, error = github_cloner.clone_github_repo(request.url)
+    
+    if error:
+        return {"error": error}
+    
+    try:
+        # Parse the cloned directory
+        result = orchestrator.get_directory_words(temp_dir)
+        return result
+    finally:
+        # Always cleanup the temporary directory
+        github_cloner.cleanup_temp_directory(temp_dir)
