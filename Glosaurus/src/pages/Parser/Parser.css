@@ -86,6 +86,7 @@ body {
 
 .import-btn-parser:hover {
   background-color: #921b2a;
+  transform: translateY(-2px);
 }
 
 .header-buttons-parser {
@@ -98,7 +99,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--color-secondary);
+  background-color: #a0a0a0;
   color: white;
   font-weight: 500;
   font-size: 1rem;
@@ -111,10 +112,11 @@ body {
 }
 
 .back-btn:hover {
-  background-color: #b32134;
+  background-color: #848484;
+  transform: translateY(-2px);
 }
 
-.parser > h1 {
+.parser>h1 {
   font-size: 1.5rem;
   margin-right: 65rem;
 }
@@ -406,4 +408,26 @@ body {
   background-color: white;
   border: none;
   cursor: pointer;
+}
+
+
+.blacklist-btn-parser {
+  background-color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 500;
+  font-size: 1rem;
+  gap: 0.6rem;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.blacklist-btn-parser:hover {
+  background-color: #921b2a;
+  transform: translateY(-2px);
 }

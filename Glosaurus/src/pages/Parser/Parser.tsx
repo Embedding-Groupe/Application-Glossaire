@@ -338,7 +338,7 @@ export function Parser() {
 
         <div className="header-buttons-parser">
           <button
-            className="import-btn-parser"
+            className="blacklist-btn-parser"
             onClick={() => setIsBlacklistModalOpen(true)}
           >
             Blacklist

@@ -8,6 +8,8 @@ import { useRoute } from 'preact-iso'
 import { Trash2 } from 'lucide-preact'
 import { useLocation } from 'preact-iso'
 import { ContextChartModal } from '../../modals/ContextChart/ContextChartModal'
+import { BlacklistModal } from '../../modals/Blacklist/BlacklistModal'
+
 
 type WordItem = {
   word: string
@@ -27,6 +29,8 @@ export function Glossaire() {
   const [editingWord, setEditingWord] = useState<WordItem | null>(null)
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
   const [isContextChartOpen, setIsContextChartOpen] = useState(false)
+  const [isBlacklistModalOpen, setIsBlacklistModalOpen] = useState(false)
+
   const { params } = useRoute()
 
   const location = useLocation()
@@ -310,14 +314,22 @@ export function Glossaire() {
           ))}
         </tbody>
       </table>
-      <button
-        className="Parser"
-        onClick={() => {
-          location.route(`/parser?glossary=${encodeURIComponent(glossaryName)}`)
-        }}
-      >
-        Parser
-      </button>
+      <div className="bottom-buttons-container">
+        <button
+          className="blacklist-btn-parser"
+          onClick={() => setIsBlacklistModalOpen(true)}
+        >
+          Blacklist
+        </button>
+        <button
+          className="Parser"
+          onClick={() => {
+            location.route(`/parser?glossary=${encodeURIComponent(glossaryName)}`)
+          }}
+        >
+          Parser
+        </button>
+      </div>
 
       <AddWordModal
         isOpen={isModalOpen}
@@ -353,6 +365,12 @@ export function Glossaire() {
         <div className="tooltip-popup" ref={tooltipRef}>
           {tooltip.text}
         </div>
+      )}
+      {isBlacklistModalOpen && (
+        <BlacklistModal
+          glossaryName={glossaryName}
+          onClose={() => setIsBlacklistModalOpen(false)}
+        />
       )}
     </div>
   )
