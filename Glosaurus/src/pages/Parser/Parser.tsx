@@ -480,7 +480,8 @@ export function Parser() {
                           className="add-to-glossary-btn"
                           onClick={(e) => {
                             e.stopPropagation()
-                            addWordToGlossary(t.term)
+                            setWordToAdd(t.term)
+                            setIsAddWordOpen(true)
                           }}
                           title="Add to glossary"
                         >
@@ -508,14 +509,15 @@ export function Parser() {
               </span>
               <div className="progress-bar">
                 <div
-                  className={`progress-fill ${glossaryStats.coverage <= 25
-                    ? 'red'
-                    : glossaryStats.coverage <= 50
-                      ? 'yellow'
-                      : glossaryStats.coverage <= 75
-                        ? 'green-light'
-                        : 'green-dark'
-                    }`}
+                  className={`progress-fill ${
+                    glossaryStats.coverage <= 25
+                      ? 'red'
+                      : glossaryStats.coverage <= 50
+                        ? 'yellow'
+                        : glossaryStats.coverage <= 75
+                          ? 'green-light'
+                          : 'green-dark'
+                  }`}
                   style={{ width: `${glossaryStats.coverage}%` }}
                 />
               </div>
@@ -527,14 +529,15 @@ export function Parser() {
 
               <div className="progress-bar">
                 <div
-                  className={`progress-fill ${glossaryStats.alignment <= 25
-                    ? 'red'
-                    : glossaryStats.alignment <= 50
-                      ? 'yellow'
-                      : glossaryStats.alignment <= 75
-                        ? 'green-light'
-                        : 'green-dark'
-                    }`}
+                  className={`progress-fill ${
+                    glossaryStats.alignment <= 25
+                      ? 'red'
+                      : glossaryStats.alignment <= 50
+                        ? 'yellow'
+                        : glossaryStats.alignment <= 75
+                          ? 'green-light'
+                          : 'green-dark'
+                  }`}
                   style={{ width: `${glossaryStats.alignment}%` }}
                 />
               </div>
@@ -582,17 +585,19 @@ export function Parser() {
         initialData={
           wordToAdd
             ? {
-              word: wordToAdd,
-              definition: '',
-              synonyms: [],
-            }
+                word: wordToAdd,
+                definition: '',
+                synonyms: [],
+              }
             : null
         }
         glossaryName={previousGlossaryName}
         existingContexts={useMemo(() => {
           const storageKey = `glossary_${previousGlossaryName}`
           const stored = loadFromStorage(storageKey, []) as any[]
-          return Array.from(new Set(stored.map(w => w.boundedContext).filter(Boolean))) as string[]
+          return Array.from(
+            new Set(stored.map((w) => w.boundedContext).filter(Boolean))
+          ) as string[]
         }, [previousGlossaryName, glossaryVersion])}
       />
     </div>
