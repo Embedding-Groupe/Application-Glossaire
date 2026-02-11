@@ -9,3 +9,4 @@ tree-sitter-php
 tree-sitter-javascript
 tree-sitter-typescript
 python-multipart
+gitpython

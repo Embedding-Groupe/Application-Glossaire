@@ -3,7 +3,7 @@ import './ImportChoiceModal.css';
 interface ImportChoiceModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSelectOption: (option: 'file' | 'folder') => void;
+    onSelectOption: (option: 'file' | 'folder' | 'github') => void;
 }
 
 export function ImportChoiceModal({ isOpen, onClose, onSelectOption }: ImportChoiceModalProps) {
@@ -35,6 +35,12 @@ export function ImportChoiceModal({ isOpen, onClose, onSelectOption }: ImportCho
                                 onClick={() => onSelectOption('folder')}
                             >
                                 Import Folder
+                            </button>
+                            <button
+                                className="btn btn-primary"
+                                onClick={() => onSelectOption('github')}
+                            >
+                                Import from GitHub Repo
                             </button>
                         </div>
                     </div>

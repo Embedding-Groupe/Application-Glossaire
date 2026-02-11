@@ -3,6 +3,7 @@ import { useRef, useState, useMemo, useEffect } from 'preact/hooks'
 import './Parser.css'
 import { ExportModal } from '../../modals/Export/Export'
 import { ImportChoiceModal } from '../../modals/Import/ImportChoiceModal'
+import { GitHubImportModal } from '../../modals/Import/GitHubImportModal'
 import { useLocation } from 'preact-iso'
 import { loadFromStorage } from '../../utils/storage'
 import { open } from '@tauri-apps/plugin-dialog'
@@ -41,6 +42,8 @@ export function Parser() {
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
   const [isImportModalOpen, setIsImportModalOpen] = useState(false)
   const [isBlacklistModalOpen, setIsBlacklistModalOpen] = useState(false)
+  const [isGitHubModalOpen, setIsGitHubModalOpen] = useState(false)
+  const [isGitHubLoading, setIsGitHubLoading] = useState(false)
   const [sortColumn, setSortColumn] = useState<SortColumn>(null)
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc')
   const [filter, setFilter] = useState<FilterType>(null)
@@ -49,7 +52,7 @@ export function Parser() {
   >({})
 
   const [glossaryVersion, setGlossaryVersion] = useState(0)
-
+            
   const [isAddWordOpen, setIsAddWordOpen] = useState(false)
   const [wordToAdd, setWordToAdd] = useState<string | null>(null)
 
@@ -149,6 +152,60 @@ export function Parser() {
       console.error('Error importing folder:', err)
       setError(err instanceof Error ? err.message : 'Unknown error occurred')
       setTerms([])
+    }
+  }
+
+  const handleGitHubImport = async (repoUrl: string) => {
+    try {
+      setIsGitHubLoading(true)
+      setError(null)
+      setTerms([])
+
+      const response = await fetch(
+        'http://127.0.0.1:8000/parser/parse_github',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ url: repoUrl }),
+        }
+      )
+
+      const data = await response.json()
+
+      if (data.error) {
+        setError(data.error)
+        setIsGitHubLoading(false)
+        return
+      }
+
+      const parsedTerms: ParsedTerm[] = []
+      const distribution: Record<string, Record<string, number>> = {}
+
+      for (const [term, details] of Object.entries(data as Record<string, ApiTermDetails>)) {
+        parsedTerms.push({
+          term,
+          occurrence: details.total_occurrences,
+        })
+
+        const filesObj: Record<string, number> = {}
+        details.files.forEach((f) => {
+          filesObj[f.name] = f.count
+        })
+
+        distribution[term] = filesObj
+      }
+
+      setTerms(parsedTerms)
+      setWordDistribution(distribution)
+      setFileName(repoUrl)
+      setIsGitHubModalOpen(false)
+      setIsGitHubLoading(false)
+    } catch (err) {
+      console.error('Error importing GitHub repository:', err)
+      setError(err instanceof Error ? err.message : 'Unknown error occurred')
+      setIsGitHubLoading(false)
     }
   }
 
@@ -388,10 +445,24 @@ export function Parser() {
           onSelectOption={(option) => {
             if (option === 'file') {
               fileInputRef.current?.click()
-            } else {
+            } else if (option === 'folder') {
               handleFolderImport()
+            } else if (option === 'github') {
+              setIsImportModalOpen(false)
+              setIsGitHubModalOpen(true)
             }
           }}
+        />
+
+        <GitHubImportModal
+          isOpen={isGitHubModalOpen}
+          onClose={() => {
+            setIsGitHubModalOpen(false)
+            setError(null)
+          }}
+          onSubmit={handleGitHubImport}
+          isLoading={isGitHubLoading}
+          error={error}
         />
       </div>
 
