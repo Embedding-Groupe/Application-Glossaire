@@ -241,7 +241,7 @@ export function AddWordModal({
       return () => {
         document.removeEventListener('keydown', onKey)
         document.body.style.overflow = prev
-        ;(previouslyFocused.current as HTMLElement | null)?.focus?.()
+          ; (previouslyFocused.current as HTMLElement | null)?.focus?.()
       }
     }
   }, [isOpen, onClose])
@@ -363,6 +363,13 @@ export function AddWordModal({
             maxLength={wordMaxLength}
             onInput={(e) => {
               const val = (e.target as HTMLInputElement).value
+              if (val.includes(' ')) {
+                setErrors((prev) => ({
+                  ...prev,
+                  word: 'Only one word is allowed',
+                }))
+                return
+              }
               setWord(val)
               setErrors((prev) => ({ ...prev, word: undefined }))
             }}
