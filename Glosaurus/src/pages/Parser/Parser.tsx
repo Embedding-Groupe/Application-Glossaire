@@ -8,6 +8,7 @@ import { useLocation } from 'preact-iso'
 import { loadFromStorage } from '../../utils/storage'
 import { open } from '@tauri-apps/plugin-dialog'
 import { AddWordModal } from '../../modals/AddWord/AddWord'
+import { BlacklistModal } from '../../modals/Blacklist/BlacklistModal'
 
 declare let CanvasJS: any
 
@@ -40,6 +41,7 @@ export function Parser() {
   const [terms, setTerms] = useState<ParsedTerm[]>([])
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
   const [isImportModalOpen, setIsImportModalOpen] = useState(false)
+  const [isBlacklistModalOpen, setIsBlacklistModalOpen] = useState(false)
   const [isGitHubModalOpen, setIsGitHubModalOpen] = useState(false)
   const [isGitHubLoading, setIsGitHubLoading] = useState(false)
   const [sortColumn, setSortColumn] = useState<SortColumn>(null)
@@ -50,7 +52,7 @@ export function Parser() {
   >({})
 
   const [glossaryVersion, setGlossaryVersion] = useState(0)
-
+            
   const [isAddWordOpen, setIsAddWordOpen] = useState(false)
   const [wordToAdd, setWordToAdd] = useState<string | null>(null)
 
@@ -393,6 +395,12 @@ export function Parser() {
 
         <div className="header-buttons-parser">
           <button
+            className="blacklist-btn-parser"
+            onClick={() => setIsBlacklistModalOpen(true)}
+          >
+            Blacklist
+          </button>
+          <button
             className="import-btn-parser"
             onClick={() => setIsImportModalOpen(true)}
           >
@@ -671,6 +679,12 @@ export function Parser() {
           ) as string[]
         }, [previousGlossaryName, glossaryVersion])}
       />
+      {isBlacklistModalOpen && (
+        <BlacklistModal
+          glossaryName={previousGlossaryName}
+          onClose={() => setIsBlacklistModalOpen(false)}
+        />
+      )}
     </div>
   )
 }
