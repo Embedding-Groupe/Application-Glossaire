@@ -7,6 +7,7 @@ import './style.css'
 import { useRoute } from 'preact-iso'
 import { Trash2 } from 'lucide-preact'
 import { useLocation } from 'preact-iso'
+import { ContextChartModal } from '../../modals/ContextChart/ContextChartModal'
 
 type WordItem = {
   word: string
@@ -25,6 +26,7 @@ export function Glossaire() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingWord, setEditingWord] = useState<WordItem | null>(null)
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
+  const [isContextChartOpen, setIsContextChartOpen] = useState(false)
   const { params } = useRoute()
 
   const location = useLocation()
@@ -47,6 +49,10 @@ export function Glossaire() {
   const [glossaryDescription, setGlossaryDescription] = useState<
     string | undefined
   >()
+
+  const uniqueContexts = useMemo(() => {
+    return Array.from(new Set(words.map(w => w.boundedContext).filter(Boolean))) as string[];
+  }, [words])
 
   useEffect(() => {
     const glossaries = loadFromStorage('glossaries', []) as Array<{
@@ -127,6 +133,13 @@ export function Glossaire() {
         </nav>
 
         <div className="header-buttons">
+          <button
+            className="export-btn"
+            onClick={() => setIsContextChartOpen(true)}
+            title="Visualize Bounded Contexts"
+          >
+            {'Bounding Context'}
+          </button>
           <button className="export-btn" onClick={handleExport}>
             <img src="/export.svg" alt="Export icon" />
             {'Export'}
@@ -316,9 +329,7 @@ export function Glossaire() {
         isEdit={!!editingWord}
         glossaryName={glossaryName}
         glossaryDescription={glossaryDescription}
-        existingContexts={useMemo(() => {
-          return Array.from(new Set(words.map(w => w.boundedContext).filter(Boolean))) as string[];
-        }, [words])}
+        existingContexts={uniqueContexts}
       />
 
       <ExportModal
@@ -329,6 +340,12 @@ export function Glossaire() {
           description: glossaryDescription,
           words: words,
         }}
+      />
+
+      <ContextChartModal
+        isOpen={isContextChartOpen}
+        onClose={() => setIsContextChartOpen(false)}
+        words={words}
       />
 
       {tooltip && (
