@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
 import './ContextChartModal.css'
 
-declare let CanvasJS: any
+// Extend Window interface to include CanvasJS
+declare global {
+    interface Window {
+        CanvasJS: any
+    }
+}
 
 interface ContextChartModalProps {
     isOpen: boolean
