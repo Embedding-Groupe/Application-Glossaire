@@ -20,23 +20,23 @@ router = APIRouter(prefix="/parser", tags=["parser"])
 
 @router.post("/parse")
 async def parse(file: UploadFile = File(...)):
-    # Create a temporary file with the same extension as the uploaded file
+    # Création d'un fichier temporaire avec la même extension que le fichier uploadé
     suffix = Path(file.filename).suffix
     with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
         shutil.copyfileobj(file.file, tmp)
         tmp_path = tmp.name
 
     try:
-        # Process the temporary file
+        # Traitement du fichier temporaire
         result = orchestrator.get_word(tmp_path)
         return result
     finally:
-        # Cleanup: Remove the temporary file
+        # Suppression du fichier temporaire
         if os.path.exists(tmp_path):
             os.remove(tmp_path)
         
-        # Cleanup: Remove generated JSON files by orchestrator if they exist
-        # The orchestrator generates {base_name}.json and {base_name}_{language}.json
+        # Suppression des fichiers JSON générés par l'orchestrateur s'ils existent
+        # L'orchestrateur génère {base_name}.json et {base_name}_{language}.json
         base_name = os.path.splitext(tmp_path)[0]
         possible_generated_files = [
             base_name + ".json",

@@ -2,7 +2,7 @@
 import { useRef, useState, useMemo, useEffect } from 'preact/hooks'
 import './Parser.css'
 import { ExportModal } from '../../modals/Export/Export'
-import { ImportChoiceModal } from '../../modals/UpdateGlossary/ImportChoiceModal'
+import { ImportChoiceModal } from '../../modals/Import/ImportChoiceModal'
 import { useLocation } from 'preact-iso'
 import { loadFromStorage } from '../../utils/storage'
 import { open } from '@tauri-apps/plugin-dialog'
@@ -508,15 +508,14 @@ export function Parser() {
               </span>
               <div className="progress-bar">
                 <div
-                  className={`progress-fill ${
-                    glossaryStats.coverage <= 25
-                      ? 'red'
-                      : glossaryStats.coverage <= 50
-                        ? 'yellow'
-                        : glossaryStats.coverage <= 75
-                          ? 'green-light'
-                          : 'green-dark'
-                  }`}
+                  className={`progress-fill ${glossaryStats.coverage <= 25
+                    ? 'red'
+                    : glossaryStats.coverage <= 50
+                      ? 'yellow'
+                      : glossaryStats.coverage <= 75
+                        ? 'green-light'
+                        : 'green-dark'
+                    }`}
                   style={{ width: `${glossaryStats.coverage}%` }}
                 />
               </div>
@@ -528,15 +527,14 @@ export function Parser() {
 
               <div className="progress-bar">
                 <div
-                  className={`progress-fill ${
-                    glossaryStats.alignment <= 25
-                      ? 'red'
-                      : glossaryStats.alignment <= 50
-                        ? 'yellow'
-                        : glossaryStats.alignment <= 75
-                          ? 'green-light'
-                          : 'green-dark'
-                  }`}
+                  className={`progress-fill ${glossaryStats.alignment <= 25
+                    ? 'red'
+                    : glossaryStats.alignment <= 50
+                      ? 'yellow'
+                      : glossaryStats.alignment <= 75
+                        ? 'green-light'
+                        : 'green-dark'
+                    }`}
                   style={{ width: `${glossaryStats.alignment}%` }}
                 />
               </div>
@@ -584,10 +582,10 @@ export function Parser() {
         initialData={
           wordToAdd
             ? {
-                word: wordToAdd,
-                definition: '',
-                synonyms: [],
-              }
+              word: wordToAdd,
+              definition: '',
+              synonyms: [],
+            }
             : null
         }
         glossaryName={previousGlossaryName}
