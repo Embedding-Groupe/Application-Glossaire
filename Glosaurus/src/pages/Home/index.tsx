@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'preact/hooks'
+import { useState, useEffect, useRef, useMemo } from 'preact/hooks'
 import { loadFromStorage, saveToStorage } from '../../utils/storage'
 import { postWords } from '../../utils/api'
 import { AddWordModal } from '../../modals/AddWord/AddWord'
@@ -316,6 +316,9 @@ export function Glossaire() {
         isEdit={!!editingWord}
         glossaryName={glossaryName}
         glossaryDescription={glossaryDescription}
+        existingContexts={useMemo(() => {
+          return Array.from(new Set(words.map(w => w.boundedContext).filter(Boolean))) as string[];
+        }, [words])}
       />
 
       <ExportModal
