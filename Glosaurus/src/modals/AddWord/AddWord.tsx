@@ -182,7 +182,8 @@ export function AddWordModal({
   isEdit,
   glossaryName,
   glossaryDescription,
-}: AddWordModalProps) {
+  existingContexts = [],
+}: AddWordModalProps & { existingContexts?: string[] }) {
   const [word, setWord] = useState(initialData?.word || '')
   const [definition, setDefinition] = useState(initialData?.definition || '')
   const [synonyms, setSynonyms] = useState<string[]>(
@@ -191,6 +192,9 @@ export function AddWordModal({
   const [boundedContext, setBoundedContext] = useState(
     initialData?.boundedContext || ''
   )
+
+  const [contextSuggestions, setContextSuggestions] = useState<string[]>([])
+  const [showContextSuggestions, setShowContextSuggestions] = useState(false)
 
   const [currentSynonym, setCurrentSynonym] = useState('')
   const [errors, setErrors] = useState<{
@@ -222,6 +226,8 @@ export function AddWordModal({
       setSynonyms([])
       setBoundedContext('')
     }
+    setContextSuggestions([])
+    setShowContextSuggestions(false)
   }, [initialData, isOpen])
 
   useEffect(() => {
@@ -245,6 +251,27 @@ export function AddWordModal({
       }
     }
   }, [isOpen, onClose])
+
+  // Filter suggestions based on input
+  useEffect(() => {
+    console.log('AddWordModal input:', {
+      boundedContext,
+      existingContexts,
+      isOpen
+    })
+
+    if (!boundedContext.trim()) {
+      setContextSuggestions(existingContexts)
+      return
+    }
+
+    const filtered = existingContexts.filter(ctx =>
+      ctx.toLowerCase().includes(boundedContext.toLowerCase()) &&
+      ctx.toLowerCase() !== boundedContext.toLowerCase()
+    )
+    console.log('AddWordModal suggestions:', filtered)
+    setContextSuggestions(filtered)
+  }, [boundedContext, existingContexts, isOpen])
 
   const handleRemoveSynonym = useCallback((index: number) => {
     setSynonyms((prev) => prev.filter((_, i) => i !== index))
@@ -438,7 +465,7 @@ export function AddWordModal({
         <label className="context-label" htmlFor="context-input">
           Bounded Context (Optional)
         </label>
-        <div className="input-container">
+        <div className="input-container" style={{ position: 'relative' }}>
           <input
             id="context-input"
             type="text"
@@ -446,13 +473,42 @@ export function AddWordModal({
             placeholder="Enter bounded context"
             value={boundedContext}
             maxLength={boundedContextMaxLength}
-            onInput={(e) =>
+            autoComplete="off"
+            onInput={(e) => {
               setBoundedContext((e.target as HTMLInputElement).value)
-            }
+              setShowContextSuggestions(true)
+            }}
+            onFocus={() => {
+              setShowContextSuggestions(true)
+            }}
+            onClick={() => {
+              setShowContextSuggestions(true)
+            }}
+            onBlur={() => {
+              // Delay hiding so click on suggestion can register
+              setTimeout(() => setShowContextSuggestions(false), 200)
+            }}
           />
           <div className="char-counter">
             {boundedContext.length}/{boundedContextMaxLength}
           </div>
+
+          {showContextSuggestions && contextSuggestions.length > 0 && (
+            <div className="context-suggestions">
+              {contextSuggestions.map((ctx) => (
+                <div
+                  key={ctx}
+                  className="context-suggestion-item"
+                  onClick={() => {
+                    setBoundedContext(ctx)
+                    setShowContextSuggestions(false)
+                  }}
+                >
+                  {ctx}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <label className={'synonym-label'} htmlFor="synonym-input">
