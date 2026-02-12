@@ -6,9 +6,10 @@ import './BlacklistModal.css'
 interface BlacklistModalProps {
     glossaryName: string
     onClose: () => void
+    onUpdate?: () => void
 }
 
-export function BlacklistModal({ glossaryName, onClose }: BlacklistModalProps) {
+export function BlacklistModal({ glossaryName, onClose, onUpdate }: BlacklistModalProps) {
     const [blacklist, setBlacklist] = useState<string[]>([])
     const [inputValue, setInputValue] = useState('')
     const [error, setError] = useState<string | null>(null)
@@ -76,12 +77,14 @@ export function BlacklistModal({ glossaryName, onClose }: BlacklistModalProps) {
         saveToStorage(updated)
         setInputValue('')
         setError(null)
+        onUpdate?.()
     }
 
     const removeWord = (word: string) => {
         const updated = blacklist.filter((w) => w !== word)
         setBlacklist(updated)
         saveToStorage(updated)
+        onUpdate?.()
     }
 
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -103,6 +106,7 @@ export function BlacklistModal({ glossaryName, onClose }: BlacklistModalProps) {
         if (confirmed) {
             setBlacklist([])
             saveToStorage([])
+            onUpdate?.()
         }
     }
 
@@ -163,6 +167,7 @@ export function BlacklistModal({ glossaryName, onClose }: BlacklistModalProps) {
                 setBlacklist(merged)
                 saveToStorage(merged)
                 setError(null)
+                onUpdate?.()
             } catch (err) {
                 setError('Error reading CSV file')
             }

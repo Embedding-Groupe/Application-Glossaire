@@ -52,6 +52,7 @@ export function Parser() {
   >({})
 
   const [glossaryVersion, setGlossaryVersion] = useState(0)
+  const [blacklistVersion, setBlacklistVersion] = useState(0)
 
   const [isAddWordOpen, setIsAddWordOpen] = useState(false)
   const [wordToAdd, setWordToAdd] = useState<string | null>(null)
@@ -274,12 +275,14 @@ export function Parser() {
   const [selectedWord, setSelectedWord] = useState<string | null>(null)
 
   const getSortedTerms = (): ParsedTerm[] => {
-    // Filtrage d'abord
-    let filtered = terms
+    // Filtrage de la blacklist d'abord
+    let filtered = terms.filter((t) => !blacklistWords.includes(t.term.toLowerCase()))
+
+    // Filtrage par inclusion dans le glossaire ensuite
     if (filter === 'included') {
-      filtered = terms.filter((t) => isAlreadyInGlossary(t.term))
+      filtered = filtered.filter((t) => isAlreadyInGlossary(t.term))
     } else if (filter === 'not-included') {
-      filtered = terms.filter((t) => !isAlreadyInGlossary(t.term))
+      filtered = filtered.filter((t) => !isAlreadyInGlossary(t.term))
     }
 
     // Tri ensuite
@@ -348,6 +351,20 @@ export function Parser() {
 
     return stored.map((w) => w.word.toLowerCase())
   }, [previousGlossaryName, glossaryVersion])
+
+  const blacklistWords = useMemo(() => {
+    const storageKey = `blacklist_${previousGlossaryName}`
+    const stored = localStorage.getItem(storageKey)
+
+    if (!stored) return []
+
+    try {
+      const parsed = JSON.parse(stored)
+      return Array.isArray(parsed) ? parsed.map((w: string) => w.toLowerCase()) : []
+    } catch {
+      return []
+    }
+  }, [previousGlossaryName, blacklistVersion])
 
   const isAlreadyInGlossary = (term: string) =>
     glossaryWords.includes(term.toLowerCase())
@@ -769,6 +786,7 @@ export function Parser() {
         <BlacklistModal
           glossaryName={previousGlossaryName}
           onClose={() => setIsBlacklistModalOpen(false)}
+          onUpdate={() => setBlacklistVersion((v) => v + 1)}
         />
       )}
     </div>
