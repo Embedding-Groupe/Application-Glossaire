@@ -74,12 +74,13 @@ async def parse_directory(request: DirectoryRequest):
 
     from fastapi.concurrency import run_in_threadpool
 
-    def update_progress(current, total):
+    def update_progress(current, total, message=""):
         if request.task_id:
             progress_store[request.task_id] = {
                 "current": current,
                 "total": total,
-                "status": "running"
+                "status": "running",
+                "message": message
             }
 
     try:
@@ -130,12 +131,13 @@ async def parse_github(request: GitHubRepoRequest):
              progress_store[request.task_id] = {"status": "error", "error": error}
         return {"error": error}
     
-    def update_progress(current, total):
+    def update_progress(current, total, message=""):
         if request.task_id:
             progress_store[request.task_id] = {
                 "current": current,
                 "total": total,
-                "status": "running"
+                "status": "running",
+                "message": message
             }
 
     try:

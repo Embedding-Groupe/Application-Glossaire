@@ -60,6 +60,7 @@ export function Parser() {
     current: number
     total: number
     status: string
+    message?: string
   } | null>(null)
 
   const pollProgress = async (taskId: string) => {
@@ -89,12 +90,13 @@ export function Parser() {
           current: data.current,
           total: data.total,
           status: data.status,
+          message: data.message,
         })
       } catch (err) {
         console.error('Error polling progress:', err)
         clearInterval(interval)
       }
-    }, 500) // Poll every 500ms
+    }, 100) // Poll every 100ms for smoother updates
   }
 
   const handleFileChange = () => {
@@ -415,6 +417,7 @@ export function Parser() {
           legendText: '{label}',
           indexLabelFontSize: 0,
           indexLabel: '',
+          indexLabelLineThickness: 0,
           dataPoints: pieDataPoints,
         },
       ],
@@ -534,12 +537,19 @@ export function Parser() {
             </div>
           </div>
           <div className="parsing-status-text">
-            {parsingProgress.status === 'starting' && 'Starting...'}
-            {parsingProgress.status === 'cloning' && 'Cloning repository...'}
-            {parsingProgress.status === 'parsing' &&
-              `Processed ${parsingProgress.current} / ${parsingProgress.total} steps`}
-            {parsingProgress.status === 'running' &&
-              `Processed ${parsingProgress.current} / ${parsingProgress.total} steps`}
+            {parsingProgress.message ? (
+              parsingProgress.message
+            ) : (
+              <>
+                {parsingProgress.status === 'starting' && 'Starting...'}
+                {parsingProgress.status === 'cloning' &&
+                  'Cloning repository...'}
+                {parsingProgress.status === 'parsing' &&
+                  `Processed ${parsingProgress.current} / ${parsingProgress.total} steps`}
+                {parsingProgress.status === 'running' &&
+                  `Processed ${parsingProgress.current} / ${parsingProgress.total} steps`}
+              </>
+            )}
           </div>
         </div>
       )}

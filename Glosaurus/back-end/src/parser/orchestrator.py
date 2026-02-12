@@ -151,10 +151,11 @@ def get_directory_words(directory_path: str, progress_callback=None):
     processed_steps = 0
     
     if progress_callback:
-        progress_callback(0, total_steps)
+        progress_callback(0, total_steps, "Starting analysis...")
 
     for file_path in files_to_process:
         _, ext = os.path.splitext(file_path)
+        filename = os.path.basename(file_path)
             
         if True: # Key check already done in collection loop
             
@@ -162,7 +163,7 @@ def get_directory_words(directory_path: str, progress_callback=None):
                 nonlocal processed_steps
                 processed_steps += 1
                 if progress_callback:
-                    progress_callback(processed_steps, total_steps)
+                    progress_callback(processed_steps, total_steps, f"Processing {filename}...")
 
             # Parse individual file
             file_result = get_word(file_path, on_step_complete=step_complete)
