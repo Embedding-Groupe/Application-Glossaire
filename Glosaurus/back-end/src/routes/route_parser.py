@@ -72,6 +72,8 @@ async def parse_directory(request: DirectoryRequest):
     if not os.path.isdir(request.path):
         return {"error": f"Not a directory: {request.path}"}
 
+    from fastapi.concurrency import run_in_threadpool
+
     def update_progress(current, total):
         if request.task_id:
             progress_store[request.task_id] = {
@@ -81,7 +83,8 @@ async def parse_directory(request: DirectoryRequest):
             }
 
     try:
-        result = orchestrator.get_directory_words(request.path, progress_callback=update_progress)
+        # Run blocking orchestartor in a separate thread to allow progress polling
+        result = await run_in_threadpool(orchestrator.get_directory_words, request.path, progress_callback=update_progress)
         
         if request.task_id:
             progress_store[request.task_id]["status"] = "completed"
@@ -136,8 +139,9 @@ async def parse_github(request: GitHubRepoRequest):
             }
 
     try:
+        from fastapi.concurrency import run_in_threadpool
         # Parse the cloned directory
-        result = orchestrator.get_directory_words(temp_dir, progress_callback=update_progress)
+        result = await run_in_threadpool(orchestrator.get_directory_words, temp_dir, progress_callback=update_progress)
         
         if request.task_id:
             progress_store[request.task_id]["status"] = "completed"
