@@ -412,18 +412,16 @@ export function Parser() {
         {
           type: 'pie',
           startAngle: 25,
-          toolTipContent: 'File: <b>{label}</b><br>Count: {y}',
-          showInLegend: false,
-          legendText: '{label}',
-          indexLabelFontSize: 0,
-          indexLabel: '',
-          indexLabelLineThickness: 0,
           dataPoints: pieDataPoints,
         },
       ],
+      toolTip: {
+        shared: false,
+        content: 'File: <b>{label}</b><br>Count: {y}',
+      },
     })
 
-    chart.render()
+    if (chart) chart.render()
   }, [pieDataPoints, selectedWord, canvasReady])
 
   return (
