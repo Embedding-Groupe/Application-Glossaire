@@ -388,6 +388,12 @@ export function Parser() {
           <button
             className="export-btn"
             onClick={() => setIsExportModalOpen(true)}
+            disabled={fileName === 'No File'}
+            title={
+              fileName === 'No File'
+                ? 'Please parse a file or folder first'
+                : 'Export Result'
+            }
           >
             <img src="/export.svg" alt="Export icon" /> Export Result
           </button>
@@ -567,12 +573,12 @@ export function Parser() {
               <div className="progress-bar">
                 <div
                   className={`progress-fill ${glossaryStats.coverage <= 25
-                      ? 'red'
-                      : glossaryStats.coverage <= 50
-                        ? 'yellow'
-                        : glossaryStats.coverage <= 75
-                          ? 'green-light'
-                          : 'green-dark'
+                    ? 'red'
+                    : glossaryStats.coverage <= 50
+                      ? 'yellow'
+                      : glossaryStats.coverage <= 75
+                        ? 'green-light'
+                        : 'green-dark'
                     }`}
                   style={{ width: `${glossaryStats.coverage}%` }}
                 />
@@ -586,12 +592,12 @@ export function Parser() {
               <div className="progress-bar">
                 <div
                   className={`progress-fill ${glossaryStats.alignment <= 25
-                      ? 'red'
-                      : glossaryStats.alignment <= 50
-                        ? 'yellow'
-                        : glossaryStats.alignment <= 75
-                          ? 'green-light'
-                          : 'green-dark'
+                    ? 'red'
+                    : glossaryStats.alignment <= 50
+                      ? 'yellow'
+                      : glossaryStats.alignment <= 75
+                        ? 'green-light'
+                        : 'green-dark'
                     }`}
                   style={{ width: `${glossaryStats.alignment}%` }}
                 />
