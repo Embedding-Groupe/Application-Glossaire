@@ -22,7 +22,7 @@ except ImportError:
     import get_word_presence
 
 
-def get_word(input_script: str):
+def get_word(input_script: str, on_step_complete=None):
     """
     Analyse un fichier source (Python ou Java) et retourne
     la fréquence des mots non-clés sous forme de dictionnaire.
@@ -69,6 +69,7 @@ def get_word(input_script: str):
     # Produit un fichier JSON temporaire : input_script.json
     try:
         extractor.main(input_script)
+        if on_step_complete: on_step_complete()
     except Exception as e:
         return {"error": f"Extraction failed: {str(e)}"}
 
@@ -87,12 +88,14 @@ def get_word(input_script: str):
     # ---------- 4. Étape 2 : Découpage des identifiants ----------
     try:
         split_identifiers.main(final_json)
+        if on_step_complete: on_step_complete()
     except Exception as e:
         return {"error": f"Identifier splitting failed: {str(e)}"}
 
     # ---------- 5. Étape 3 : Calcul des fréquences ----------
     try:
         get_word_presence.main(final_json)
+        if on_step_complete: on_step_complete()
     except Exception as e:
         return {"error": f"Word frequency calculation failed: {str(e)}"}
 
@@ -144,20 +147,30 @@ def get_directory_words(directory_path: str, progress_callback=None):
                 total_files += 1
                 files_to_process.append(os.path.join(root, file))
 
-    processed_count = 0
+    total_steps = total_files * 3
+    processed_steps = 0
+    
     if progress_callback:
-        progress_callback(0, total_files)
+        progress_callback(0, total_steps)
 
     for file_path in files_to_process:
         _, ext = os.path.splitext(file_path)
             
         if True: # Key check already done in collection loop
-            # Parse individual file
-            file_result = get_word(file_path)
             
-            processed_count += 1
-            if progress_callback:
-                progress_callback(processed_count, total_files)
+            def step_complete():
+                nonlocal processed_steps
+                processed_steps += 1
+                if progress_callback:
+                    progress_callback(processed_steps, total_steps)
+
+            # Parse individual file
+            file_result = get_word(file_path, on_step_complete=step_complete)
+            
+            # Additional callback is handled inside get_word now
+            # processed_count += 1
+            # if progress_callback:
+            #    progress_callback(processed_count, total_files)
             
             # Cleanup generated JSON files
                 base_name = os.path.splitext(file_path)[0]

@@ -410,11 +410,11 @@ export function Parser() {
         {
           type: 'pie',
           startAngle: 25,
-          toolTipContent: '<b>{label}</b>: {y} occurrences',
-          showInLegend: true,
+          toolTipContent: 'File: <b>{label}</b><br>Count: {y}',
+          showInLegend: false,
           legendText: '{label}',
-          indexLabelFontSize: 16,
-          indexLabel: '{label} - {y} occurrences',
+          indexLabelFontSize: 0,
+          indexLabel: '',
           dataPoints: pieDataPoints,
         },
       ],
@@ -518,7 +518,7 @@ export function Parser() {
               className="parsing-progress-fill"
               style={{
                 width: `${(parsingProgress.current /
-                    (parsingProgress.total === 0 ? 1 : parsingProgress.total)) *
+                  (parsingProgress.total === 0 ? 1 : parsingProgress.total)) *
                   100
                   }%`,
               }}
@@ -537,9 +537,9 @@ export function Parser() {
             {parsingProgress.status === 'starting' && 'Starting...'}
             {parsingProgress.status === 'cloning' && 'Cloning repository...'}
             {parsingProgress.status === 'parsing' &&
-              `Parsed ${parsingProgress.current} / ${parsingProgress.total} files`}
+              `Processed ${parsingProgress.current} / ${parsingProgress.total} steps`}
             {parsingProgress.status === 'running' &&
-              `Parsed ${parsingProgress.current} / ${parsingProgress.total} files`}
+              `Processed ${parsingProgress.current} / ${parsingProgress.total} steps`}
           </div>
         </div>
       )}
