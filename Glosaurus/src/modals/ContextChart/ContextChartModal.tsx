@@ -73,11 +73,11 @@ export function ContextChartModal({
                 animationEnabled: true,
                 theme: 'light2',
                 title: {
-                    text: 'Words Distribution by Bounding Context',
+                    text: 'Words Distribution by Bounded Context',
                     fontSize: 20,
                 },
                 axisX: {
-                    title: 'Bounding Context',
+                    title: 'Bounded Context',
                     labelAngle: -45,
                     interval: 1
                 },
@@ -116,7 +116,7 @@ export function ContextChartModal({
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="modal-header">
-                    <h2>Bounding Contexts Statistics</h2>
+                    <h2>Bounded Contexts Statistics</h2>
                     <button className="close-btn" onClick={onClose} aria-label="Close modal">
                         ×
                     </button>

@@ -143,7 +143,7 @@ export function Glossaire() {
             onClick={() => setIsContextChartOpen(true)}
             title="Visualize Bounded Contexts"
           >
-            {'Bounding Context'}
+            {'Bounded Context'}
           </button>
           <button className="export-btn" onClick={handleExport}>
             <img src="/export.svg" alt="Export icon" />
