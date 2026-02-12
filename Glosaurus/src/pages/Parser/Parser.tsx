@@ -411,7 +411,7 @@ export function Parser() {
 
     return Object.entries(distribution).map(([file, count]) => ({
       y: count,
-      label: file,
+      fileName: file,  // Store filename in custom property, not 'label'
     }))
   }, [selectedWord, wordDistribution])
 
@@ -425,22 +425,104 @@ export function Parser() {
       title: {
         text: `Distribution of occurences of "${selectedWord}"`,
       },
+      legend: {
+        enabled: false,  // Completely hide the legend
+      },
       data: [
         {
           type: 'pie',
           startAngle: 25,
-          toolTipContent: 'File: <b>{label}</b><br>Count: {y}',
-          showInLegend: false,
-          legendText: '{label}',
-          indexLabelFontSize: 0,
-          indexLabel: '',
-          indexLabelLineThickness: 0,
+          indexLabel: '',  // Remove labels on slices
+          indexLabelFontSize: 0,  // Force font size to 0
+          indexLabelPlacement: 'inside',
+          showInLegend: false,  // Don't show in legend
           dataPoints: pieDataPoints,
         },
       ],
+      toolTip: {
+        enabled: false,  // Disable default tooltip, we'll use custom one
+      },
     })
 
-    chart.render()
+    if (chart) {
+      chart.render()
+
+      // Create custom tooltip element
+      let customTooltip = document.getElementById('custom-chart-tooltip')
+      if (!customTooltip) {
+        customTooltip = document.createElement('div')
+        customTooltip.id = 'custom-chart-tooltip'
+        customTooltip.style.position = 'fixed'
+        customTooltip.style.display = 'none'
+        customTooltip.style.backgroundColor = 'rgba(0, 0, 0, 0.8)'
+        customTooltip.style.color = 'white'
+        customTooltip.style.padding = '8px 12px'
+        customTooltip.style.borderRadius = '5px'
+        customTooltip.style.fontSize = '14px'
+        customTooltip.style.pointerEvents = 'none'
+        customTooltip.style.zIndex = '10000'
+        customTooltip.style.whiteSpace = 'nowrap'
+        document.body.appendChild(customTooltip)
+      }
+
+      // Add mousemove event to chart container
+      const chartContainer = chartRef.current
+      const handleMouseMove = (mouseEvent: MouseEvent) => {
+        const rect = chartContainer.getBoundingClientRect()
+        const x = mouseEvent.clientX - rect.left
+        const y = mouseEvent.clientY - rect.top
+
+        // Check if mouse is within chart area
+        if (customTooltip && x > 50 && x < rect.width - 50 && y > 50 && y < rect.height - 50) {
+          customTooltip.style.left = `${mouseEvent.clientX + 15}px`
+          customTooltip.style.top = `${mouseEvent.clientY + 15}px`
+          customTooltip.style.display = 'block'
+          
+          // Find which slice we're hovering over
+          const centerX = rect.width / 2
+          const centerY = rect.height / 2
+          const angle = Math.atan2(y - centerY, x - centerX) * 180 / Math.PI
+          const normalizedAngle = (angle + 360 + 90) % 360
+          
+          let currentAngle = 25 // startAngle
+          let hoveredPoint = null
+          const total = pieDataPoints.reduce((sum, dp) => sum + dp.y, 0)
+          
+          for (const dp of pieDataPoints) {
+            const sliceAngle = (dp.y / total) * 360
+            if (normalizedAngle >= currentAngle && normalizedAngle < currentAngle + sliceAngle) {
+              hoveredPoint = dp
+              break
+            }
+            currentAngle += sliceAngle
+          }
+          
+          if (hoveredPoint) {
+            customTooltip.innerHTML = `<b>File:</b> ${hoveredPoint.fileName}<br><b>Count:</b> ${hoveredPoint.y}`
+          }
+        } else if (customTooltip) {
+          customTooltip.style.display = 'none'
+        }
+      }
+
+      const handleMouseLeave = () => {
+        if (customTooltip) {
+          customTooltip.style.display = 'none'
+        }
+      }
+
+      chartContainer.addEventListener('mousemove', handleMouseMove)
+      chartContainer.addEventListener('mouseleave', handleMouseLeave)
+
+      // Cleanup
+      return () => {
+        chartContainer.removeEventListener('mousemove', handleMouseMove)
+        chartContainer.removeEventListener('mouseleave', handleMouseLeave)
+        if (customTooltip && customTooltip.parentNode) {
+          customTooltip.parentNode.removeChild(customTooltip)
+        }
+      }
+    }
   }, [pieDataPoints, selectedWord, canvasReady])
 
   return (
