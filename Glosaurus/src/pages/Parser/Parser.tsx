@@ -56,6 +56,47 @@ export function Parser() {
   const [isAddWordOpen, setIsAddWordOpen] = useState(false)
   const [wordToAdd, setWordToAdd] = useState<string | null>(null)
 
+  const [parsingProgress, setParsingProgress] = useState<{
+    current: number
+    total: number
+    status: string
+  } | null>(null)
+
+  const pollProgress = async (taskId: string) => {
+    const interval = setInterval(async () => {
+      try {
+        const response = await fetch(
+          `http://127.0.0.1:8000/parser/progress/${taskId}`
+        )
+        const data = await response.json()
+
+        if (data.status === 'not_found' || data.status === 'error') {
+          clearInterval(interval)
+          if (data.status === 'error') {
+            setError(data.error || 'Unknown error during parsing')
+            setParsingProgress(null)
+          }
+          return
+        }
+
+        if (data.status === 'completed') {
+          clearInterval(interval)
+          setParsingProgress(null)
+          return
+        }
+
+        setParsingProgress({
+          current: data.current,
+          total: data.total,
+          status: data.status,
+        })
+      } catch (err) {
+        console.error('Error polling progress:', err)
+        clearInterval(interval)
+      }
+    }, 500) // Poll every 500ms
+  }
+
   const handleFileChange = () => {
     const files = fileInputRef.current?.files
     if (!files || files.length === 0) return
@@ -63,6 +104,7 @@ export function Parser() {
     setError(null)
     const file = files[0]
     setFileName(file.name)
+    setParsingProgress({ current: 0, total: 1, status: 'parsing' })
 
     const formData = new FormData()
     formData.append('file', file)
@@ -81,11 +123,13 @@ export function Parser() {
         console.log('parsedTerms transformé:', parsedTerms)
 
         setTerms(parsedTerms)
+        setParsingProgress(null)
         setIsImportModalOpen(false)
       })
       .catch((err) => {
         console.error('Erreur parser :', err)
         setTerms([])
+        setParsingProgress(null)
       })
   }
 
@@ -107,6 +151,11 @@ export function Parser() {
       setFileName(selected as string)
       setTerms([])
       setError(null)
+      setIsImportModalOpen(false)
+
+      const taskId = crypto.randomUUID()
+      setParsingProgress({ current: 0, total: 0, status: 'starting' })
+      pollProgress(taskId)
 
       // Call backend
       const response = await fetch(
@@ -116,7 +165,7 @@ export function Parser() {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ path: selected }),
+          body: JSON.stringify({ path: selected, task_id: taskId }),
         }
       )
 
@@ -147,11 +196,12 @@ export function Parser() {
 
       setTerms(parsedTerms)
       setWordDistribution(distribution)
-      setIsImportModalOpen(false)
+      setParsingProgress(null)
     } catch (err) {
       console.error('Error importing folder:', err)
       setError(err instanceof Error ? err.message : 'Unknown error occurred')
       setTerms([])
+      setParsingProgress(null)
     }
   }
 
@@ -161,6 +211,13 @@ export function Parser() {
       setError(null)
       setTerms([])
 
+      // Close modal immediately to show progress on main page
+      setIsGitHubModalOpen(false)
+
+      const taskId = crypto.randomUUID()
+      setParsingProgress({ current: 0, total: 0, status: 'cloning' })
+      pollProgress(taskId)
+
       const response = await fetch(
         'http://127.0.0.1:8000/parser/parse_github',
         {
@@ -168,7 +225,7 @@ export function Parser() {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ url: repoUrl }),
+          body: JSON.stringify({ url: repoUrl, task_id: taskId }),
         }
       )
 
@@ -177,6 +234,7 @@ export function Parser() {
       if (data.error) {
         setError(data.error)
         setIsGitHubLoading(false)
+        setParsingProgress(null)
         return
       }
 
@@ -200,12 +258,14 @@ export function Parser() {
       setTerms(parsedTerms)
       setWordDistribution(distribution)
       setFileName(repoUrl)
-      setIsGitHubModalOpen(false)
+
       setIsGitHubLoading(false)
+      setParsingProgress(null)
     } catch (err) {
       console.error('Error importing GitHub repository:', err)
       setError(err instanceof Error ? err.message : 'Unknown error occurred')
       setIsGitHubLoading(false)
+      setParsingProgress(null)
     }
   }
 
@@ -350,11 +410,11 @@ export function Parser() {
         {
           type: 'pie',
           startAngle: 25,
-          toolTipContent: '<b>{label}</b>: {y} occurrences',
-          showInLegend: true,
+          toolTipContent: 'File: <b>{label}</b><br>Count: {y}',
+          showInLegend: false,
           legendText: '{label}',
-          indexLabelFontSize: 16,
-          indexLabel: '{label} - {y} occurrences',
+          indexLabelFontSize: 0,
+          indexLabel: '',
           dataPoints: pieDataPoints,
         },
       ],
@@ -388,6 +448,12 @@ export function Parser() {
           <button
             className="export-btn"
             onClick={() => setIsExportModalOpen(true)}
+            disabled={fileName === 'No File'}
+            title={
+              fileName === 'No File'
+                ? 'Please parse a file or folder first'
+                : 'Export Result'
+            }
           >
             <img src="/export.svg" alt="Export icon" /> Export Result
           </button>
@@ -443,6 +509,40 @@ export function Parser() {
           error={error}
         />
       </div>
+
+      {parsingProgress && (
+        <div className="parsing-progress-container">
+          <h3>Parsing in progress...</h3>
+          <div className="parsing-progress-bar">
+            <div
+              className="parsing-progress-fill"
+              style={{
+                width: `${(parsingProgress.current /
+                  (parsingProgress.total === 0 ? 1 : parsingProgress.total)) *
+                  100
+                  }%`,
+              }}
+            >
+              <span className="parsing-progress-text">
+                {Math.round(
+                  (parsingProgress.current /
+                    (parsingProgress.total === 0 ? 1 : parsingProgress.total)) *
+                  100
+                )}
+                %
+              </span>
+            </div>
+          </div>
+          <div className="parsing-status-text">
+            {parsingProgress.status === 'starting' && 'Starting...'}
+            {parsingProgress.status === 'cloning' && 'Cloning repository...'}
+            {parsingProgress.status === 'parsing' &&
+              `Processed ${parsingProgress.current} / ${parsingProgress.total} steps`}
+            {parsingProgress.status === 'running' &&
+              `Processed ${parsingProgress.current} / ${parsingProgress.total} steps`}
+          </div>
+        </div>
+      )}
 
       <div className="terms-found">
         <h1>Terms found in {fileName} :</h1>
@@ -567,12 +667,12 @@ export function Parser() {
               <div className="progress-bar">
                 <div
                   className={`progress-fill ${glossaryStats.coverage <= 25
-                      ? 'red'
-                      : glossaryStats.coverage <= 50
-                        ? 'yellow'
-                        : glossaryStats.coverage <= 75
-                          ? 'green-light'
-                          : 'green-dark'
+                    ? 'red'
+                    : glossaryStats.coverage <= 50
+                      ? 'yellow'
+                      : glossaryStats.coverage <= 75
+                        ? 'green-light'
+                        : 'green-dark'
                     }`}
                   style={{ width: `${glossaryStats.coverage}%` }}
                 />
@@ -586,12 +686,12 @@ export function Parser() {
               <div className="progress-bar">
                 <div
                   className={`progress-fill ${glossaryStats.alignment <= 25
-                      ? 'red'
-                      : glossaryStats.alignment <= 50
-                        ? 'yellow'
-                        : glossaryStats.alignment <= 75
-                          ? 'green-light'
-                          : 'green-dark'
+                    ? 'red'
+                    : glossaryStats.alignment <= 50
+                      ? 'yellow'
+                      : glossaryStats.alignment <= 75
+                        ? 'green-light'
+                        : 'green-dark'
                     }`}
                   style={{ width: `${glossaryStats.alignment}%` }}
                 />

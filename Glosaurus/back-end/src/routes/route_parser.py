@@ -18,6 +18,13 @@ except ImportError:
 
 router = APIRouter(prefix="/parser", tags=["parser"])
 
+# Store for progress: {task_id: {"current": 0, "total": 0, "status": "running"|"completed"|"error"}}
+progress_store = {}
+
+@router.get("/progress/{task_id}")
+async def get_progress(task_id: str):
+    return progress_store.get(task_id, {"status": "not_found"})
+
 @router.post("/parse")
 async def parse(file: UploadFile = File(...)):
     # Création d'un fichier temporaire avec la même extension que le fichier uploadé
@@ -51,6 +58,7 @@ from pydantic import BaseModel
 
 class DirectoryRequest(BaseModel):
     path: str
+    task_id: str = None
 
 @router.post("/parse_directory")
 async def parse_directory(request: DirectoryRequest):
@@ -64,11 +72,35 @@ async def parse_directory(request: DirectoryRequest):
     if not os.path.isdir(request.path):
         return {"error": f"Not a directory: {request.path}"}
 
-    result = orchestrator.get_directory_words(request.path)
-    return result
+    from fastapi.concurrency import run_in_threadpool
+
+    def update_progress(current, total):
+        if request.task_id:
+            progress_store[request.task_id] = {
+                "current": current,
+                "total": total,
+                "status": "running"
+            }
+
+    try:
+        # Run blocking orchestartor in a separate thread to allow progress polling
+        result = await run_in_threadpool(orchestrator.get_directory_words, request.path, progress_callback=update_progress)
+        
+        if request.task_id:
+            progress_store[request.task_id]["status"] = "completed"
+            
+        return result
+    except Exception as e:
+        if request.task_id:
+            progress_store[request.task_id] = {
+                "status": "error",
+                "error": str(e)
+            }
+        return {"error": str(e)}
 
 class GitHubRepoRequest(BaseModel):
     url: str
+    task_id: str = None
 
 @router.post("/parse_github")
 async def parse_github(request: GitHubRepoRequest):
@@ -83,15 +115,45 @@ async def parse_github(request: GitHubRepoRequest):
         from src.parser import github_cloner
     
     # Clone the repository
+    # TODO: GitHub cloning progress? separate step?
+    if request.task_id:
+        progress_store[request.task_id] = {
+            "current": 0,
+            "total": 0,
+            "status": "cloning"
+        }
+
     temp_dir, error = github_cloner.clone_github_repo(request.url)
     
     if error:
+        if request.task_id:
+             progress_store[request.task_id] = {"status": "error", "error": error}
         return {"error": error}
     
+    def update_progress(current, total):
+        if request.task_id:
+            progress_store[request.task_id] = {
+                "current": current,
+                "total": total,
+                "status": "running"
+            }
+
     try:
+        from fastapi.concurrency import run_in_threadpool
         # Parse the cloned directory
-        result = orchestrator.get_directory_words(temp_dir)
+        result = await run_in_threadpool(orchestrator.get_directory_words, temp_dir, progress_callback=update_progress)
+        
+        if request.task_id:
+            progress_store[request.task_id]["status"] = "completed"
+
         return result
+    except Exception as e:
+        if request.task_id:
+            progress_store[request.task_id] = {
+                "status": "error",
+                "error": str(e)
+            }
+        return {"error": str(e)}
     finally:
         # Always cleanup the temporary directory
         github_cloner.cleanup_temp_directory(temp_dir)
