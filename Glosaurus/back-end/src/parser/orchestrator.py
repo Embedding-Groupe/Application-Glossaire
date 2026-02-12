@@ -173,43 +173,43 @@ def get_directory_words(directory_path: str, progress_callback=None):
             #    progress_callback(processed_count, total_files)
             
             # Cleanup generated JSON files
-                base_name = os.path.splitext(file_path)[0]
-                _, ext = os.path.splitext(file_path)
-                
-                language = "python"
-                if ext.lower() == ".java": language = "java"
-                elif ext.lower() == ".php": language = "php"
-                elif ext.lower() == ".js": language = "javascript"
-                elif ext.lower() == ".ts": language = "typescript"
+            base_name = os.path.splitext(file_path)[0]
+            _, ext = os.path.splitext(file_path)
+            
+            language = "python"
+            if ext.lower() == ".java": language = "java"
+            elif ext.lower() == ".php": language = "php"
+            elif ext.lower() == ".js": language = "javascript"
+            elif ext.lower() == ".ts": language = "typescript"
 
-                final_json = f"{base_name}_{language}.json"
-                default_json = base_name + ".json"
-                
-                if os.path.exists(final_json):
-                    os.remove(final_json)
-                if os.path.exists(default_json):
-                    os.remove(default_json)
+            final_json = f"{base_name}_{language}.json"
+            default_json = base_name + ".json"
+            
+            if os.path.exists(final_json):
+                os.remove(final_json)
+            if os.path.exists(default_json):
+                os.remove(default_json)
 
-                if "error" in file_result:
-                    print(f"Error parsing {file_path}: {file_result['error']}")
-                    continue
+            if "error" in file_result:
+                print(f"Error parsing {file_path}: {file_result['error']}")
+                continue
+            
+            # Aggregate results
+            # file_result is { "word": count, ... }
+            for word, count in file_result.items():
+                if word not in aggregated_results:
+                    aggregated_results[word] = {
+                        "total_occurrences": 0,
+                        "file_count": 0,
+                        "files": []
+                    }
                 
-                # Aggregate results
-                # file_result is { "word": count, ... }
-                for word, count in file_result.items():
-                    if word not in aggregated_results:
-                        aggregated_results[word] = {
-                            "total_occurrences": 0,
-                            "file_count": 0,
-                            "files": []
-                        }
-                    
-                    aggregated_results[word]["total_occurrences"] += count
-                    aggregated_results[word]["file_count"] += 1
-                    aggregated_results[word]["files"].append({
-                        "name": os.path.basename(file_path),
-                        "count": count
-                    })
+                aggregated_results[word]["total_occurrences"] += count
+                aggregated_results[word]["file_count"] += 1
+                aggregated_results[word]["files"].append({
+                    "name": os.path.basename(file_path),
+                    "count": count
+                })
 
     return aggregated_results
 
