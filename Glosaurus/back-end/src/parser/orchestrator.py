@@ -108,10 +108,12 @@ def get_word(input_script: str):
         return {"error": "Failed to decode final JSON file"}
 
 
-def get_directory_words(directory_path: str):
+def get_directory_words(directory_path: str, progress_callback=None):
     """
     Analyse récursivement un dossier pour trouver les fichiers .java et .py,
     les parse, et agrège les résultats.
+
+    progress_callback: function(current, total) -> void
 
     Retour attendu :
     {
@@ -131,16 +133,33 @@ def get_directory_words(directory_path: str):
 
     aggregated_results = {}
 
+    # 1. Count total files to parse
+    total_files = 0
+    files_to_process = []
+    
     for root, _, files in os.walk(directory_path):
         for file in files:
-            file_path = os.path.join(root, file)
             _, ext = os.path.splitext(file)
-            
             if ext.lower() in ['.py', '.java', '.php', '.js', '.ts']:
-                # Parse individual file
-                file_result = get_word(file_path)
-                
-                # Cleanup generated JSON files
+                total_files += 1
+                files_to_process.append(os.path.join(root, file))
+
+    processed_count = 0
+    if progress_callback:
+        progress_callback(0, total_files)
+
+    for file_path in files_to_process:
+        _, ext = os.path.splitext(file_path)
+            
+        if True: # Key check already done in collection loop
+            # Parse individual file
+            file_result = get_word(file_path)
+            
+            processed_count += 1
+            if progress_callback:
+                progress_callback(processed_count, total_files)
+            
+            # Cleanup generated JSON files
                 base_name = os.path.splitext(file_path)[0]
                 _, ext = os.path.splitext(file_path)
                 
